@@ -102,7 +102,6 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             // us a cv::Mat. I'm too lazy to change to cv::Mat throughout right now, so I
             // do this conversion here -jbinney
             IplImage ipl_image = cv_ptr_->image;
-            int multiplier=1;
 
             marker_detector.Detect(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
             arPoseMarkers_.markers.clear ();
@@ -147,44 +146,68 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				tf::StampedTransform camToMarker (t, image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str());
     			tf_broadcaster->sendTransform(camToMarker);
 				
-				//Create the rviz visualization messages
-				tf::poseTFToMsg (markerPose, rvizMarker_.pose);
+    			bool vis_en=true;
 
-				//
-				visualization_msgs::Marker points;
-				points.header.frame_id = image_msg->header.frame_id;
-				points.header.stamp =image_msg->header.stamp;
-				points.ns =  "basic_shapes";
-				points.action = visualization_msgs::Marker::ADD;
-				tf::poseTFToMsg (markerPose, points.pose);
-				points.id = id;
-				points.type = visualization_msgs::Marker::CUBE_LIST;
-				points.scale.x = 1.0 * marker_size/100.0;
-				points.scale.y = 1.0 * marker_size/100.0;
-				points.scale.z = 0.2 * marker_size/100.0;
-				points.color.r = 0.0f;
-				points.color.g = 0.0f;
-				points.color.b = 1.0f;
-				points.color.a = 1.0;
-				for (int i = 0; i < 8; ++i)
-			    {
-			    	for (int j = 0; j < 8; ++j)
-			    	{
-						geometry_msgs::Point pi;
-						pi.x = points.pose.position.x+0.1*i;
-						pi.y = points.pose.position.y-0.1*j;
-						pi.z = points.pose.position.z;
-						points.points.push_back(pi);
+    			if (vis_en){
+					//
+					visualization_msgs::Marker points;
+					tf::poseTFToMsg (markerPose, points.pose);
+					points.header.frame_id = image_msg->header.frame_id;
+					points.header.stamp =image_msg->header.stamp;
+					points.ns =  "basic_shapes";
+					points.action = visualization_msgs::Marker::ADD;
+					points.id = id;
+					points.type = visualization_msgs::Marker::CUBE_LIST;
+					points.scale.x = 1.0 * marker_size/100.0;
+					points.scale.y = 1.0 * marker_size/100.0;
+					points.scale.z = 0.2 * marker_size/100.0;
+					
+					int tag_index=0;
+
+					if(id==7){
+						points.color.r = 0.5f;
+						points.color.g = 0.0f;
+						points.color.b = 0.0f;
+						points.color.a = 1.0;
+						tag_index=1;
 					}
-			    }
+					else{
+						points.color.r = 0.0f;
+						points.color.g = 0.0f;
+						points.color.b = 0.5f;
+						points.color.a = 1.0;
+						tag_index=-1;
+					}
 
+
+					points.frame_locked=true; // ? 
+					
+					for (int i = 1; i < 8; ++i)
+				    {
+				    	for (int j = 1; j < 8; ++j)
+				    	{
+							geometry_msgs::Point pi;
+							pi.x = tag_index*(0.001+marker_size/100.0)*i;
+							pi.y = (0.001+marker_size/100.0)*j;
+							pi.z = 0; // in a relation with the started pose.. init tag pose
+							points.points.push_back(pi);
+						}
+				    }
+			
+					rvizMarker_.lifetime = ros::Duration (1.0);	
+					rvizMarkerPub_.publish (points);
+				}else
+				{
+
+  				//Create the rviz visualization messages
+				tf::poseTFToMsg (markerPose, rvizMarker_.pose);
 				rvizMarker_.header.frame_id = image_msg->header.frame_id;
 				rvizMarker_.header.stamp = image_msg->header.stamp;
 				rvizMarker_.id = id;
-				rvizMarker_.type = visualization_msgs::Marker::SPHERE_LIST;
+				rvizMarker_.type = visualization_msgs::Marker::CUBE;
 
-				rvizMarker_.scale.x = 1.0 * multiplier * marker_size/100.0;
-				rvizMarker_.scale.y = 1.0 * multiplier * marker_size/100.0;
+				rvizMarker_.scale.x = 1.0 * marker_size/100.0;
+				rvizMarker_.scale.y = 1.0 * marker_size/100.0;
 				rvizMarker_.scale.z = 0.2 * marker_size/100.0;
 				rvizMarker_.ns = "basic_shapes";
 				rvizMarker_.action = visualization_msgs::Marker::ADD;
@@ -222,7 +245,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				    break;
 				  case 5:
 				    rvizMarker_.color.r = 0.2f;
-				    rvizMarker_.color.g = 0.5f;a
+				    rvizMarker_.color.g = 0.5f;
 				    rvizMarker_.color.b = 0.0;
 				    rvizMarker_.color.a = 1.0;
 				    break;
@@ -233,8 +256,10 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				    rvizMarker_.color.a = 1.0;
 				    break;
 				}
-				rvizMarker_.lifetime = ros::Duration (1.0);
-				rvizMarkerPub_.publish (points);
+				rvizMarker_.lifetime = ros::Duration (1.0);				
+				rvizMarkerPub_.publish (rvizMarker_);
+				}
+				
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
 				tf::Transform tagPoseOutput = CamToOutput * markerPose;
