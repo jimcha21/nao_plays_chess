@@ -156,7 +156,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				points.header.stamp =image_msg->header.stamp;
 				points.ns =  "basic_shapes";
 				points.action = visualization_msgs::Marker::ADD;
-				tf::poseTFToMsg (markerPose, points.pose);
+				tf::poseTFToMsg (markerPose,a points.pose);
 				points.id = id;
 				points.type = visualization_msgs::Marker::CUBE_LIST;
 				points.scale.x = 1.0 * marker_size/100.0;
