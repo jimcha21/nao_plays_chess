@@ -156,7 +156,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				points.header.stamp =image_msg->header.stamp;
 				points.ns =  "basic_shapes";
 				points.action = visualization_msgs::Marker::ADD;
-				tf::poseTFToMsg (markerPose,a points.pose);
+				tf::poseTFToMsg (markerPose, points.pose);
 				points.id = id;
 				points.type = visualization_msgs::Marker::CUBE_LIST;
 				points.scale.x = 1.0 * marker_size/100.0;
@@ -234,7 +234,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				    break;
 				}
 				rvizMarker_.lifetime = ros::Duration (1.0);
-				rvizMarkerPub_.publish (rvizMarker_);
+				rvizMarkerPub_.publish (points);
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
 				tf::Transform tagPoseOutput = CamToOutput * markerPose;
