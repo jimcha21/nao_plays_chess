@@ -222,7 +222,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				    break;
 				  case 5:
 				    rvizMarker_.color.r = 0.2f;
-				    rvizMarker_.color.g = 0.5f;
+				    rvizMarker_.color.g = 0.5f;a
 				    rvizMarker_.color.b = 0.0;
 				    rvizMarker_.color.a = 1.0;
 				    break;
