@@ -35,6 +35,8 @@
 */
 
 
+#include <ros/ros.h>
+#include <visualization_msgs/Marker.h>
 #include <std_msgs/Bool.h>
 #include "ar_track_alvar/CvTestbed.h"
 #include "ar_track_alvar/MarkerDetector.h"
@@ -147,15 +149,44 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				
 				//Create the rviz visualization messages
 				tf::poseTFToMsg (markerPose, rvizMarker_.pose);
+
+				//
+				visualization_msgs::Marker points;
+				points.header.frame_id = image_msg->header.frame_id;
+				points.header.stamp =image_msg->header.stamp;
+				points.ns =  "basic_shapes";
+				points.action = visualization_msgs::Marker::ADD;
+				tf::poseTFToMsg (markerPose, points.pose);
+				points.id = id;
+				points.type = visualization_msgs::Marker::CUBE_LIST;
+				points.scale.x = 1.0 * marker_size/100.0;
+				points.scale.y = 1.0 * marker_size/100.0;
+				points.scale.z = 0.2 * marker_size/100.0;
+				points.color.r = 0.0f;
+				points.color.g = 0.0f;
+				points.color.b = 1.0f;
+				points.color.a = 1.0;
+				for (int i = 0; i < 8; ++i)
+			    {
+			    	for (int j = 0; j < 8; ++j)
+			    	{
+						geometry_msgs::Point pi;
+						pi.x = points.pose.position.x+0.1*i;
+						pi.y = points.pose.position.y-0.1*j;
+						pi.z = points.pose.position.z;
+						points.points.push_back(pi);
+					}
+			    }
+
 				rvizMarker_.header.frame_id = image_msg->header.frame_id;
 				rvizMarker_.header.stamp = image_msg->header.stamp;
 				rvizMarker_.id = id;
+				rvizMarker_.type = visualization_msgs::Marker::SPHERE_LIST;
 
 				rvizMarker_.scale.x = 1.0 * multiplier * marker_size/100.0;
 				rvizMarker_.scale.y = 1.0 * multiplier * marker_size/100.0;
 				rvizMarker_.scale.z = 0.2 * marker_size/100.0;
 				rvizMarker_.ns = "basic_shapes";
-				rvizMarker_.type = visualization_msgs::Marker::CUBE;
 				rvizMarker_.action = visualization_msgs::Marker::ADD;
 				switch (id)
 				{
@@ -203,7 +234,6 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				    break;
 				}
 				rvizMarker_.lifetime = ros::Duration (1.0);
-				rvizMarker_.pose.position.y=rvizMarker_.pose.position.y-0.0271817414663;
 				rvizMarkerPub_.publish (rvizMarker_);
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
