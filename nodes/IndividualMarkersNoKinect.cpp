@@ -150,37 +150,45 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
     			if (vis_en){
 					//
-					visualization_msgs::Marker points;
-					tf::poseTFToMsg (markerPose, points.pose);
-					points.header.frame_id = image_msg->header.frame_id;
-					points.header.stamp =image_msg->header.stamp;
-					points.ns =  "basic_shapes";
-					points.action = visualization_msgs::Marker::ADD;
-					points.id = id;
-					points.type = visualization_msgs::Marker::CUBE_LIST;
-					points.scale.x = 1.0 * marker_size/100.0;
-					points.scale.y = 1.0 * marker_size/100.0;
-					points.scale.z = 0.2 * marker_size/100.0;
+					visualization_msgs::Marker points_;
+					tf::poseTFToMsg (markerPose, points_.pose);
+					points_.header.frame_id = image_msg->header.frame_id;
+					points_.header.stamp =image_msg->header.stamp;
+					points_.ns =  "basic_shapes";
+					points_.action = visualization_msgs::Marker::ADD;
+					points_.id = id;
+					points_.type = visualization_msgs::Marker::CUBE_LIST;
+					points_.scale.x = 1.0 * marker_size/100.0;
+					points_.scale.y = 1.0 * marker_size/100.0;
+					points_.scale.z = 0.2 * marker_size/100.0;
 					
 					int tag_index=0;
 
+					//initial tag position with green..
+					points_.color.r = 0.0f;
+					points_.color.g = 0.5f;
+					points_.color.b = 0.0f;
+					points_.color.a = 1.0;
+					geometry_msgs::Point pi;
+					pi.x = pi.y = pi.z = 0;
+					points_.points_.push_back(pi);
+
 					if(id==7){
-						points.color.r = 0.5f;
-						points.color.g = 0.0f;
-						points.color.b = 0.0f;
-						points.color.a = 1.0;
+						points_.color.r = 0.5f;
+						points_.color.g = 0.0f;
+						points_.color.b = 0.0f;
+						points_.color.a = 1.0;
 						tag_index=1;
 					}
 					else{
-						points.color.r = 0.0f;
-						points.color.g = 0.0f;
-						points.color.b = 0.5f;
-						points.color.a = 1.0;
+						points_.color.r = 0.0f;
+						points_.color.g = 0.0f;
+						points_.color.b = 0.5f;
+						points_.color.a = 1.0;
 						tag_index=-1;
 					}
 
-
-					points.frame_locked=true; // ? 
+					points_.frame_locked=true; // ? 
 					
 					for (int i = 1; i < 8; ++i)
 				    {
@@ -190,12 +198,12 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 							pi.x = tag_index*(0.001+marker_size/100.0)*i;
 							pi.y = (0.001+marker_size/100.0)*j;
 							pi.z = 0; // in a relation with the started pose.. init tag pose
-							points.points.push_back(pi);
+							points_.points_.push_back(pi);
 						}
 				    }
 			
 					rvizMarker_.lifetime = ros::Duration (1.0);	
-					rvizMarkerPub_.publish (points);
+					rvizMarkerPub_.publish (points_);
 				}else
 				{
 
