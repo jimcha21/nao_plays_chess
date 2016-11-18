@@ -168,7 +168,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				chessPoints_.color.a = 1.0;
 				geometry_msgs::Point pi;
 				pi.x = pi.y = pi.z = 0;
-				chessPoints_.chessPoints_.push_back(pi);
+				chessPoints_.points.push_back(pi);
 
 				if(id==7){
 					chessPoints_.color.r = 0.5f;
@@ -187,15 +187,15 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				chessPoints_.frame_locked=true; // ? 
 				
-				for (int i = 1; i < 8; ++i)
+				for (double i = -3.5; i < 4; ++i)
 			    {
-			    	for (int j = 1; j < 8; ++j)
+			    	for (int j = 1; j < 9; ++j)
 			    	{
 						geometry_msgs::Point pi;
 						pi.x = tag_index*(0.001+marker_size/100.0)*i;
 						pi.y = (0.001+marker_size/100.0)*j;
 						pi.z = 0; // in a relation with the started pose.. init tag pose
-						chessPoints_.chessPoints_.push_back(pi);
+						chessPoints_.points.push_back(pi);
 					}
 			    }
 		

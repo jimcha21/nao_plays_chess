@@ -171,7 +171,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 					points_.color.a = 1.0;
 					geometry_msgs::Point pi;
 					pi.x = pi.y = pi.z = 0;
-					points_.points_.push_back(pi);
+					points_.points.push_back(pi);
 
 					if(id==7){
 						points_.color.r = 0.5f;
@@ -198,7 +198,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 							pi.x = tag_index*(0.001+marker_size/100.0)*i;
 							pi.y = (0.001+marker_size/100.0)*j;
 							pi.z = 0; // in a relation with the started pose.. init tag pose
-							points_.points_.push_back(pi);
+							points_.points.push_back(pi);
 						}
 				    }
 			
