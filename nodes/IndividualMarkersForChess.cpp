@@ -1,39 +1,3 @@
-/*
- Software License Agreement (BSD License)
-
- Copyright (c) 2012, Scott Niekum
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  * Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-  * Neither the name of the Willow Garage nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- POSSIBILITY OF SUCH DAMAGE.
-
- author: Scott Niekum
-*/
-
 
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
@@ -146,8 +110,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				markerFrame += id_string;
 				tf::StampedTransform camToMarker (t, image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str());
     			tf_broadcaster->sendTransform(camToMarker);
-				
-			
+							
 				tf::poseTFToMsg (markerPose, chessPoints_.pose);
 				chessPoints_.header.frame_id = image_msg->header.frame_id;
 				chessPoints_.header.stamp =image_msg->header.stamp;
@@ -158,16 +121,10 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				chessPoints_.scale.x = 1.0 * marker_size/100.0;
 				chessPoints_.scale.y = 1.0 * marker_size/100.0;
 				chessPoints_.scale.z = 0.2 * marker_size/100.0;
-				
-				int tag_index=0;
 
-				//initial tag position with green..
-				chessPoints_.color.r = 0.0f;
-				chessPoints_.color.g = 0.5f;
-				chessPoints_.color.b = 0.0f;
-				chessPoints_.color.a = 1.0;
+				int tag_index=0;
 				geometry_msgs::Point pi;
-				pi.x = pi.y = pi.z = 0;
+				pi.x = pi.y = pi.z = 0;				
 				chessPoints_.points.push_back(pi);
 
 				if(id==7){
@@ -187,7 +144,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				chessPoints_.frame_locked=true; // ? 
 				
-				for (double i = -3.5; i < 4; ++i)
+				for (double i = -3.5; i < 0; ++i)
 			    {
 			    	for (int j = 1; j < 9; ++j)
 			    	{
@@ -201,7 +158,6 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 		
 				chessPoints_.lifetime = ros::Duration (1.0);	
 				rvizMarkerPub_.publish (chessPoints_);
-			
 				
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
