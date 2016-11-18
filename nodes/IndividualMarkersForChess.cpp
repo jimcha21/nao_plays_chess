@@ -127,7 +127,43 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				pi.x = pi.y = pi.z = 0;				
 				chessPoints_.points.push_back(pi);
 
-				if(id==7){
+				if(id==1){
+					chessPoints_.color.r = 0.5f;
+					chessPoints_.color.g = 0.0f;
+					chessPoints_.color.b = 0.5f;
+					chessPoints_.color.a = 1.0;
+					tag_index=1;
+				}else if(id==2){
+					chessPoints_.color.r = 0.5f;
+					chessPoints_.color.g = 0.5f;
+					chessPoints_.color.b = 0.0f;
+					chessPoints_.color.a = 1.0;
+					tag_index=1;
+				}else if(id==3){
+					chessPoints_.color.r = 0.0f;
+					chessPoints_.color.g = 0.5f;
+					chessPoints_.color.b = 0.5f;
+					chessPoints_.color.a = 1.0;
+					tag_index=1;
+				}else if(id==4){
+					chessPoints_.color.r = 0.5f;
+					chessPoints_.color.g = 0.5f;
+					chessPoints_.color.b = 0.2f;
+					chessPoints_.color.a = 1.0;
+					tag_index=1;
+				}else if(id==5){
+					chessPoints_.color.r = 0.0f;
+					chessPoints_.color.g = 0.5f;
+					chessPoints_.color.b = 0.0f;
+					chessPoints_.color.a = 1.0;
+					tag_index=1;
+				}else if(id==6){
+					chessPoints_.color.r = 0.0f;
+					chessPoints_.color.g = 0.0f;
+					chessPoints_.color.b = 0.5f;
+					chessPoints_.color.a = 1.0;
+					tag_index=1;
+				}else if(id==7){
 					chessPoints_.color.r = 0.5f;
 					chessPoints_.color.g = 0.0f;
 					chessPoints_.color.b = 0.0f;
@@ -135,16 +171,16 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 					tag_index=1;
 				}
 				else{
-					chessPoints_.color.r = 0.0f;
-					chessPoints_.color.g = 0.0f;
-					chessPoints_.color.b = 0.5f;
+					chessPoints_.color.r = 1.0f;
+					chessPoints_.color.g = 1.0f;
+					chessPoints_.color.b = 1.0f;
 					chessPoints_.color.a = 1.0;
 					tag_index=-1;
 				}
 
 				chessPoints_.frame_locked=true; // ? 
 				
-				for (double i = -3.5; i < 0; ++i)
+				for (double i = -3.5; i < 4; ++i)
 			    {
 			    	for (int j = 1; j < 9; ++j)
 			    	{
@@ -211,7 +247,7 @@ int main(int argc, char *argv[])
 	if(argc < 7){
 		std::cout << std::endl;
 		cout << "Not enough arguments provided." << endl;
-		cout << "Usage: ./individualMarkersNoKinect <marker size in cm> <max new marker error> "
+		cout << "Usage: ./individualMarkersForChess <chess block ? size in cm> <max new marker error> "
 		     << "<max track error> <cam image topic> <cam info topic> <output frame> [ <max frequency> ]";
 		std::cout << std::endl;
 		return 0;
