@@ -42,6 +42,9 @@
 #include <cmath> //for abs
 #include <map>
 
+// DELETE THIS INCLUSION IF YOU ARE IN PAIONAIOS !!!~!!!!!!!
+#include <opencv2/calib3d/calib3d.hpp>
+
 namespace alvar {
 
 const double PI = 3.14159265;
