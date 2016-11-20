@@ -98,7 +98,9 @@ public:
       }
 
       cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );
+      /*
       src=cv_ptr->image.clone();
+
 
       /// Set some parameters
       int blockSize = 3; int apertureSize = 3, choice=3; //1 for harris, else for shatosshi
@@ -110,7 +112,7 @@ public:
 
           cornerEigenValsAndVecs( src_gray, myHarris_dst, blockSize, apertureSize, BORDER_DEFAULT );
 
-          /* calculate Mc */
+          // calculate Mc 
           for( int j = 0; j < src_gray.rows; j++ )
              { for( int i = 0; i < src_gray.cols; i++ )
                   {
@@ -122,7 +124,7 @@ public:
 
           minMaxLoc( Mc, &myHarris_minVal, &myHarris_maxVal, 0, 0, Mat() );
 
-          /* Create Window and Trackbar */
+          // Create Window and Trackbar 
           namedWindow( myHarris_window, WINDOW_AUTOSIZE );
           createTrackbar( " Quality Level:", myHarris_window, &myHarris_qualityLevel, max_qualityLevel, myHarris_function );
           myHarris_function( 0, 0 );
@@ -134,7 +136,7 @@ public:
 
           minMaxLoc( myShiTomasi_dst, &myShiTomasi_minVal, &myShiTomasi_maxVal, 0, 0, Mat() );
 
-          /* Create Window and Trackbar */
+          // Create Window and Trackbar 
           namedWindow( myShiTomasi_window, WINDOW_AUTOSIZE );
           createTrackbar( " Quality Level:", myShiTomasi_window, &myShiTomasi_qualityLevel, max_qualityLevel, myShiTomasi_function );
           myShiTomasi_function( 0, 0 );
@@ -143,8 +145,19 @@ public:
         best_corners(0,0,false,2);
         
       }
+      */
+
+
+
+
+
+
+
+
+
+
       
-      //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
+      cv::imshow(OPENCV_WINDOW, cv_ptr->image);
       //cv::imshow(OPENCV_WINDOW,result_image);
       cv::waitKey(3);
 
@@ -279,12 +292,13 @@ void best_corners( int, void*,bool useHarrisDetector,int compar)
     }
 
     //cv::namedWindow( "argv[1]", CV_WINDOW_NORMAL );
+      
     if(compar==1){
       cv::imshow( "argv[1]", src_gray );
     }else{
       cv::imshow( "without harrris", src_gray );
     }
-    
+    result_image=src_gray.clone();
     //cv::waitKey(0);
 
 }
