@@ -52,8 +52,8 @@ const char* myShiTomasi_window = "My Shi Tomasi corner detector";
 /// Function headers
 void myShiTomasi_function( int, void* );
 void myHarris_function( int, void* );
-
 void cornerHarris_demo( int, void* );
+void best_corners( int, void*,bool useHarrisDetector,int compar);
 
 /**
  * @function main
@@ -101,7 +101,7 @@ public:
       src=cv_ptr->image.clone();
 
       /// Set some parameters
-      int blockSize = 3; int apertureSize = 3, choice=2; //1 for harris, else for shatosshi
+      int blockSize = 3; int apertureSize = 3, choice=3; //1 for harris, else for shatosshi
 
       if(choice==1){
           /// My Harris matrix -- Using cornerEigenValsAndVecs
@@ -127,7 +127,7 @@ public:
           createTrackbar( " Quality Level:", myHarris_window, &myHarris_qualityLevel, max_qualityLevel, myHarris_function );
           myHarris_function( 0, 0 );
       }
-      else{
+      else if(choice==2){
           /// My Shi-Tomasi -- Using cornerMinEigenVal
           myShiTomasi_dst = Mat::zeros( src_gray.size(), CV_32FC1 );
           cornerMinEigenVal( src_gray, myShiTomasi_dst, blockSize, apertureSize, BORDER_DEFAULT );
@@ -138,10 +138,14 @@ public:
           namedWindow( myShiTomasi_window, WINDOW_AUTOSIZE );
           createTrackbar( " Quality Level:", myShiTomasi_window, &myShiTomasi_qualityLevel, max_qualityLevel, myShiTomasi_function );
           myShiTomasi_function( 0, 0 );
+      }else{
+        best_corners(0,0,true,1);
+        best_corners(0,0,false,2);
+        
       }
       
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-      cv::imshow(OPENCV_WINDOW,result_image);
+      //cv::imshow(OPENCV_WINDOW,result_image);
       cv::waitKey(3);
 
       // Output modified video stream
@@ -209,7 +213,7 @@ void cornerHarris_demo( int, void* )
   double k = 0.04;
 
   /// Detecting corners
-  cornerHarris( src_gray, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
+  //cornerHarris( src_gray, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
 
   /// Normalizing
   normalize( dst, dst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
@@ -228,4 +232,59 @@ void cornerHarris_demo( int, void* )
   /// Showing the result
   namedWindow( corners_window, CV_WINDOW_AUTOSIZE );
   imshow( corners_window, dst_norm_scaled );
+}
+
+void best_corners( int, void*,bool useHarrisDetector,int compar)
+{
+     
+    std::vector< cv::Point2f > corners;
+
+    // maxCorners – The maximum number of corners to return. If there are more corners
+    // than that will be found, the strongest of them will be returned
+    int maxCorners = 30;
+
+    // qualityLevel – Characterizes the minimal accepted quality of image corners;
+    // the value of the parameter is multiplied by the by the best corner quality
+    // measure (which is the min eigenvalue, see cornerMinEigenVal() ,
+    // or the Harris function response, see cornerHarris() ).
+    // The corners, which quality measure is less than the product, will be rejected.
+    // For example, if the best corner has the quality measure = 1500,
+    // and the qualityLevel=0.01 , then all the corners which quality measure is
+    // less than 15 will be rejected.
+    double qualityLevel = 0.01;
+
+    // minDistance – The minimum possible Euclidean distance between the returned corners
+    double minDistance = 20.;
+
+    // mask – The optional region of interest. If the image is not empty (then it
+    // needs to have the type CV_8UC1 and the same size as image ), it will specify
+    // the region in which the corners are detected
+    cv::Mat mask; //!!
+
+    // blockSize – Size of the averaging block for computing derivative covariation
+    // matrix over each pixel neighborhood, see cornerEigenValsAndVecs()
+    int blockSize = 3;
+
+    // useHarrisDetector – Indicates, whether to use operator or cornerMinEigenVal()
+    //bool useHarrisDetector = true;
+
+    // k – Free parameter of Harris detector
+    double k = 0.04;
+
+    cv::goodFeaturesToTrack( src_gray, corners, maxCorners, qualityLevel, minDistance, mask, blockSize, useHarrisDetector, k );
+
+    for( size_t i = 0; i < corners.size(); i++ )
+    {
+    cv::circle( src_gray, corners[i], 5, cv::Scalar( 255. ), -1 );
+    }
+
+    //cv::namedWindow( "argv[1]", CV_WINDOW_NORMAL );
+    if(compar==1){
+      cv::imshow( "argv[1]", src_gray );
+    }else{
+      cv::imshow( "without harrris", src_gray );
+    }
+    
+    //cv::waitKey(0);
+
 }
