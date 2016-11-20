@@ -1,0 +1,10 @@
+$ cat .gitignore
+# exclude everything except directory foo/bar
+/*
+!/ar_track_with_chess
+!/vision
+!/CMakeLists.txt
+!/README.md
+
+
+!/.gitignore
