@@ -1,5 +1,5 @@
 $ cat .gitignore
-# exclude everything except directory foo/bar
+# exclude everything except below directories.. (git help gitignore to see more options)
 /*
 !/ar_track_with_chess
 !/vision
