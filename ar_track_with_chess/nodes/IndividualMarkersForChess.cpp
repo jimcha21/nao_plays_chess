@@ -48,6 +48,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 	if(cam->getCamInfo_){
 		try{
 			tf::StampedTransform CamToOutput;
+			//ROS_INFO("%s" , "mpe");
     			try{
 					tf_listener->waitForTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, ros::Duration(1.0));
 					tf_listener->lookupTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, CamToOutput);
@@ -89,10 +90,14 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
                 tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin);
                 tf::Transform markerPose = t * m; // marker pose in the camera frame
                 
-                //ROS_INFO("the marker %d %f %f %f %f",id,p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
-                //ROS_INFO("the marker %d %f %f %f",id,p.translation[0],p.translation[1],p.translation[2]);
-                
-                //ROS_INFO("%f",marker_size);
+                ROS_INFO("%f %f %f %f\n",p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
+                //ROS_INFO("BRIKE %d\n",marker_detector.markers->size());
+                //ROS_INFO("the marker %d with %f %f %f \n",id,p.translation[0],p.translation[1],p.translation[2]);
+                // / ROS_INFO("transf %f", t.translation[0]);
+               // ROS_INFO("transf %f %f %f",  origin.x(),origin.y(),origin.z());
+                ////ROS_INFO("%f",marker_size);
+
+                //ROS_INFO("%f %f %f",tf::Quaternion::getIdentity().y(),tf::Quaternion::getIdentity().z() ,tf::Quaternion::getIdentity().w()  );
 
                 tf::Vector3 z_axis_cam = tf::Transform(rotation, tf::Vector3(0,0,0)) * tf::Vector3(0, 0, 1);
                 //ROS_INFO("%02i Z in cam frame: %f %f %f",id, z_axis_cam.x(), z_axis_cam.y(), z_axis_cam.z());
@@ -180,7 +185,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				chessPoints_.frame_locked=true; // ? 
 				
-				for (double i = -3.5; i < 4; ++i)
+				/*for (double i = -3.5; i < 4; ++i)
 			    {
 			    	for (int j = 1; j < 9; ++j)
 			    	{
@@ -190,7 +195,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 						pi.z = 0; // in a relation with the started pose.. init tag pose
 						chessPoints_.points.push_back(pi);
 					}
-			    }
+			    }*/
 		
 				chessPoints_.lifetime = ros::Duration (1.0);	
 				rvizMarkerPub_.publish (chessPoints_);
