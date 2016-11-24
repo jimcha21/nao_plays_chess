@@ -57,7 +57,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
       				ROS_ERROR("%s",ex.what());
     			}
 
-
+    		//ROS_INFO("CamToOutput x=%f ,y=%f , z=%f\n",CamToOutput.getOrigin()[0],CamToOutput.getOrigin()[1] ,CamToOutput.getOrigin()[2]);
             //Convert the image
             cv_ptr_ = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
 
@@ -90,10 +90,14 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
                 tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin);
                 tf::Transform markerPose = t * m; // marker pose in the camera frame
                 
+                //ROS_INFO("%f",origin.m_floats[0]); //yes
+                //ROS_INFO("mpe %f",origin.x());
+                //ROS_INFO("%f",t.getOrigin().m_floats[0]);
+
                 //ROS_INFO("%f %f %f %f\n",p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
                 //ROS_INFO("BRIKE %d\n",marker_detector.markers->size());
                 //ROS_INFO("the marker %d with %f %f %f \n",id,p.translation[0],p.translation[1],p.translation[2]);
-                // / ROS_INFO("transf %f", t.translation[0]);
+
                // ROS_INFO("transf %f %f %f",  origin.x(),origin.y(),origin.z());
                 ////ROS_INFO("%f",marker_size);
 
@@ -134,67 +138,63 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				chessPoints_.scale.x = 0.2 * marker_size/100.0;
 				chessPoints_.scale.y = 0.2 * marker_size/100.0;
 
-				int tag_index=0;
+				int tag_index=0; //mallon perito.. xrhsh gia parapanw apo 1 tag
+
+				chessSquares_.color.a = 1; // alpha color-color densities
+				chessPoints_.color.a = 0;
+
 				geometry_msgs::Point pi;
 				pi.x = pi.y = pi.z = 0;				
 				chessSquares_.points.push_back(pi);
 
+				//green points
 				chessPoints_.color.g = 1.0f;
-				chessPoints_.color.a = 1;
 
 				if(id==1){
 					chessSquares_.color.r = 0.5f;
 					chessSquares_.color.g = 0.0f;
 					chessSquares_.color.b = 0.5f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==2){
 					chessSquares_.color.r = 0.5f;
 					chessSquares_.color.g = 0.5f;
 					chessSquares_.color.b = 0.0f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==3){
 					chessSquares_.color.r = 0.0f;
 					chessSquares_.color.g = 0.5f;
 					chessSquares_.color.b = 0.5f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==4){
 					chessSquares_.color.r = 0.5f;
 					chessSquares_.color.g = 0.5f;
 					chessSquares_.color.b = 0.2f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==5){
 					chessSquares_.color.r = 0.0f;
 					chessSquares_.color.g = 0.5f;
 					chessSquares_.color.b = 0.0f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==6){
 					chessSquares_.color.r = 0.0f;
 					chessSquares_.color.g = 0.0f;
 					chessSquares_.color.b = 0.5f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==7){
 					chessSquares_.color.r = 0.5f;
 					chessSquares_.color.g = 0.0f;
 					chessSquares_.color.b = 0.0f;
-					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}
 				else{
 					chessSquares_.color.r = 1.0f;
 					chessSquares_.color.g = 1.0f;
 					chessSquares_.color.b = 1.0f;
-					chessSquares_.color.a = 1.0;
 					tag_index=-1;
 				}
 
-				chessSquares_.frame_locked=true; // ? 
-				
+				chessSquares_.frame_locked=false; // ? 
+				/*
 				for (double i = -3.5; i < 4; i++)
 			    {
 			    	for (int j = 1; j < 9; j++)
@@ -208,7 +208,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 						chessSquares_.points.push_back(pi);
 	
 						//and for the 4 knobs of the current square..
-						pi.z=pi.z;
+						pi.z=pi.z+0.001;
 						double init_x = pi.x;
 						double init_y = pi.y;	
 						for(int q = 0; q < 4; q++){
@@ -221,15 +221,13 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 							pi.x=init_x+marker_area*0.5;	
 							chessPoints_.points.push_back(pi);
 							pi.y=init_y-marker_area*0.5;
-							// top right
 							chessPoints_.points.push_back(pi);
 						}
 					}
 			    }
-		
+				*/
 				chessSquares_.lifetime = chessPoints_.lifetime = ros::Duration (1.0);	
 				rvizMarkerPub_.publish (chessSquares_);
-
 				rvizMarkerPub_.publish (chessPoints_);
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
@@ -242,6 +240,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
       			ar_pose_marker.header.frame_id = output_frame;
 			    ar_pose_marker.header.stamp = image_msg->header.stamp;
 			    ar_pose_marker.id = id;
+			    ROS_INFO("%f",tagPoseOutput.getOrigin().m_floats[0]);
 			    //ROS_INFO("%02i Z in cam frame: %f ",id, tagPoseOutput.position.x);
                 ar_pose_marker.pose.pose.position.y=ar_pose_marker.pose.pose.position.y+10;
 
