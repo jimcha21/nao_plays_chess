@@ -24,7 +24,7 @@ image_transport::Subscriber cam_sub_;
 ros::Publisher arMarkerPub_;
 ros::Publisher rvizMarkerPub_;
 ar_track_alvar_msgs::AlvarMarkers arPoseMarkers_;
-visualization_msgs::Marker chessPoints_;
+visualization_msgs::Marker chessSquares_,chessPoints_;
 tf::TransformListener *tf_listener;
 tf::TransformBroadcaster *tf_broadcaster;
 MarkerDetector<MarkerData> marker_detector;
@@ -90,7 +90,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
                 tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin);
                 tf::Transform markerPose = t * m; // marker pose in the camera frame
                 
-                ROS_INFO("%f %f %f %f\n",p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
+                //ROS_INFO("%f %f %f %f\n",p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
                 //ROS_INFO("BRIKE %d\n",marker_detector.markers->size());
                 //ROS_INFO("the marker %d with %f %f %f \n",id,p.translation[0],p.translation[1],p.translation[2]);
                 // / ROS_INFO("transf %f", t.translation[0]);
@@ -116,90 +116,121 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				tf::StampedTransform camToMarker (t, image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str());
     			tf_broadcaster->sendTransform(camToMarker);
 							
+				tf::poseTFToMsg (markerPose, chessSquares_.pose);
 				tf::poseTFToMsg (markerPose, chessPoints_.pose);
-				chessPoints_.header.frame_id = image_msg->header.frame_id;
-				chessPoints_.header.stamp =image_msg->header.stamp;
-				chessPoints_.ns =  "basic_shapes";
-				chessPoints_.action = visualization_msgs::Marker::ADD;
-				chessPoints_.id = id;
-				chessPoints_.type = visualization_msgs::Marker::CUBE_LIST;
-				chessPoints_.scale.x = 1.0 * marker_size/100.0;
-				chessPoints_.scale.y = 1.0 * marker_size/100.0;
-				chessPoints_.scale.z = 0.2 * marker_size/100.0;
+				chessSquares_.header.frame_id = chessPoints_.header.frame_id = image_msg->header.frame_id;
+				chessSquares_.header.stamp = chessPoints_.header.stamp = image_msg->header.stamp;
+				chessSquares_.ns = chessPoints_.ns =  "basic_shapes";
+				chessSquares_.action = chessPoints_.action = visualization_msgs::Marker::ADD;
+				chessSquares_.id = id;
+				chessPoints_.id = 101;
+				chessSquares_.type = visualization_msgs::Marker::CUBE_LIST;
+				chessPoints_.type = visualization_msgs::Marker::POINTS;	
+
+				chessSquares_.scale.x = 1.0 * marker_size/100.0;
+				chessSquares_.scale.y = 1.0 * marker_size/100.0;
+				chessSquares_.scale.z = 0.2 * marker_size/100.0;
+
+				chessPoints_.scale.x = 0.2 * marker_size/100.0;
+				chessPoints_.scale.y = 0.2 * marker_size/100.0;
 
 				int tag_index=0;
 				geometry_msgs::Point pi;
 				pi.x = pi.y = pi.z = 0;				
-				chessPoints_.points.push_back(pi);
+				chessSquares_.points.push_back(pi);
+
+				chessPoints_.color.g = 1.0f;
+				chessPoints_.color.a = 1;
 
 				if(id==1){
-					chessPoints_.color.r = 0.5f;
-					chessPoints_.color.g = 0.0f;
-					chessPoints_.color.b = 0.5f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.5f;
+					chessSquares_.color.g = 0.0f;
+					chessSquares_.color.b = 0.5f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==2){
-					chessPoints_.color.r = 0.5f;
-					chessPoints_.color.g = 0.5f;
-					chessPoints_.color.b = 0.0f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.5f;
+					chessSquares_.color.g = 0.5f;
+					chessSquares_.color.b = 0.0f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==3){
-					chessPoints_.color.r = 0.0f;
-					chessPoints_.color.g = 0.5f;
-					chessPoints_.color.b = 0.5f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.0f;
+					chessSquares_.color.g = 0.5f;
+					chessSquares_.color.b = 0.5f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==4){
-					chessPoints_.color.r = 0.5f;
-					chessPoints_.color.g = 0.5f;
-					chessPoints_.color.b = 0.2f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.5f;
+					chessSquares_.color.g = 0.5f;
+					chessSquares_.color.b = 0.2f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==5){
-					chessPoints_.color.r = 0.0f;
-					chessPoints_.color.g = 0.5f;
-					chessPoints_.color.b = 0.0f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.0f;
+					chessSquares_.color.g = 0.5f;
+					chessSquares_.color.b = 0.0f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==6){
-					chessPoints_.color.r = 0.0f;
-					chessPoints_.color.g = 0.0f;
-					chessPoints_.color.b = 0.5f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.0f;
+					chessSquares_.color.g = 0.0f;
+					chessSquares_.color.b = 0.5f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}else if(id==7){
-					chessPoints_.color.r = 0.5f;
-					chessPoints_.color.g = 0.0f;
-					chessPoints_.color.b = 0.0f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 0.5f;
+					chessSquares_.color.g = 0.0f;
+					chessSquares_.color.b = 0.0f;
+					chessSquares_.color.a = 1.0;
 					tag_index=1;
 				}
 				else{
-					chessPoints_.color.r = 1.0f;
-					chessPoints_.color.g = 1.0f;
-					chessPoints_.color.b = 1.0f;
-					chessPoints_.color.a = 1.0;
+					chessSquares_.color.r = 1.0f;
+					chessSquares_.color.g = 1.0f;
+					chessSquares_.color.b = 1.0f;
+					chessSquares_.color.a = 1.0;
 					tag_index=-1;
 				}
 
-				chessPoints_.frame_locked=true; // ? 
+				chessSquares_.frame_locked=true; // ? 
 				
-				/*for (double i = -3.5; i < 4; ++i)
+				for (double i = -3.5; i < 4; i++)
 			    {
-			    	for (int j = 1; j < 9; ++j)
+			    	for (int j = 1; j < 9; j++)
 			    	{
 						geometry_msgs::Point pi;
-						pi.x = tag_index*(0.001+marker_size/100.0)*i;
-						pi.y = (0.001+marker_size/100.0)*j;
+						double marker_area=0.001+marker_size/100.0; // 0.001 is for the chess line bordering
+						
+						pi.x = tag_index*marker_area*i;
+						pi.y = marker_area*j;
 						pi.z = 0; // in a relation with the started pose.. init tag pose
-						chessPoints_.points.push_back(pi);
+						chessSquares_.points.push_back(pi);
+	
+						//and for the 4 knobs of the current square..
+						pi.z=pi.z;
+						double init_x = pi.x;
+						double init_y = pi.y;	
+						for(int q = 0; q < 4; q++){
+							
+							pi.x=init_x-marker_area*0.5;
+							pi.y=init_y-marker_area*0.5;						
+							chessPoints_.points.push_back(pi);
+							pi.y=init_y+marker_area*0.5;
+							chessPoints_.points.push_back(pi);
+							pi.x=init_x+marker_area*0.5;	
+							chessPoints_.points.push_back(pi);
+							pi.y=init_y-marker_area*0.5;
+							// top right
+							chessPoints_.points.push_back(pi);
+						}
 					}
-			    }*/
+			    }
 		
-				chessPoints_.lifetime = ros::Duration (1.0);	
+				chessSquares_.lifetime = chessPoints_.lifetime = ros::Duration (1.0);	
+				rvizMarkerPub_.publish (chessSquares_);
+
 				rvizMarkerPub_.publish (chessPoints_);
-				
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
 				tf::Transform tagPoseOutput = CamToOutput * markerPose;
