@@ -10,9 +10,18 @@
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_datatypes.h>
 #include <sensor_msgs/image_encodings.h>
 #include <dynamic_reconfigure/server.h>
 #include <ar_track_alvar/ParamsConfig.h>
+//#include <ar_track_alvar/kinect_filtering.h>
+#include <fstream>
+
+namespace a=ar_track_alvar;
+namespace gm=geometry_msgs;
+
+
+using std::cerr;
 
 using namespace alvar;
 using namespace std;
@@ -35,9 +44,43 @@ double max_frequency;
 double marker_size;
 double max_new_marker_error;
 double max_track_error;
+tf::Vector3 id_0;
+tf::Vector3 id_1;
+tf::Vector3 id_3;
 std::string cam_image_topic; 
 std::string cam_info_topic; 
 std::string output_frame;
+
+// Random float between a and b
+float randFloat (float a, float b)
+{
+  const float u = static_cast<float>(rand())/RAND_MAX;
+  return a + u*(b-a);
+}
+
+// Generate points in a square in space of form p+av+bw where 
+// a and b range from 0 to 1
+a::ARCloud::Ptr generateCloud(const double px, const double py, const double pz,
+                              const double vx, const double vy, const double vz,
+                              const double wx, const double wy, const double wz)
+{
+  const double INC=0.1;
+  const double NOISE=0.01;
+
+  a::ARCloud::Ptr cloud(boost::make_shared<a::ARCloud>());
+  for (double u=0; u<1+INC/2; u+=INC)
+  {
+    for (double v=0; v<1+INC/2; v+=INC)
+    {
+      a::ARPoint p;
+      p.x = px+u*vx+v*wx+randFloat(-NOISE, NOISE);
+      p.y = py+u*vy+v*wy+randFloat(-NOISE, NOISE);
+      p.z = pz+u*vz+v*wz+randFloat(-NOISE, NOISE);
+      cloud->points.push_back(p);
+    }
+  }
+  return cloud;
+}
 
 void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg);
 
@@ -95,15 +138,21 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
                 //ROS_INFO("%f",origin.m_floats[0]); //yes
                 //ROS_INFO("mpe %f",origin.x());
                 //ROS_INFO("%f",t.getOrigin().m_floats[0]);
-
-                //ROS_INFO("%f %f %f %f\n",p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
+				tf::Matrix3x3 matrix(rotation);
+				double roll, pitch, yaw;
+				matrix.getRPY(roll, pitch, yaw); //stable on pitch (on the same surface ~ roll and yaw some littl differences )
+				//ROS_INFO("roll, pitch, yaw=%1.2f  %1.2f  %1.2f", roll, pitch, yaw);
+                
+                //ROS_INFO("id:%d quat %f %f %f %f\n",id,p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
                 //ROS_INFO("BRIKE %d\n",marker_detector.markers->size());
-                ROS_INFO("raw translation %f %f %f\n",p.translation[0],p.translation[1],p.translation[2]);
+                //ROS_INFO("id:%d raw translation %f %f %f\n",id,p.translation[0],p.translation[1],p.translation[2]);
+
+				ROS_INFO("id:%d %f %f %f",id, px, py, pz);
 
                // ROS_INFO("transf %f %f %f",  origin.x(),origin.y(),origin.z());
                 ////ROS_INFO("%f",marker_size);
 
-                ROS_INFO("?%f %f %f",tf::Quaternion::getIdentity().y(),tf::Quaternion::getIdentity().z() ,tf::Quaternion::getIdentity().w()  );
+                //ROS_INFO("?%f %f %f",tf::Quaternion::getIdentity().y(),tf::Quaternion::getIdentity().z() ,tf::Quaternion::getIdentity().w()  );
 
                 tf::Vector3 z_axis_cam = tf::Transform(rotation, tf::Vector3(0,0,0)) * tf::Vector3(0, 0, 1);
                 //ROS_INFO("%02i Z in cam frame: %f %f %f",id, z_axis_cam.x(), z_axis_cam.y(), z_axis_cam.z());
@@ -121,8 +170,101 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				markerFrame += id_string;
 				tf::StampedTransform camToMarker (t, image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str());
     			tf_broadcaster->sendTransform(camToMarker);
+    			
+    			//KATI DIKA MOU
 
-    			//
+				a::ARCloud::Ptr cloud(new a::ARCloud());
+				a::ARPoint pt;
+
+/* 				pt.x=0.035301; pt.y=0.138741;pt.z=0.862000;
+				cloud->points.push_back(pt);	
+				pt.x=0.012314; pt.y=0.130531;pt.z=0.862000;
+				cloud->points.push_back(pt);	
+				pt.x=0.048605; pt.y=0.119452;pt.z=0.865000;
+				cloud->points.push_back(pt);	
+				pt.x=0.025656; pt.y=0.101797;pt.z=0.869000;
+				cloud->points.push_back(pt);*/	
+
+				//the real one
+				pt.x=-0.021602; pt.y= -0.015103 ;pt.z= 0.252153;
+				cloud->points.push_back(pt);	
+				pt.x=-0.064867; pt.y= -0.013673 ;pt.z= 0.250095;
+				cloud->points.push_back(pt);	
+				pt.x=0.024267 ; pt.y=0.012232;  pt.z=0.218399;
+
+				cloud->points.push_back(pt);	
+				pt.x=-0.068078; pt.y= -0.043404; pt.z= 0.285051;
+
+				cloud->points.push_back(pt);
+
+				ROS_INFO("Cloud has %zu points such as (%.2f, %.2f, %.2f)",
+				cloud->points.size(), cloud->points[0].x, cloud->points[0].y,cloud->points[0].z);
+
+				a::ARPoint p1, p2, p3;
+				p1.x = 0.1888;
+				p1.y = 0.1240;
+				p1.z = 0.8620;
+				p2.x = 0.0372;
+				p2.y = 0.1181;
+				p2.z = 0.8670;
+				p3.x = 42;
+				p3.y = 24;
+				p3.z = 88;
+
+				a::PlaneFitResult res = a::fitPlane(cloud);
+				ROS_INFO("Plane equation is %.3fx + %.3fy + %.3fz + %.3f = 0",
+				res.coeffs.values[0], res.coeffs.values[1], res.coeffs.values[2],
+				res.coeffs.values[3]);
+
+				//gm::Quaternion q = a::extractOrientation(res.coeffs, p1, p2, p3, p1);
+				//ROS_INFO_STREAM("Orientation is " << q);
+
+
+    			///
+
+    			
+    			if(id==3){
+	    			std::string markerFrame2 = "somethingpanwapototria2";
+	    			tf::Quaternion rotation2 (qx,qy,qz,qw);
+	    			pz=pz+0.03;
+	    			px=px;
+	    			py=-(res.coeffs.values[0]*px+ res.coeffs.values[2]*pz + res.coeffs.values[3])/res.coeffs.values[1];
+	    			//py=py-0.014;
+	                tf::Vector3 origin2 (px,py,pz);
+	                ROS_INFO("mine %f %f %f",px,py,pz);
+	                tf::Transform t2 (rotation2, origin2);
+	                //ROS_INFO("t %f %f %f", t2.getOrigin().m_floats[0],t2.getOrigin().m_floats[1],t2.getOrigin().m_floats[2]);
+					tf::StampedTransform camToMarker2 (t2, image_msg->header.stamp, image_msg->header.frame_id, markerFrame2.c_str());
+	    			tf_broadcaster->sendTransform(camToMarker2);
+					std::string markerFrame3 = "somethingpanwapototria3";
+					tf::Quaternion rotation3 (qx,qy,qz,qw);
+					pz=pz+0.06;
+					px=px;
+					py=-(res.coeffs.values[0]*px+ res.coeffs.values[2]*pz + res.coeffs.values[3])/res.coeffs.values[1];
+					//py=py-0.014;
+					tf::Vector3 origin3 (px,py,pz);
+					ROS_INFO("mine %f %f %f",px,py,pz);
+					tf::Transform t3 (rotation3, origin3);
+					//ROS_INFO("t %f %f %f", t3.getOrigin().m_floats[0],t3.getOrigin().m_floats[1],t3.getOrigin().m_floats[3]);
+					tf::StampedTransform camToMarker3 (t3, image_msg->header.stamp, image_msg->header.frame_id, markerFrame3.c_str());
+					tf_broadcaster->sendTransform(camToMarker3);
+					std::string markerFrame4 = "somethingpanwapototria4";
+	    			tf::Quaternion rotation4 (qx,qy,qz,qw);
+	    			pz=pz+0.09;
+	    			px=px;
+	    			py=-(res.coeffs.values[0]*px+ res.coeffs.values[2]*pz + res.coeffs.values[3])/res.coeffs.values[1];
+	    			//py=py-0.014;
+	                tf::Vector3 origin4 (px,py,pz);
+	                ROS_INFO("mine %f %f %f",px,py,pz);
+	                tf::Transform t4 (rotation4, origin4);
+	                //ROS_INFO("t %f %f %f", t4.getOrigin().m_floats[0],t4.getOrigin().m_floats[1],t4.getOrigin().m_floats[4]);
+					tf::StampedTransform camToMarker4 (t4, image_msg->header.stamp, image_msg->header.frame_id, markerFrame4.c_str());
+	    			tf_broadcaster->sendTransform(camToMarker4);
+
+				}
+	    			
+
+    			
 							
 				tf::poseTFToMsg (markerPose, chessSquares_.pose);
 				tf::poseTFToMsg (markerPose, chessPoints_.pose);
@@ -144,8 +286,9 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				int tag_index=0; //mallon perito.. xrhsh gia parapanw apo 1 tag
 
-				chessSquares_.color.a = 0.5; // alpha color-color densities
+				chessSquares_.color.a = 0.5; // alpha color-color densities                          --!!--
 				chessPoints_.color.a = 1;
+				bool enable_chess=false;
 
 				geometry_msgs::Point pi;
 				pi.x = pi.y = pi.z = 0;				
@@ -199,37 +342,39 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				chessSquares_.frame_locked=false; // ? 
 				
-				for (double i = -3.5; i < 4; i++)
-			    {
-			    	for (int j = 1; j < 9; j++)
-			    	{
-						geometry_msgs::Point pi;
-						double marker_area=0.001+marker_size/100.0; // 0.001 is for the chess line bordering
-						
-						pi.x = tag_index*marker_area*i;
-						pi.y = marker_area*j;
-						pi.z = 0; // in a relation with the started pose.. init tag pose
-						chessSquares_.points.push_back(pi);
-	
-						//and for the 4 knobs of the current square..
-						pi.z=pi.z+0.001;
-						double init_x = pi.x;
-						double init_y = pi.y;	
-						for(int q = 0; q < 4; q++){
+				if(enable_chess){
+					for (double i = -3.5; i < 4; i++)
+				    {
+				    	for (int j = 1; j < 9; j++)
+				    	{
+							geometry_msgs::Point pi;
+							double marker_area=0.001+marker_size/100.0; // 0.001 is for the chess line bordering
 							
-							pi.x=init_x-marker_area*0.5;
-							pi.y=init_y-marker_area*0.5;						
-							chessPoints_.points.push_back(pi);
-							pi.y=init_y+marker_area*0.5;
-							chessPoints_.points.push_back(pi);
-							pi.x=init_x+marker_area*0.5;	
-							chessPoints_.points.push_back(pi);
-							pi.y=init_y-marker_area*0.5;
-							chessPoints_.points.push_back(pi);
+							pi.x = tag_index*marker_area*i;
+							pi.y = marker_area*j;
+							pi.z = 0; // in a relation with the started pose.. init tag pose
+							chessSquares_.points.push_back(pi);
+		
+							//and for the 4 knobs of the current square..
+							pi.z=pi.z+0.001;
+							double init_x = pi.x;
+							double init_y = pi.y;	
+							for(int q = 0; q < 4; q++){
+								
+								pi.x=init_x-marker_area*0.5;
+								pi.y=init_y-marker_area*0.5;						
+								chessPoints_.points.push_back(pi);
+								pi.y=init_y+marker_area*0.5;
+								chessPoints_.points.push_back(pi);
+								pi.x=init_x+marker_area*0.5;	
+								chessPoints_.points.push_back(pi);
+								pi.y=init_y-marker_area*0.5;
+								chessPoints_.points.push_back(pi);
+							}
 						}
-					}
-			    }
-				
+				    }
+				}
+
 				chessSquares_.lifetime = chessPoints_.lifetime = ros::Duration (1.0);	
 				//rvizMarkerPub_.publish (chessSquares_);
 				rvizMarkerPub_.publish (chessPoints_);
