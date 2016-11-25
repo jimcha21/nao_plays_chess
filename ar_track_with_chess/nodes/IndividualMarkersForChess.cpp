@@ -132,23 +132,33 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
                 tf::Quaternion rotation (qx,qy,qz,qw);
                 tf::Vector3 origin (px,py,pz);
                 tf::Transform t (rotation, origin);
-                tf::Vector3 markerOrigin (0, 0, 0);
-                tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin); //creating a transform for (0,0)
-                tf::Transform markerPose = t * m; // marker pose in the camera frame
+
+                // marker pose in the camera frame - visualize and place the marker in a relation to the camera pose (initial marker pose in 
+                //relation with the camera pose ::transational->(0,0,0) orientation is the same)..
+                tf::Vector3 markerOrigin (0.001+marker_size/100.0*1, 0, 0);
+                tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin); //creating a transform (0,0,0,1),(0,0,0)
+                tf::Transform markerPose = t * m; 
                 
                 //ROS_INFO("%f",origin.m_floats[0]); //yes
                 //ROS_INFO("mpe %f",origin.x());
-                //ROS_INFO("%f",t.getOrigin().m_floats[0]);
-				tf::Matrix3x3 matrix(rotation);
+                ROS_INFO("t %f %f %f",t.getOrigin().m_floats[0],t.getOrigin().m_floats[1],t.getOrigin().m_floats[2]);
+				ROS_INFO("t+ %f %f %f",t.getOrigin().m_floats[0]+0.01,t.getOrigin().m_floats[1],t.getOrigin().m_floats[2]);
+				
+				ROS_INFO("m %f %f %f",markerPose.getOrigin().m_floats[0],markerPose.getOrigin().m_floats[1],markerPose.getOrigin().m_floats[2]);
+				
+
+				//quat to euler
+				/*tf::Matrix3x3 matrix(rotation);
 				double roll, pitch, yaw;
 				matrix.getRPY(roll, pitch, yaw); //stable on pitch (on the same surface ~ roll and yaw some littl differences )
+				*/
 				//ROS_INFO("roll, pitch, yaw=%1.2f  %1.2f  %1.2f", roll, pitch, yaw);
                 
                 //ROS_INFO("id:%d quat %f %f %f %f\n",id,p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
                 //ROS_INFO("BRIKE %d\n",marker_detector.markers->size());
                 //ROS_INFO("id:%d raw translation %f %f %f\n",id,p.translation[0],p.translation[1],p.translation[2]);
 
-				ROS_INFO("id:%d %f %f %f",id, px, py, pz);
+				//ROS_INFO("id:%d %f %f %f",id, px, py, pz);
 
                // ROS_INFO("transf %f %f %f",  origin.x(),origin.y(),origin.z());
                 ////ROS_INFO("%f",marker_size);
@@ -169,6 +179,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				out << id;
 				std::string id_string = out.str();
 				markerFrame += id_string;
+
 				tf::StampedTransform camToMarker (t, image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str());
     			tf_broadcaster->sendTransform(camToMarker);
     			
@@ -265,6 +276,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 							
 				tf::poseTFToMsg (markerPose, chessSquares_.pose);
 				tf::poseTFToMsg (markerPose, chessPoints_.pose);
+				ROS_INFO("%f",chessSquares_.pose.position.x);
 				chessSquares_.header.frame_id = chessPoints_.header.frame_id = image_msg->header.frame_id;
 				chessSquares_.header.stamp = chessPoints_.header.stamp = image_msg->header.stamp;
 				chessSquares_.ns = chessPoints_.ns =  "basic_shapes";
@@ -373,8 +385,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				}
 
 				chessSquares_.lifetime = chessPoints_.lifetime = ros::Duration (1.0);	
-				//rvizMarkerPub_.publish (chessSquares_);
-				rvizMarkerPub_.publish (chessPoints_);
+				rvizMarkerPub_.publish (chessSquares_);
+				//rvizMarkerPub_.publish (chessPoints_);
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
 				tf::Transform tagPoseOutput = CamToOutput * markerPose;
