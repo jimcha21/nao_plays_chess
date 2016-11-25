@@ -46,6 +46,7 @@ double max_new_marker_error;
 double max_track_error;
 tf::Vector3 id_0;
 tf::Vector3 id_1;
+tf::Vector3 id_2;
 tf::Vector3 id_3;
 std::string cam_image_topic; 
 std::string cam_info_topic; 
@@ -171,12 +172,11 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				tf::StampedTransform camToMarker (t, image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str());
     			tf_broadcaster->sendTransform(camToMarker);
     			
-    			//KATI DIKA MOU
+    			
+    			// 3D Plane Estimation
 
-				a::ARCloud::Ptr cloud(new a::ARCloud());
-				a::ARPoint pt;
-
-/* 				pt.x=0.035301; pt.y=0.138741;pt.z=0.862000;
+				/* //fakes translations
+ 				pt.x=0.035301; pt.y=0.138741;pt.z=0.862000;
 				cloud->points.push_back(pt);	
 				pt.x=0.012314; pt.y=0.130531;pt.z=0.862000;
 				cloud->points.push_back(pt);	
@@ -185,43 +185,40 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				pt.x=0.025656; pt.y=0.101797;pt.z=0.869000;
 				cloud->points.push_back(pt);*/	
 
+    			/*
+				a::ARCloud::Ptr cloud(new a::ARCloud());
+				a::ARPoint pt;
+
+				// more than 3 detected markers needed for better plane equation estimation .. 
+				if(id==0){
+					id_0.setValue(px,py,pz);
+				}else if(id==1){
+					id_1.setValue(px,py,pz);
+				}else if(id==2){
+					id_2.setValue(px,py,pz);
+				}else if(id==3){
+					id_3.setValue(px,py,pz);
+				}
+
 				//the real one
-				pt.x=-0.021602; pt.y= -0.015103 ;pt.z= 0.252153;
+				pt.x=id_0.x(); pt.y=id_0.y();pt.z=id_0.z();
 				cloud->points.push_back(pt);	
-				pt.x=-0.064867; pt.y= -0.013673 ;pt.z= 0.250095;
+				pt.x=id_1.x(); pt.y=id_1.y();pt.z=id_1.z();
 				cloud->points.push_back(pt);	
-				pt.x=0.024267 ; pt.y=0.012232;  pt.z=0.218399;
-
+				pt.x=id_2.x(); pt.y=id_2.y();pt.z=id_2.z();
 				cloud->points.push_back(pt);	
-				pt.x=-0.068078; pt.y= -0.043404; pt.z= 0.285051;
-
+				pt.x=id_3.x(); pt.y=id_3.y();pt.z=id_3.z();
 				cloud->points.push_back(pt);
 
-				ROS_INFO("Cloud has %zu points such as (%.2f, %.2f, %.2f)",
-				cloud->points.size(), cloud->points[0].x, cloud->points[0].y,cloud->points[0].z);
+				//ROS_INFO("Cloud has %zu points such as (%.2f, %.2f, %.2f)",cloud->points.size(), cloud->points[0].x, cloud->points[0].y,cloud->points[0].z);
 
-				a::ARPoint p1, p2, p3;
-				p1.x = 0.1888;
-				p1.y = 0.1240;
-				p1.z = 0.8620;
-				p2.x = 0.0372;
-				p2.y = 0.1181;
-				p2.z = 0.8670;
-				p3.x = 42;
-				p3.y = 24;
-				p3.z = 88;
-
-				a::PlaneFitResult res = a::fitPlane(cloud);
+				a::PlaneFitResult res = a::fitPlane(cloud); //plane equation calculation
 				ROS_INFO("Plane equation is %.3fx + %.3fy + %.3fz + %.3f = 0",
 				res.coeffs.values[0], res.coeffs.values[1], res.coeffs.values[2],
 				res.coeffs.values[3]);
 
 				//gm::Quaternion q = a::extractOrientation(res.coeffs, p1, p2, p3, p1);
 				//ROS_INFO_STREAM("Orientation is " << q);
-
-
-    			///
-
     			
     			if(id==3){
 	    			std::string markerFrame2 = "somethingpanwapototria2";
@@ -263,7 +260,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				}
 	    			
-
+				*/
     			
 							
 				tf::poseTFToMsg (markerPose, chessSquares_.pose);
@@ -428,6 +425,12 @@ int main(int argc, char *argv[])
 	ros::init (argc, argv, "marker_detect");
 	ros::NodeHandle n, pn("~");
 	
+	//for the plane equation estimation
+	id_0.setValue(0,0,0);
+	id_1.setValue(0,0,0);
+	id_2.setValue(0,0,0);
+	id_3.setValue(0,0,0);
+
 	if(argc < 7){
 		std::cout << std::endl;
 		cout << "Not enough arguments provided." << endl;
