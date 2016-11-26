@@ -1,6 +1,6 @@
 
 #include <ros/ros.h>
-#include <string> 
+#include <iostream>
 #include <visualization_msgs/Marker.h>
 #include <std_msgs/Bool.h>
 #include "ar_track_alvar/CvTestbed.h"
@@ -45,10 +45,21 @@ std::string cam_image_topic;
 std::string cam_info_topic; 
 std::string output_frame;
 
-
-
 void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg);
 
+const char* getTfName(int tf_category, int data_name)
+{			
+	string name;
+	ostringstream convert;  
+
+ 	//chess_knobs
+ 	if(tf_category==1){
+		convert << data_name;
+		name = "ar_knob_" + convert.str();   		
+ 	}
+	const char *nameInChar = name.c_str();
+ 	return nameInChar;
+}
 
 void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 {
@@ -107,8 +118,6 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
                 //Chess' Squares and Knobs Spatial arrangment in 3D space in relation with the Camera Pose.  
 
-
-
 				std::vector<tf::Transform> chess_SQvector; // vector of chess squares's transforms
 				std::vector<tf::Transform> chess_KNvector; // vector of chess knob's transforms
 				tf::Transform chessPose = t * m; //just for initialization
@@ -130,9 +139,6 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
     					//ROS_INFO("o %f %f %f",chess_SQvector[0].getOrigin().m_floats[0],chess_SQvector[0].getOrigin().m_floats[1],chess_SQvector[0].getOrigin().m_floats[2]);
                			
 
-						string markerFrame;
-						ostringstream convert;  
-
 						//and for the 4 knobs of the current square..
 						
 						if(i==-3.5 && j==1){								
@@ -140,23 +146,17 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 								markerOrigin.setValue(x_ax-marker_area*0.5,y_ax-marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
 								chess_KNvector.push_back (chessPose);
-								convert << chess_KNvector.size();
-								markerFrame = "ar_knob_" + convert.str();
-								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
+								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, getTfName(1,chess_KNvector.size()) ) );
 
 								markerOrigin.setValue(x_ax-marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
 								chess_KNvector.push_back (chessPose);
-								convert << chess_KNvector.size();
-								markerFrame = "ar_knob_" + convert.str();
-								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
+								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, getTfName(1,chess_KNvector.size()) ) );
 
 								markerOrigin.setValue(x_ax+marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
 								chess_KNvector.push_back (chessPose);
-								convert << chess_KNvector.size();
-								markerFrame = "ar_knob_" + convert.str();
-								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
+								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, getTfName(1,chess_KNvector.size()) ) );
 
 								markerOrigin.setValue(x_ax+marker_area*0.5,y_ax-marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
@@ -167,9 +167,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 								markerOrigin.setValue(x_ax+marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
 								chess_KNvector.push_back (chessPose);
-								convert << chess_KNvector.size();
-								markerFrame = "ar_knob_" + convert.str();
-								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
+								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, getTfName(1,chess_KNvector.size()) ) );
 
 								markerOrigin.setValue(x_ax-marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
@@ -179,9 +177,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 								markerOrigin.setValue(x_ax+marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
 								chess_KNvector.push_back (chessPose);
-								convert << chess_KNvector.size();
-								markerFrame = "ar_knob_" + convert.str();
-								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
+								tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, getTfName(1,chess_KNvector.size()) ) );
 
 								markerOrigin.setValue(x_ax+marker_area*0.5,y_ax-marker_area*0.5,z_ax+0.001); 
 								chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
@@ -195,26 +191,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 						} 
 
-						convert << chess_KNvector.size();
-						markerFrame = "ar_knob_" + convert.str();
-						tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
+						tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, getTfName(1,chess_KNvector.size()) ) );
 
-/*						markerOrigin.setValue(x_ax-marker_area*0.5,y_ax-marker_area*0.5,z_ax+0.001); 
-						chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
-						chess_KNvector.push_back (chessPose);
-
-						std::string markerFrame = "ar_knob_" + std::to_string(chess_KNvector.size());
-						tf_broadcaster->sendTransform(tf::StampedTransform(chess_KNvector[chess_KNvector.size()-1], image_msg->header.stamp, image_msg->header.frame_id, markerFrame.c_str() ) );
-
-						markerOrigin.setValue(x_ax-marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
-						chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
-						chess_KNvector.push_back (chessPose);
-						markerOrigin.setValue(x_ax+marker_area*0.5,y_ax-marker_area*0.5,z_ax+0.001); 
-						chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
-						chess_KNvector.push_back (chessPose);
-						markerOrigin.setValue(x_ax+marker_area*0.5,y_ax+marker_area*0.5,z_ax+0.001); 
-						chessPose = t * tf::Transform(tf::Quaternion::getIdentity(), markerOrigin);
-						chess_KNvector.push_back (chessPose);*/
 					}
 			    }
 				
