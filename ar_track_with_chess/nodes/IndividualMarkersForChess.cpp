@@ -44,10 +44,10 @@ double max_frequency;
 double marker_size;
 double max_new_marker_error;
 double max_track_error;
-tf::Vector3 id_0;
+/*tf::Vector3 id_0;
 tf::Vector3 id_1;
 tf::Vector3 id_2;
-tf::Vector3 id_3;
+tf::Vector3 id_3;*/
 std::string cam_image_topic; 
 std::string cam_info_topic; 
 std::string output_frame;
@@ -135,14 +135,23 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
                 // marker pose in the camera frame - visualize and place the marker in a relation to the camera pose (initial marker pose in 
                 //relation with the camera pose ::transational->(0,0,0) orientation is the same)..
-                tf::Vector3 markerOrigin (0.001+marker_size/100.0*1, 0, 0);
+                tf::Vector3 markerOrigin (0, 0, 0);
                 tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin); //creating a transform (0,0,0,1),(0,0,0)
                 tf::Transform markerPose = t * m; 
+
+
+				std::vector<tf::Transform> myvector; // vector of chess knob's transforms
+    			myvector.push_back (markerPose);
+    			ROS_INFO("o %f %f %f",myvector[0].getOrigin().m_floats[0],myvector[0].getOrigin().m_floats[1],myvector[0].getOrigin().m_floats[2]);
+                //tf::Vector3 markerOrigin (0.001+marker_size/100.0*1, 0, 0);
+                //tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin); //creating a transform (0,0,0,1),(0,0,0)
+                //tf::Transform markerPose = t * m; 
                 
                 //ROS_INFO("%f",origin.m_floats[0]); //yes
                 //ROS_INFO("mpe %f",origin.x());
-                ROS_INFO("t %f %f %f",t.getOrigin().m_floats[0],t.getOrigin().m_floats[1],t.getOrigin().m_floats[2]);
-				ROS_INFO("t+ %f %f %f",t.getOrigin().m_floats[0]+0.01,t.getOrigin().m_floats[1],t.getOrigin().m_floats[2]);
+
+                //ROS_INFO("t %f %f %f",t.getOrigin().m_floats[0],t.getOrigin().m_floats[1],t.getOrigin().m_floats[2]);
+				//ROS_INFO("t+ %f %f %f",t.getOrigin().m_floats[0]+0.01,t.getOrigin().m_floats[1],t.getOrigin().m_floats[2]);
 				
 				ROS_INFO("m %f %f %f",markerPose.getOrigin().m_floats[0],markerPose.getOrigin().m_floats[1],markerPose.getOrigin().m_floats[2]);
 				
@@ -276,7 +285,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 							
 				tf::poseTFToMsg (markerPose, chessSquares_.pose);
 				tf::poseTFToMsg (markerPose, chessPoints_.pose);
-				ROS_INFO("%f",chessSquares_.pose.position.x);
+				//ROS_INFO("%f",chessSquares_.pose.position.x);
 				chessSquares_.header.frame_id = chessPoints_.header.frame_id = image_msg->header.frame_id;
 				chessSquares_.header.stamp = chessPoints_.header.stamp = image_msg->header.stamp;
 				chessSquares_.ns = chessPoints_.ns =  "basic_shapes";
@@ -438,11 +447,11 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n, pn("~");
 	
 	//for the plane equation estimation
-	id_0.setValue(0,0,0);
+/*	id_0.setValue(0,0,0);
 	id_1.setValue(0,0,0);
 	id_2.setValue(0,0,0);
 	id_3.setValue(0,0,0);
-
+*/
 	if(argc < 7){
 		std::cout << std::endl;
 		cout << "Not enough arguments provided." << endl;
