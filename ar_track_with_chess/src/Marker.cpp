@@ -50,7 +50,7 @@ void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2
 	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,0,255));//z_axis
 }
 
-void Marker::DrawChessCordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
+void Marker::DrawChessCoordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
 	
 	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,2,8,0);
 	//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
@@ -139,24 +139,8 @@ void MarkerData::VisualizeMarkerContent(IplImage *image, Camera *cam, double dat
 	cvPutText(image, val.str().c_str(), cvPoint((int)datatext_point[0], (int)datatext_point[1]), &font, rgb);
 }
 
-void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
-/*	double visualize3d_points[12][3] = {
-		// cube
-		{ -(edge_length/2), -(edge_length/2), 0 },
-		{ -(edge_length/2),  (edge_length/2), 0 },
-		{  (edge_length/2),  (edge_length/2), 0 },
-		{  (edge_length/2), -(edge_length/2), 0 },
-		{ -(edge_length/2), -(edge_length/2), edge_length },
-		{ -(edge_length/2),  (edge_length/2), edge_length },
-		{  (edge_length/2),  (edge_length/2), edge_length },
-		{  (edge_length/2), -(edge_length/2), edge_length },
-		//coordinates
-		{  0+edge_length, 0+edge_length, 0 },
-		{  edge_length, 0+edge_length, 0 },
-		{  0+edge_length, edge_length, 0 },
-		{  0+edge_length, 0+edge_length, edge_length },
-	};*/
-	double visualize3d_points[12][3] = {
+void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const {
+		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
 		{ -(edge_length),  (edge_length), 0 },
@@ -172,21 +156,13 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 		{  0, edge_length, 0 },
 		{  0, 0, edge_length },
 	};
-	
+
 	double visualize2d_points[12][2];
 	CvMat visualize3d_points_mat;
 	CvMat visualize2d_points_mat;
-/*	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
-	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-	DrawChessCordinates(image, cam, visualize2d_points, color);*/
 
-	//VisualizeMarkerPose(image, cam, visualize2d_points, color);
-	//VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
-	//VisualizeMarkerError(image, cam, visualize2d_points[2]);
-	ROS_INFO("h pleyra einai %f",edge_length);
-
-	for (double i = -3.5; i < 4; i++)
+		for (double i = -3.5; i < 4; i++)
     {
     	for (double j = 1.1; j < 9.1; j++)
     	{
@@ -231,9 +207,8 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 
 
 cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCordinates(image, cam, visualize2d_points, color); 
+DrawChessCoordinates(image, cam, visualize2d_points, color); 
 
 				x_ax=square_x-edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;
@@ -252,9 +227,8 @@ DrawChessCordinates(image, cam, visualize2d_points, color);
 				//visualize3d_points[8][2]=;
 
 cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCordinates(image, cam, visualize2d_points, color);
+DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;
@@ -273,9 +247,8 @@ DrawChessCordinates(image, cam, visualize2d_points, color);
 				//visualize3d_points[8][2]=;
 
 cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCordinates(image, cam, visualize2d_points, color);
+DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y-edge_length*0.5;
@@ -312,9 +285,8 @@ DrawChessCordinates(image, cam, visualize2d_points, color);
 
 
 cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCordinates(image, cam, visualize2d_points, color);
+DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x-edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;
@@ -349,9 +321,8 @@ DrawChessCordinates(image, cam, visualize2d_points, color);
 				visualize3d_points[8][1]=y_ax;
 
 cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCordinates(image, cam, visualize2d_points, color);
+DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y-edge_length*0.5;
@@ -388,11 +359,44 @@ DrawChessCordinates(image, cam, visualize2d_points, color);
 			} 
 
 			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-			cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-			DrawChessCordinates(image, cam, visualize2d_points, color); 			
+			DrawChessCoordinates(image, cam, visualize2d_points, color); 			
     	}
     }
+}
+
+
+void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
+	double visualize3d_points[12][3] = {
+		// cube
+		{ -(edge_length), -(edge_length), 0 },
+		{ -(edge_length),  (edge_length), 0 },
+		{  (edge_length),  (edge_length), 0 },
+		{  (edge_length), -(edge_length), 0 },
+		{ -(edge_length), -(edge_length), edge_length },
+		{ -(edge_length),  (edge_length), edge_length },
+		{  (edge_length),  (edge_length), edge_length },
+		{  (edge_length), -(edge_length), edge_length },
+		//coordinates
+		{  0, 0, 0 },
+		{  edge_length, 0, 0},
+		{  0, edge_length, 0 },
+		{  0, 0, edge_length },
+	};
+	
+	double visualize2d_points[12][2];
+	CvMat visualize3d_points_mat;
+	CvMat visualize2d_points_mat;
+	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+	DrawChessCoordinates(image, cam, visualize2d_points, color);
+
+	VisualizeMarkerPose(image, cam, visualize2d_points, color);
+	VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
+	VisualizeMarkerError(image, cam, visualize2d_points[2]);
+	
+	//ROS_INFO("h pleyra einai %f",edge_length);
 
 }
 
