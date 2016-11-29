@@ -62,8 +62,8 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
-    image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
+    image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
+    //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
     image_pub_ = it_.advertise("/image_converter/output_video", 1);
 
     cv::namedWindow(OPENCV_WINDOW);
@@ -117,7 +117,7 @@ public:
     //
 
     // Update GUI Window
-    /*Mat dst, cdst,src_gray;
+    */Mat dst, cdst,src_gray;
 
     Canny(cv_ptr->image, dst, 50, 200, 3);
     cvtColor(dst, cdst, COLOR_GRAY2BGR);
@@ -129,8 +129,8 @@ public:
         Vec4i l = lines[i];
         line( cdst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
     }
-    //imshow("detected lines", cdst);
-*/
+    imshow("detected lines", cdst);
+
     //cv::imshow(OPENCV_WINDOW, cv_ptr->image); //the robot's source image..
     cv::imshow(OPENCV_WINDOW, cv_ptr->image);
     cv::waitKey(3);

@@ -71,8 +71,8 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
-    image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
+    image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
+    //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
     //image_pub_ = it_.advertise("/image_converter/output_video", 1);
 
     cv::namedWindow(OPENCV_WINDOW);
@@ -98,7 +98,7 @@ public:
       }
 
       cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );
-      /*
+      
       src=cv_ptr->image.clone();
 
 
@@ -145,7 +145,7 @@ public:
         best_corners(0,0,false,2);
         
       }
-      */
+      
 
 
 
