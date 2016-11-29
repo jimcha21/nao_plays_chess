@@ -1,4 +1,3 @@
-
 #include <ros/ros.h>
 #include <iostream>
 #include <visualization_msgs/Marker.h>
@@ -15,6 +14,9 @@
 #include <sensor_msgs/image_encodings.h>
 #include <dynamic_reconfigure/server.h>
 #include <ar_track_alvar/ParamsConfig.h>
+
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp> //remove those 2 if you are in paionaios..
 
 using namespace alvar;
 using namespace std;
