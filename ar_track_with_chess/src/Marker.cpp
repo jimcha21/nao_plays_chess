@@ -185,9 +185,10 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 	//VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
 	//VisualizeMarkerError(image, cam, visualize2d_points[2]);
 	ROS_INFO("h pleyra einai %f",edge_length);
+
 	for (double i = -3.5; i < 4; i++)
     {
-    	for (int j = 1; j < 9; j++)
+    	for (double j = 1.1; j < 9.1; j++)
     	{
     		//the squares' centre coordinates (chess square center points)
     		double square_x=edge_length*i;
@@ -210,7 +211,7 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 */
 			//and now for the squares' knob coordinates
 			double x_ax,y_ax;
-			if(i==-3.5 && j==1){								
+			if(i==-3.5 && j==1.1){								
 				//visualize all the knobs (4 total)
 				x_ax=square_x-edge_length*0.5;
 				y_ax=square_y-edge_length*0.5;
@@ -330,7 +331,7 @@ DrawChessCordinates(image, cam, visualize2d_points, color);
 				visualize3d_points[8][0]=x_ax;
 				visualize3d_points[8][1]=y_ax;
 
-			}else if(j==1){
+			}else if(j==1.1){
 				//visualize the 2 top knobs				
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;

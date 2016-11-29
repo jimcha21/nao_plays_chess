@@ -134,12 +134,12 @@ namespace alvar {
 					mn->UpdatePose(blob_corners[track_i], cam, track_orientation, update_pose);
 					_markers_push_back(mn);
 					blob_corners[track_i].clear(); // We don't want to handle this again...
-					if (visualize) mn->Visualize(image, cam, CV_RGB(255,255,0));
+					if (visualize) mn->Visualize(image, cam, CV_RGB(255,0,0));
 				}
 			}
 		}
 
-		// Now we go through the rest of the blobs -- in case there are new markers...
+		// Now we go through the rest of the blobs -- in case there are new markers... not 100%sure
 		for(size_t i = 0; i < blob_corners.size(); ++i)
 		{
 			if (blob_corners[i].empty()) continue;
