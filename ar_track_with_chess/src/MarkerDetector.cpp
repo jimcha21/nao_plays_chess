@@ -22,6 +22,7 @@
  */
 
 #include "ar_track_alvar/MarkerDetector.h"
+#include <ros/ros.h>
 
 template class ALVAR_EXPORT alvar::MarkerDetector<alvar::Marker>;
 template class ALVAR_EXPORT alvar::MarkerDetector<alvar::MarkerData>;

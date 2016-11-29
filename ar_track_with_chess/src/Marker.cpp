@@ -24,6 +24,7 @@
 #include "ar_track_alvar/Alvar.h"
 #include "ar_track_alvar/Marker.h"
 #include "highgui.h"
+#include <ros/ros.h>
 
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::Marker>;
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::MarkerData>;
@@ -44,9 +45,16 @@ void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2
 		cvLine(image, cvPoint((int)visualize2d_points[4+i][0], (int)visualize2d_points[4+i][1]), cvPoint((int)visualize2d_points[4+((i+1)%4)][0], (int)visualize2d_points[4+((i+1)%4)][1]), color);
 	}
 	// Coordinates
-	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(255,0,0));
-	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), CV_RGB(0,255,0));
-	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,0,255));
+	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(255,0,0));//x_axis
+	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), CV_RGB(0,255,0));//y_axis
+	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,0,255));//z_axis
+}
+
+void Marker::DrawChessCordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
+	
+	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,1,8,0);
+	//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+
 }
 
 void Marker::VisualizeMarkerContent(IplImage *image, Camera *cam, double datatext_point[2], double content_point[2]) const {
@@ -132,7 +140,7 @@ void MarkerData::VisualizeMarkerContent(IplImage *image, Camera *cam, double dat
 }
 
 void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
-	double visualize3d_points[12][3] = {
+/*	double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length/2), -(edge_length/2), 0 },
 		{ -(edge_length/2),  (edge_length/2), 0 },
@@ -143,21 +151,58 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 		{  (edge_length/2),  (edge_length/2), edge_length },
 		{  (edge_length/2), -(edge_length/2), edge_length },
 		//coordinates
+		{  0+edge_length, 0+edge_length, 0 },
+		{  edge_length, 0+edge_length, 0 },
+		{  0+edge_length, edge_length, 0 },
+		{  0+edge_length, 0+edge_length, edge_length },
+	};*/
+	double visualize3d_points[12][3] = {
+		// cube
+		{ -(edge_length), -(edge_length), 0 },
+		{ -(edge_length),  (edge_length), 0 },
+		{  (edge_length),  (edge_length), 0 },
+		{  (edge_length), -(edge_length), 0 },
+		{ -(edge_length), -(edge_length), edge_length },
+		{ -(edge_length),  (edge_length), edge_length },
+		{  (edge_length),  (edge_length), edge_length },
+		{  (edge_length), -(edge_length), edge_length },
+		//coordinates
 		{  0, 0, 0 },
-		{  edge_length, 0, 0 },
+		{  edge_length, 0, 0},
 		{  0, edge_length, 0 },
 		{  0, 0, edge_length },
 	};
+	
 	double visualize2d_points[12][2];
 	CvMat visualize3d_points_mat;
 	CvMat visualize2d_points_mat;
+	ROS_INFO("ma mpike "); 
 	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+	DrawChessCordinates(image, cam, visualize2d_points, color);
 
-	VisualizeMarkerPose(image, cam, visualize2d_points, color);
-	VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
-	VisualizeMarkerError(image, cam, visualize2d_points[2]);
+	//VisualizeMarkerPose(image, cam, visualize2d_points, color);
+	//VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
+	//VisualizeMarkerError(image, cam, visualize2d_points[2]);
+	ROS_INFO("h pleyra einai %d",edge_length);
+	visualize3d_points[11][0]=visualize3d_points[11][0]+edge_length/2;
+	//visualize3d_points[11][1]=;
+	//visualize3d_points[11][2]=;
+	visualize3d_points[10][0]=visualize3d_points[10][0]+edge_length/2;
+	//visualize3d_points[10][1]=;
+	//visualize3d_points[10]2]=;
+	visualize3d_points[9][0]=visualize3d_points[9][0]+edge_length/2;
+	//visualize3d_points[9][1]=;
+	//visualize3d_points[9][2]=;
+	visualize3d_points[8][0]=visualize3d_points[8][0]+edge_length/2;
+	//visualize3d_points[8][1]=;
+	//visualize3d_points[8][2]=;
+	
+	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+	DrawChessCordinates(image, cam, visualize2d_points, color);
 }
 
 void Marker::CompareCorners(vector<PointDouble > &_marker_corners_img, int *orientation, double *error) {
