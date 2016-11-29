@@ -206,9 +206,9 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const 
 				//visualize3d_points[8][2]=;
 
 
-cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCoordinates(image, cam, visualize2d_points, color); 
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+				DrawChessCoordinates(image, cam, visualize2d_points, color); 
 
 				x_ax=square_x-edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;
@@ -226,9 +226,9 @@ DrawChessCoordinates(image, cam, visualize2d_points, color);
 				visualize3d_points[8][1]=y_ax;
 				//visualize3d_points[8][2]=;
 
-cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCoordinates(image, cam, visualize2d_points, color);
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+				DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;
@@ -246,9 +246,9 @@ DrawChessCoordinates(image, cam, visualize2d_points, color);
 				visualize3d_points[8][1]=y_ax;
 				//visualize3d_points[8][2]=;
 
-cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCoordinates(image, cam, visualize2d_points, color);
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+				DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y-edge_length*0.5;
@@ -284,9 +284,9 @@ DrawChessCoordinates(image, cam, visualize2d_points, color);
 				visualize3d_points[8][1]=y_ax;
 
 
-cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCoordinates(image, cam, visualize2d_points, color);
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+				DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x-edge_length*0.5;
 				y_ax=square_y+edge_length*0.5;
@@ -320,9 +320,9 @@ DrawChessCoordinates(image, cam, visualize2d_points, color);
 				visualize3d_points[8][0]=x_ax;
 				visualize3d_points[8][1]=y_ax;
 
-cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-DrawChessCoordinates(image, cam, visualize2d_points, color);
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+				DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 				x_ax=square_x+edge_length*0.5;
 				y_ax=square_y-edge_length*0.5;
@@ -390,7 +390,7 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-	DrawChessCoordinates(image, cam, visualize2d_points, color);
+	//DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 	VisualizeMarkerPose(image, cam, visualize2d_points, color);
 	VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
