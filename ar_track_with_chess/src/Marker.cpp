@@ -52,7 +52,7 @@ void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2
 
 void Marker::DrawChessCordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
 	
-	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,1,8,0);
+	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,2,8,0);
 	//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
 
 }
@@ -176,33 +176,223 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 	double visualize2d_points[12][2];
 	CvMat visualize3d_points_mat;
 	CvMat visualize2d_points_mat;
-	ROS_INFO("ma mpike "); 
-	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+/*	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
 	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-	DrawChessCordinates(image, cam, visualize2d_points, color);
+	DrawChessCordinates(image, cam, visualize2d_points, color);*/
 
 	//VisualizeMarkerPose(image, cam, visualize2d_points, color);
 	//VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
 	//VisualizeMarkerError(image, cam, visualize2d_points[2]);
-	ROS_INFO("h pleyra einai %d",edge_length);
-	visualize3d_points[11][0]=visualize3d_points[11][0]+edge_length/2;
-	//visualize3d_points[11][1]=;
-	//visualize3d_points[11][2]=;
-	visualize3d_points[10][0]=visualize3d_points[10][0]+edge_length/2;
-	//visualize3d_points[10][1]=;
-	//visualize3d_points[10]2]=;
-	visualize3d_points[9][0]=visualize3d_points[9][0]+edge_length/2;
-	//visualize3d_points[9][1]=;
-	//visualize3d_points[9][2]=;
-	visualize3d_points[8][0]=visualize3d_points[8][0]+edge_length/2;
-	//visualize3d_points[8][1]=;
-	//visualize3d_points[8][2]=;
-	
-	cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
-	cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-	DrawChessCordinates(image, cam, visualize2d_points, color);
+	ROS_INFO("h pleyra einai %f",edge_length);
+	for (double i = -3.5; i < 4; i++)
+    {
+    	for (int j = 1; j < 9; j++)
+    	{
+    		//the squares' centre coordinates (chess square center points)
+    		double square_x=edge_length*i;
+    		double square_y=edge_length*j;
+    		//z_ax don't care
+/*
+    		//cube base coordinates in 2d plane							
+			visualize3d_points[11][0]=square_x;
+			visualize3d_points[11][1]=square_y;
+			//visualize3d_points[11][2]=;
+			visualize3d_points[10][0]=square_x;
+			visualize3d_points[10][1]=edge_length+square_y;
+			//visualize3d_points[10]2]=;
+			visualize3d_points[9][0]=edge_length+square_x;
+			visualize3d_points[9][1]=square_y;
+			//visualize3d_points[9][2]=;
+			visualize3d_points[8][0]=square_x;
+			visualize3d_points[8][1]=square_y;
+			//visualize3d_points[8][2]=;
+*/
+			//and now for the squares' knob coordinates
+			double x_ax,y_ax;
+			if(i==-3.5 && j==1){								
+				//visualize all the knobs (4 total)
+				x_ax=square_x-edge_length*0.5;
+				y_ax=square_y-edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+				//visualize3d_points[8][2]=;
+
+
+cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+DrawChessCordinates(image, cam, visualize2d_points, color); 
+
+				x_ax=square_x-edge_length*0.5;
+				y_ax=square_y+edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+				//visualize3d_points[8][2]=;
+
+cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+DrawChessCordinates(image, cam, visualize2d_points, color);
+
+				x_ax=square_x+edge_length*0.5;
+				y_ax=square_y+edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+				//visualize3d_points[8][2]=;
+
+cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+DrawChessCordinates(image, cam, visualize2d_points, color);
+
+				x_ax=square_x+edge_length*0.5;
+				y_ax=square_y-edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+				//visualize3d_points[8][2]=;
+
+			}else if(i==-3.5){
+				//visualize the 2 right knobs
+				x_ax=square_x+edge_length*0.5;
+				y_ax=square_y+edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+
+
+cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+DrawChessCordinates(image, cam, visualize2d_points, color);
+
+				x_ax=square_x-edge_length*0.5;
+				y_ax=square_y+edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+
+			}else if(j==1){
+				//visualize the 2 top knobs				
+				x_ax=square_x+edge_length*0.5;
+				y_ax=square_y+edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+
+cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+DrawChessCordinates(image, cam, visualize2d_points, color);
+
+				x_ax=square_x+edge_length*0.5;
+				y_ax=square_y-edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+
+			}else{
+				//visualize only the top right knob
+				x_ax=square_x+edge_length*0.5;
+				y_ax=square_y+edge_length*0.5;
+				
+				visualize3d_points[11][0]=x_ax;
+				visualize3d_points[11][1]=y_ax;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=x_ax;
+				visualize3d_points[10][1]=edge_length+y_ax;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+x_ax;
+				visualize3d_points[9][1]=y_ax;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=x_ax;
+				visualize3d_points[8][1]=y_ax;
+
+			} 
+
+			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+			cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+			DrawChessCordinates(image, cam, visualize2d_points, color); 			
+    	}
+    }
+
 }
 
 void Marker::CompareCorners(vector<PointDouble > &_marker_corners_img, int *orientation, double *error) {
