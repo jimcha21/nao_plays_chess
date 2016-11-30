@@ -91,15 +91,15 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             // do this conversion here -jbinney
             IplImage ipl_image = cv_ptr_->image;
 
-	if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
-	marker_detector.Detect(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
-		cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
-		cv::waitKey(3);
-	}else{
-	marker_detector.Detect(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
-	}
+			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
+				marker_detector.Detect(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
+				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
+				cv::waitKey(3);
+			}else{
+				marker_detector.Detect(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
+			}
 
-          arPoseMarkers_.markers.clear ();
+      	    arPoseMarkers_.markers.clear ();
 			for (size_t i=0; i<marker_detector.markers->size(); i++) 
 			{
 				//Get the pose relative to the camera
@@ -113,12 +113,26 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				double qz = p.quaternion[3];
 				double qw = p.quaternion[0];
 
-                tf::Quaternion rotation (qx,qy,qz,qw);
+				//ROS_INFO("oi quat einai %f %f %f %f ",qx,qy,qz,qw);
+
+				//quat to euler
+				tf::Quaternion rotation (qx,qy,qz,qw);
+/*				tf::Matrix3x3 matrix(temp_rotation);
+				double roll, pitch, yaw;
+				matrix.getRPY(roll, pitch, yaw); //stable on pitch (on the same surface ~ roll and yaw some littl differences )
+				ROS_INFO("roll, pitch, yaw=%1.2f  %1.2f  %1.2f", roll, pitch, yaw);
+				//pitch=0;
+
+				tf::Quaternion qua_matrix(roll, pitch, yaw);
+				ROS_INFO("oi nees quat einai %f %f %f %f ",qua_matrix.y() ,qua_matrix.x(),qua_matrix.z(),qua_matrix.w());
+
+                tf::Quaternion rotation (qua_matrix.y() ,qua_matrix.x(),qua_matrix.z(),qua_matrix.w());*/
                 tf::Vector3 origin (px,py,pz);
                 tf::Transform t (rotation, origin);
 
                 // marker pose in the camera frame - visualize and place the marker in a relation to the camera pose (initial marker pose in 
                 //relation with the camera pose ::transational->(0,0,0) orientation is the same)..
+                
                 tf::Vector3 markerOrigin (0, 0, 0);
                 tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin); //creating a transform (0,0,0,1),(0,0,0)
                 tf::Transform markerPose = t * m; 
@@ -206,7 +220,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 			    }
 				
 
-				ROS_INFO("ekane synolika %d",chess_KNvector.size());
+				//ROS_INFO("ekane synolika %d",chess_KNvector.size());
     			 //tf::Vector3 markerOrigin (0.001+marker_size/100.0*1, 0, 0);
                 //tf::Transform m (tf::Quaternion::getIdentity (), markerOrigin); //creating a transform (0,0,0,1),(0,0,0)
                 //tf::Transform markerPose = t * m; 
@@ -220,13 +234,6 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				//ROS_INFO("m %f %f %f",markerPose.getOrigin().m_floats[0],markerPose.getOrigin().m_floats[1],markerPose.getOrigin().m_floats[2]);
 				
 
-				//quat to euler
-				/*tf::Matrix3x3 matrix(rotation);
-				double roll, pitch, yaw;
-				matrix.getRPY(roll, pitch, yaw); //stable on pitch (on the same surface ~ roll and yaw some littl differences )
-				*/
-				//ROS_INFO("roll, pitch, yaw=%1.2f  %1.2f  %1.2f", roll, pitch, yaw);
-                
                 //ROS_INFO("id:%d quat %f %f %f %f\n",id,p.quaternion[1],p.quaternion[2],p.quaternion[3],p.quaternion[0]);
                 //ROS_INFO("BRIKE %d\n",marker_detector.markers->size());
                 //ROS_INFO("id:%d raw translation %f %f %f\n",id,p.translation[0],p.translation[1],p.translation[2]);

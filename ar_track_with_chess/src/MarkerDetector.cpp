@@ -134,7 +134,7 @@ namespace alvar {
 					mn->UpdatePose(blob_corners[track_i], cam, track_orientation, update_pose);
 					_markers_push_back(mn);
 					blob_corners[track_i].clear(); // We don't want to handle this again...
-					if (visualize) mn->Visualize(image, cam, CV_RGB(255,0,0));
+					if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,0,0));
 				}
 			}
 		}
@@ -157,7 +157,7 @@ namespace alvar {
                 mn->ros_orientation = orientation;
 				_markers_push_back(mn);
  
-				if (visualize) mn->Visualize(image, cam, CV_RGB(255,0,0));
+				if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,255,0));
 			}
 
 			delete mn;

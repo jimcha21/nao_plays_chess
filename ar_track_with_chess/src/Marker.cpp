@@ -52,7 +52,7 @@ void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2
 
 void Marker::DrawChessCoordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
 	
-	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,2,8,0);
+	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
 	//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
 
 }
@@ -170,7 +170,9 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const 
     		double square_x=edge_length*i;
     		double square_y=edge_length*j;
     		//z_ax don't care
-/*
+    		bool enabe_squares_or_centre=false;
+
+if(enabe_squares_or_centre){ //sto true ta squares
     		//cube base coordinates in 2d plane							
 			visualize3d_points[11][0]=square_x;
 			visualize3d_points[11][1]=square_y;
@@ -184,7 +186,7 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const 
 			visualize3d_points[8][0]=square_x;
 			visualize3d_points[8][1]=square_y;
 			//visualize3d_points[8][2]=;
-*/
+}else{
 			//and now for the squares' knob coordinates
 			double x_ax,y_ax;
 			if(i==-3.5 && j==1.1){								
@@ -357,7 +359,7 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const 
 				visualize3d_points[8][1]=y_ax;
 
 			} 
-
+}
 			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 			DrawChessCoordinates(image, cam, visualize2d_points, color); 			
