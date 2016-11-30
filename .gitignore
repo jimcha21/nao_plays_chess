@@ -5,6 +5,6 @@ $ cat .gitignore
 !/vision
 !/CMakeLists.txt
 !/README.md
-
+!/chessboard_schematics
 
 !/.gitignore
