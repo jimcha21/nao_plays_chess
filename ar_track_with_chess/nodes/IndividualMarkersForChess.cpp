@@ -92,7 +92,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             IplImage ipl_image = cv_ptr_->image;
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
-				marker_detector.Detect(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
+				marker_detector.Detect(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
 				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
 				cv::waitKey(3);
 			}else{
@@ -164,6 +164,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 						//and for the 4 knobs of the current square..
 						
+//NEEDS OPTIMISATION LIKE 2D !!
+
 						if(i==-3.5 && j==1){								
 								//visualize all the knobs (4 total)
 								markerOrigin.setValue(x_ax-marker_area*0.5,y_ax-marker_area*0.5,z_ax+0.001); 
@@ -289,7 +291,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 				chessSquares_.color.a = 0.5; // alpha color-color densities                          --!!--
 				chessPoints_.color.a = 1;
-				bool enable_chess=true;
+				bool enable_chess=false;
 
 				geometry_msgs::Point pi;
 				pi.x = pi.y = pi.z = 0;				
@@ -368,6 +370,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 							//(1,-1) top left 
 							//(1, 1) top right
 
+//NEEDS OPTIMISATION LIKE 2D !!
+
 							if(i==-3.5 && j==1){								
 								//visualize all the knobs (4 total)
 								pi.x=init_x-marker_area*0.5;
@@ -405,8 +409,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				}
 
 				chessSquares_.lifetime = chessPoints_.lifetime = ros::Duration (1.0);	
-				//rvizMarkerPub_.publish (chessSquares_);
-				rvizMarkerPub_.publish (chessPoints_);
+				rvizMarkerPub_.publish (chessSquares_);
+				//rvizMarkerPub_.publish (chessPoints_);
 
 				//Get the pose of the tag in the camera frame, then the output frame (usually torso)				
 				tf::Transform tagPoseOutput = CamToOutput * markerPose;

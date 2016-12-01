@@ -68,6 +68,8 @@ namespace alvar {
      *  Returns the marker orientation and an error value describing the pixel error 
      *  relative to the marker diameter.
      */
+    void whaza();
+
     void CompareCorners(std::vector<Point<CvPoint2D64f> > &_marker_corners_img, int *orientation, double *error);
     /** \brief Compares the marker corners with the previous match. 
      */

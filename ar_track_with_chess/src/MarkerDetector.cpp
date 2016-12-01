@@ -113,6 +113,7 @@ namespace alvar {
 		if (track) {
 			for (size_t ii=0; ii<_track_markers_size(); ii++) {
 				Marker *mn = _track_markers_at(ii);
+
 				if (mn->GetError(Marker::DECODE_ERROR|Marker::MARGIN_ERROR) > 0) continue; // We track only perfectly decoded markers
 				int track_i=-1;
 				int track_orientation=0;
@@ -135,6 +136,7 @@ namespace alvar {
 					_markers_push_back(mn);
 					blob_corners[track_i].clear(); // We don't want to handle this again...
 					if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,0,0));
+					mn->whaza();
 				}
 			}
 		}

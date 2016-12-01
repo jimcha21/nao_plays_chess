@@ -37,6 +37,15 @@ using namespace std;
 
 #define HEADER_SIZE 8
 
+void Marker::whaza(){
+	ROS_INFO("%d",int(GetId()));
+	DrawChessCoordinates(image, cam, visualize2d_points, color);
+	if(int(GetId()==7)){
+
+	}
+}
+
+
 void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
 	// Cube
 	for (int i=0; i<4; i++) {
@@ -161,18 +170,22 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const 
 	CvMat visualize3d_points_mat;
 	CvMat visualize2d_points_mat;
 	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+	
+	bool enabe_squares_or_centre=false;
+	double lim=0.5;
+	if(enabe_squares_or_centre){ //true for squares
+		lim=0;
+	}
 
-		for (double i = -3.5; i < 4; i++)
+	for (double i = -3.5-lim; i < 3.6+lim; i++)
     {
-    	for (double j = 1.1; j < 9.1; j++)
+    	for (double j = 1.1-lim; j < 8.2+lim; j++)
     	{
     		//the squares' centre coordinates (chess square center points)
     		double square_x=edge_length*i;
     		double square_y=edge_length*j;
     		//z_ax don't care
-    		bool enabe_squares_or_centre=false;
 
-if(enabe_squares_or_centre){ //sto true ta squares
     		//cube base coordinates in 2d plane							
 			visualize3d_points[11][0]=square_x;
 			visualize3d_points[11][1]=square_y;
@@ -186,183 +199,11 @@ if(enabe_squares_or_centre){ //sto true ta squares
 			visualize3d_points[8][0]=square_x;
 			visualize3d_points[8][1]=square_y;
 			//visualize3d_points[8][2]=;
-}else{
-			//and now for the squares' knob coordinates
-			double x_ax,y_ax;
-			if(i==-3.5 && j==1.1){								
-				//visualize all the knobs (4 total)
-				x_ax=square_x-edge_length*0.5;
-				y_ax=square_y-edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-				//visualize3d_points[8][2]=;
 
-
-				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				DrawChessCoordinates(image, cam, visualize2d_points, color); 
-
-				x_ax=square_x-edge_length*0.5;
-				y_ax=square_y+edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-				//visualize3d_points[8][2]=;
-
-				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				DrawChessCoordinates(image, cam, visualize2d_points, color);
-
-				x_ax=square_x+edge_length*0.5;
-				y_ax=square_y+edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-				//visualize3d_points[8][2]=;
-
-				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				DrawChessCoordinates(image, cam, visualize2d_points, color);
-
-				x_ax=square_x+edge_length*0.5;
-				y_ax=square_y-edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-				//visualize3d_points[8][2]=;
-
-			}else if(i==-3.5){
-				//visualize the 2 right knobs
-				x_ax=square_x+edge_length*0.5;
-				y_ax=square_y+edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-
-
-				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				DrawChessCoordinates(image, cam, visualize2d_points, color);
-
-				x_ax=square_x-edge_length*0.5;
-				y_ax=square_y+edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-
-			}else if(j==1.1){
-				//visualize the 2 top knobs				
-				x_ax=square_x+edge_length*0.5;
-				y_ax=square_y+edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-
-				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				DrawChessCoordinates(image, cam, visualize2d_points, color);
-
-				x_ax=square_x+edge_length*0.5;
-				y_ax=square_y-edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-
-			}else{
-				//visualize only the top right knob
-				x_ax=square_x+edge_length*0.5;
-				y_ax=square_y+edge_length*0.5;
-				
-				visualize3d_points[11][0]=x_ax;
-				visualize3d_points[11][1]=y_ax;
-				//visualize3d_points[11][2]=;
-				visualize3d_points[10][0]=x_ax;
-				visualize3d_points[10][1]=edge_length+y_ax;
-				//visualize3d_points[10]2]=;
-				visualize3d_points[9][0]=edge_length+x_ax;
-				visualize3d_points[9][1]=y_ax;
-				//visualize3d_points[9][2]=;
-				visualize3d_points[8][0]=x_ax;
-				visualize3d_points[8][1]=y_ax;
-
-			} 
-}
 			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-			DrawChessCoordinates(image, cam, visualize2d_points, color); 			
+			whaza();
+			 			
     	}
     }
 }
@@ -398,9 +239,9 @@ void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
 	VisualizeMarkerContent(image, cam, visualize2d_points[0], visualize2d_points[8]);
 	VisualizeMarkerError(image, cam, visualize2d_points[2]);
 	
-	//ROS_INFO("h pleyra einai %f",edge_length);
 
 }
+
 
 void Marker::CompareCorners(vector<PointDouble > &_marker_corners_img, int *orientation, double *error) {
 	vector<PointDouble >::iterator corners_new = _marker_corners_img.begin();
