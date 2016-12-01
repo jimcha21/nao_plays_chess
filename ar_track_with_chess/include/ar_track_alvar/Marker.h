@@ -53,7 +53,7 @@ namespace alvar {
   {
   protected:
     void VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color=CV_RGB(255,0,0)) const;
-    void DrawChessCoordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color=CV_RGB(255,0,0)) const;
+    void DrawChessCoordinates(IplImage *image, Camera *cam, CvPoint chessknob_point, CvScalar color=CV_RGB(255,0,0)) const;
     virtual void VisualizeMarkerContent(IplImage *image, Camera *cam, double datatext_point[2], double content_point[2]) const;
     virtual void VisualizeMarkerError(IplImage *image, Camera *cam, double errortext_point[2]) const;
     bool UpdateContentBasic(std::vector<Point<CvPoint2D64f> > &_marker_corners_img, IplImage *gray, Camera *cam, int frame_no = 0);
@@ -68,7 +68,6 @@ namespace alvar {
      *  Returns the marker orientation and an error value describing the pixel error 
      *  relative to the marker diameter.
      */
-    void whaza();
 
     void CompareCorners(std::vector<Point<CvPoint2D64f> > &_marker_corners_img, int *orientation, double *error);
     /** \brief Compares the marker corners with the previous match. 
@@ -100,9 +99,11 @@ namespace alvar {
      */
     void Visualize(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0)) const;
     /*visualize Chessboard's characteristics' coordination points*/
-    void VisualizeChess(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0)) const;
+    void VisualizeChess(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0), int chess_2dcoordinates[81][2]) const;
+
     /** \brief Method for resizing the marker dimensions  */
     void SetMarkerSize(double _edge_length = 0, int _res = 0, double _margin = 0);
+
     /** \brief Get edge length (to support different size markers */
     double GetMarkerEdgeLength() const { return edge_length; }
     /** \brief Destructor  */

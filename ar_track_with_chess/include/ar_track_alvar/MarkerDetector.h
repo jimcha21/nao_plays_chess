@@ -67,6 +67,7 @@ protected:
 
 	std::map<unsigned long, double> map_edge_length;
 	double edge_length;
+	int chess_2dcoordinates[81][2];
 	int res;
 	double margin;
 	bool detect_pose_grayscale;
@@ -94,6 +95,8 @@ public:
     * \note The default marker content resolution (_res) of 5 can only detect marker ids from 0 to 255. For larger marker ids, you need to increase the marker content resolution accordingly.
 	*/
 	void SetMarkerSize(double _edge_length = 1, int _res = 5, double _margin = 2);
+
+	void Initialize_Chess2dArray();
 
 	/** Set marker size for specified marker id. This needs to be called after setting the default marker size.
 	* \param id The specified marker id

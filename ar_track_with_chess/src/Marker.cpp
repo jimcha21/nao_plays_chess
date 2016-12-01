@@ -30,6 +30,8 @@ template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::Marker>;
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::MarkerData>;
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::MarkerArtoolkit>;
 
+
+
 using namespace std;
 
 namespace alvar {
@@ -37,12 +39,79 @@ using namespace std;
 
 #define HEADER_SIZE 8
 
-void Marker::whaza(){
-	ROS_INFO("%d",int(GetId()));
-	DrawChessCoordinates(image, cam, visualize2d_points, color);
+CvPoint UpdateChessboard(double row, double column,double visualize2d_x,double visualize2d_y){
+/*	ROS_INFO("%d",int(GetId()));
+	//cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1])
+	//DrawChessCoordinates(image, cam, visualize2d_points, color);
 	if(int(GetId()==7)){
 
+	}*/
+
+	return cvPoint((int)visualize2d_x, (int)visualize2d_y);
+}
+
+void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color, int chess_2dcoordinates[81][2]) const {
+		double visualize3d_points[12][3] = {
+		// cube
+		{ -(edge_length), -(edge_length), 0 },
+		{ -(edge_length),  (edge_length), 0 },
+		{  (edge_length),  (edge_length), 0 },
+		{  (edge_length), -(edge_length), 0 },
+		{ -(edge_length), -(edge_length), edge_length },
+		{ -(edge_length),  (edge_length), edge_length },
+		{  (edge_length),  (edge_length), edge_length },
+		{  (edge_length), -(edge_length), edge_length },
+		//coordinates
+		{  0, 0, 0 },
+		{  edge_length, 0, 0},
+		{  0, edge_length, 0 },
+		{  0, 0, edge_length },
+	};
+
+	double visualize2d_points[12][2];
+	CvMat visualize3d_points_mat;
+	CvMat visualize2d_points_mat;
+	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
+	
+	bool enabe_squares_or_centre=false;
+	double lim=0.5;
+	if(enabe_squares_or_centre){ //true for squares
+		lim=0;
 	}
+
+	for (double i = -3.5-lim; i < 3.6+lim; i++)
+    {
+    	for (double j = 1.1-lim; j < 8.2+lim; j++)
+    	{
+    		//the squares' centre coordinates (chess square center points)
+    		double square_x=edge_length*i;
+    		double square_y=edge_length*j;
+    		//z_ax don't care
+
+    		//cube base coordinates in 2d plane							
+			visualize3d_points[11][0]=square_x;
+			visualize3d_points[11][1]=square_y;
+			//visualize3d_points[11][2]=;
+			visualize3d_points[10][0]=square_x;
+			visualize3d_points[10][1]=edge_length+square_y;
+			//visualize3d_points[10]2]=;
+			visualize3d_points[9][0]=edge_length+square_x;
+			visualize3d_points[9][1]=square_y;
+			//visualize3d_points[9][2]=;
+			visualize3d_points[8][0]=square_x;
+			visualize3d_points[8][1]=square_y;
+			//visualize3d_points[8][2]=;
+
+			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+			//ROS_INFO("mpainoun %f %f",visualize2d_points[8][0], visualize2d_points[8][1]);
+			CvPoint knob_coord;
+			knob_coord=UpdateChessboard(i,j,visualize2d_points[8][0], visualize2d_points[8][1]);
+
+			//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
+			ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
+    	}
+    }
 }
 
 
@@ -59,9 +128,10 @@ void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2
 	cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,0,255));//z_axis
 }
 
-void Marker::DrawChessCoordinates(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {
+void Marker::DrawChessCoordinates(IplImage *image, Camera *cam, CvPoint chessknob_point, CvScalar color) const {
 	
-	cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
+	cvCircle(image,chessknob_point,1,color,5,8,0);
+	//cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
 	//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
 
 }
@@ -148,65 +218,6 @@ void MarkerData::VisualizeMarkerContent(IplImage *image, Camera *cam, double dat
 	cvPutText(image, val.str().c_str(), cvPoint((int)datatext_point[0], (int)datatext_point[1]), &font, rgb);
 }
 
-void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const {
-		double visualize3d_points[12][3] = {
-		// cube
-		{ -(edge_length), -(edge_length), 0 },
-		{ -(edge_length),  (edge_length), 0 },
-		{  (edge_length),  (edge_length), 0 },
-		{  (edge_length), -(edge_length), 0 },
-		{ -(edge_length), -(edge_length), edge_length },
-		{ -(edge_length),  (edge_length), edge_length },
-		{  (edge_length),  (edge_length), edge_length },
-		{  (edge_length), -(edge_length), edge_length },
-		//coordinates
-		{  0, 0, 0 },
-		{  edge_length, 0, 0},
-		{  0, edge_length, 0 },
-		{  0, 0, edge_length },
-	};
-
-	double visualize2d_points[12][2];
-	CvMat visualize3d_points_mat;
-	CvMat visualize2d_points_mat;
-	cvInitMatHeader(&visualize2d_points_mat, 12, 2, CV_64F, visualize2d_points);
-	
-	bool enabe_squares_or_centre=false;
-	double lim=0.5;
-	if(enabe_squares_or_centre){ //true for squares
-		lim=0;
-	}
-
-	for (double i = -3.5-lim; i < 3.6+lim; i++)
-    {
-    	for (double j = 1.1-lim; j < 8.2+lim; j++)
-    	{
-    		//the squares' centre coordinates (chess square center points)
-    		double square_x=edge_length*i;
-    		double square_y=edge_length*j;
-    		//z_ax don't care
-
-    		//cube base coordinates in 2d plane							
-			visualize3d_points[11][0]=square_x;
-			visualize3d_points[11][1]=square_y;
-			//visualize3d_points[11][2]=;
-			visualize3d_points[10][0]=square_x;
-			visualize3d_points[10][1]=edge_length+square_y;
-			//visualize3d_points[10]2]=;
-			visualize3d_points[9][0]=edge_length+square_x;
-			visualize3d_points[9][1]=square_y;
-			//visualize3d_points[9][2]=;
-			visualize3d_points[8][0]=square_x;
-			visualize3d_points[8][1]=square_y;
-			//visualize3d_points[8][2]=;
-
-			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-			whaza();
-			 			
-    	}
-    }
-}
 
 
 void Marker::Visualize(IplImage *image, Camera *cam, CvScalar color) const {
@@ -435,6 +446,8 @@ void Marker::ScaleMarkerToImage(IplImage *image) const {
 	cvReleaseImage(&img_content);
 	cvReleaseImage(&img);
 }
+
+
 
 void Marker::SetMarkerSize(double _edge_length, int _res, double _margin) {
 	// TODO: Is this right place for default marker size?
