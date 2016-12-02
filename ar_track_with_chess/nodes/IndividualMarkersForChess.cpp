@@ -484,7 +484,7 @@ int main(int argc, char *argv[])
 	cam_info_topic = argv[5];
     output_frame = argv[6];
 	marker_detector.SetMarkerSize(marker_size);
-	//marker_detector.Initialize_Chess2dArray();
+	marker_detector.Initialize_Chess2dArray();
 
   if (argc > 7)
     max_frequency = atof(argv[7]);

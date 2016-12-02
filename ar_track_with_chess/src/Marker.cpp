@@ -39,18 +39,29 @@ using namespace std;
 
 #define HEADER_SIZE 8
 
-CvPoint UpdateChessboard(double row, double column,double visualize2d_x,double visualize2d_y){
-/*	ROS_INFO("%d",int(GetId()));
+CvPoint UpdateChessboard(double row, double column,double visualize2d_x,double visualize2d_y, int chess_2dcoordinates[81][2]){
+	
+/*	ROS_INFO("%d",int(GetId()));*/
 	//cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1])
 	//DrawChessCoordinates(image, cam, visualize2d_points, color);
+
+	if(chess_2dcoordinates[0][0]==chess_2dcoordinates[1][0]==chess_2dcoordinates[2][0]==0){
+		ROS_INFO("init ?");
+		chess_2dcoordinates[0][0]=1;
+	}else{
+		ROS_INFO("no init");
+		chess_2dcoordinates[0][0]=1;
+	}
+/*
 	if(int(GetId()==7)){
 
 	}*/
 
+
 	return cvPoint((int)visualize2d_x, (int)visualize2d_y);
 }
 
-void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const {
+void Marker::VisualizeChess(IplImage *image, Camera *cam, int chess_2dcoordinates[81][2], CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -106,10 +117,10 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const 
 			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 			//ROS_INFO("mpainoun %f %f",visualize2d_points[8][0], visualize2d_points[8][1]);
 			CvPoint knob_coord;
-			knob_coord=UpdateChessboard(i,j,visualize2d_points[8][0], visualize2d_points[8][1]);
+			knob_coord=UpdateChessboard(i,j,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 
 			//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
-			//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
+			ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
     	}
     }
 }
