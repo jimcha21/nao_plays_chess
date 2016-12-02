@@ -156,9 +156,9 @@ namespace alvar {
 					blob_corners[track_i].clear(); // We don't want to handle this again...
 					if (visualize){
 						//ROS_INFO("mpainei kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
-						mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,0,0));
+						chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,0,0));
 						//mn->Update_Chess2dArray();
-						//ROS_INFO("vgike kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
+						ROS_INFO("vgike kserw gw to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
 					}
 				}
 			}
@@ -184,9 +184,10 @@ namespace alvar {
  
 				if (visualize){
 					//ROS_INFO("mpainei kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
-					mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,255,0));
+					chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,255,0));
+					
 					//mn->Update_Chess2dArray();
-					//ROS_INFO("vgike kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
+					ROS_INFO("vgike kserw gw to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
 				}
 			}
 
