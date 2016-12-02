@@ -40,32 +40,26 @@ int knob_reallocation_id;
 
 #define HEADER_SIZE 8
 
-CvPoint UpdateChessboard(int track_id,int knob_id_num, double row, double column,double visualize2d_x,double visualize2d_y, std::vector<CvPoint> chess_2dcoordinates){
+CvPoint FindMidPoint(int track_id,int knob_id_num, double visualize2d_x,double visualize2d_y, std::vector<CvPoint> chess_2dcoordinates){
 	
 /*	ROS_INFO("%d",int(GetId()));*/
 	//cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1])
 	//DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 	if(chess_2dcoordinates[0].x==chess_2dcoordinates[1].x==chess_2dcoordinates[2].x==0){
+		
 		ROS_INFO("init ?");
-		if(track_id==7){
-			knob_reallocation_id=knob_id_num;
-			return cvPoint((int)visualize2d_x, (int)visualize2d_y); 
-		}else if(track_id==8) {
-			knob_reallocation_id=11;
-		}
-	}else{
-		ROS_INFO("no init");
-	}
-/*
-	if(int(GetId()==7)){
+		return cvPoint((int)visualize2d_x, (int)visualize2d_y); 
+	
+	}//else return the midpoint, of the previous knob point and the new detected one..
+	
+	ROS_INFO("no init.. returning midpoint");
 
-	}*/	
 
-	return cvPoint((int)visualize2d_x, (int)visualize2d_y);
+	return cvPoint((chess_2dcoordinates[knob_id_num].x+(int)visualize2d_x)/2, (chess_2dcoordinates[knob_id_num].y+(int)visualize2d_y)/2);
 }
 
-int Marker::VisualizeChess(IplImage *image, Camera *cam, std::vector<CvPoint> chess_2dcoordinates, CvScalar color) const {
+std::vector<CvPoint> Marker::VisualizeChess(IplImage *image, Camera *cam, std::vector<CvPoint> chess_2dcoordinates, CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -141,12 +135,13 @@ ROS_INFO("eide 7");
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 
 				CvPoint knob_points;
-				//knob_points=UpdateChessboard(int(GetId()),knob_id_num,i,j,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+				knob_points=FindMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 				
-				ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
+				//ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
 
-	/*			chess_2dcoordinates[knob_id_num].x=knob_points.x;
-				chess_2dcoordinates[knob_id_num].y=knob_points.y;*/
+				chess_2dcoordinates[knob_id_num].x=knob_points.x;
+				chess_2dcoordinates[knob_id_num].y=knob_points.y;
+				DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color);
 				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
 				//chess_2dcoordinates[0].x=1;
 				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
@@ -185,12 +180,13 @@ ROS_INFO("eide 7");
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 
 				CvPoint knob_points;
-				//knob_points=UpdateChessboard(int(GetId()),knob_id_num,i,j,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+				knob_points=FindMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 				
-				ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
+			//	ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
 
-	/*			chess_2dcoordinates[knob_id_num].x=knob_points.x;
-				chess_2dcoordinates[knob_id_num].y=knob_points.y;*/
+				chess_2dcoordinates[knob_id_num].x=knob_points.x;
+				chess_2dcoordinates[knob_id_num].y=knob_points.y;
+				DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color);
 				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
 				//chess_2dcoordinates[0].x=1;
 				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
@@ -200,7 +196,7 @@ ROS_INFO("eide 7");
 	    	}
 	    }
 	} 
-    return 0;
+    return chess_2dcoordinates;
 }
 
 
