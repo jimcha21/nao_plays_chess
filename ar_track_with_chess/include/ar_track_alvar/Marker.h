@@ -99,7 +99,7 @@ namespace alvar {
      */
     void Visualize(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0)) const;
     /*visualize Chessboard's characteristics' coordination points*/
-    void VisualizeChess(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0), int chess_2dcoordinates[81][2]) const;
+    void VisualizeChess(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0)) const;
 
     /** \brief Method for resizing the marker dimensions  */
     void SetMarkerSize(double _edge_length = 0, int _res = 0, double _margin = 0);

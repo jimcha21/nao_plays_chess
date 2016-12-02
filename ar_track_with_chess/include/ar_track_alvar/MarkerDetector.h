@@ -96,7 +96,7 @@ public:
 	*/
 	void SetMarkerSize(double _edge_length = 1, int _res = 5, double _margin = 2);
 
-	void Initialize_Chess2dArray();
+	//void Initialize_Chess2dArray();
 
 	/** Set marker size for specified marker id. This needs to be called after setting the default marker size.
 	* \param id The specified marker id

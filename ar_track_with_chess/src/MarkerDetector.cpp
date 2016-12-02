@@ -68,13 +68,13 @@ namespace alvar {
 		map_edge_length.clear(); // TODO: Should we clear these here?
     }
 
-	void MarkerDetectorImpl::Initialize_Chess2dArray(){
+/*	void MarkerDetectorImpl::Initialize_Chess2dArray(){
 		for(int i=0;i<81;i++){
 			chess_2dcoordinates[i][0]=0;
 			chess_2dcoordinates[i][1]=1;
 		}
 		ROS_INFO("he mpika kai ekana init");
-	} 
+	}*/ 
 
 	void MarkerDetectorImpl::SetMarkerSizeForId(unsigned long id, double _edge_length) {
 		map_edge_length[id] = _edge_length;
@@ -143,7 +143,7 @@ namespace alvar {
 					mn->UpdatePose(blob_corners[track_i], cam, track_orientation, update_pose);
 					_markers_push_back(mn);
 					blob_corners[track_i].clear(); // We don't want to handle this again...
-					if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,0,0),chess_2dcoordinates);
+					if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,0,0));
 				}
 			}
 		}
@@ -166,7 +166,7 @@ namespace alvar {
                 mn->ros_orientation = orientation;
 				_markers_push_back(mn);
  
-				if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,255,0),chess_2dcoordinates);
+				if (visualize) mn->VisualizeChess(image, cam, CV_RGB(255,255,0));
 			}
 
 			delete mn;

@@ -50,7 +50,7 @@ CvPoint UpdateChessboard(double row, double column,double visualize2d_x,double v
 	return cvPoint((int)visualize2d_x, (int)visualize2d_y);
 }
 
-void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color, int chess_2dcoordinates[81][2]) const {
+void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -109,7 +109,7 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, CvScalar color, int ch
 			knob_coord=UpdateChessboard(i,j,visualize2d_points[8][0], visualize2d_points[8][1]);
 
 			//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
-			ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
+			//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
     	}
     }
 }
