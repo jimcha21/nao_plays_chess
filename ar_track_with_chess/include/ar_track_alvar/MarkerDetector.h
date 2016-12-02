@@ -67,7 +67,7 @@ protected:
 
 	std::map<unsigned long, double> map_edge_length;
 	double edge_length;
-	int chess_2dcoordinates[81][2];
+	std::vector<CvPoint> chess_2dcoordinates; //chess_2dcoordinates[81][2];
 	int res;
 	double margin;
 	bool detect_pose_grayscale;
@@ -96,7 +96,8 @@ public:
 	*/
 	void SetMarkerSize(double _edge_length = 1, int _res = 5, double _margin = 2);
 
-	void Initialize_Chess2dArray();
+	void Initialize_Chess2dArray();/*
+	void Update_Chess2dArray(int updated_array[81][2]);*/
 
 	/** Set marker size for specified marker id. This needs to be called after setting the default marker size.
 	* \param id The specified marker id

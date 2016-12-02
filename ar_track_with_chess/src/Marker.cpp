@@ -36,32 +36,36 @@ using namespace std;
 
 namespace alvar {
 using namespace std;
+int knob_reallocation_id;
 
 #define HEADER_SIZE 8
 
-CvPoint UpdateChessboard(double row, double column,double visualize2d_x,double visualize2d_y, int chess_2dcoordinates[81][2]){
+CvPoint UpdateChessboard(int track_id,int knob_id_num, double row, double column,double visualize2d_x,double visualize2d_y, std::vector<CvPoint> chess_2dcoordinates){
 	
 /*	ROS_INFO("%d",int(GetId()));*/
 	//cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1])
 	//DrawChessCoordinates(image, cam, visualize2d_points, color);
 
-	if(chess_2dcoordinates[0][0]==chess_2dcoordinates[1][0]==chess_2dcoordinates[2][0]==0){
+	if(chess_2dcoordinates[0].x==chess_2dcoordinates[1].x==chess_2dcoordinates[2].x==0){
 		ROS_INFO("init ?");
-		chess_2dcoordinates[0][0]=1;
+		if(track_id==7){
+			knob_reallocation_id=knob_id_num;
+			return cvPoint((int)visualize2d_x, (int)visualize2d_y); 
+		}else if(track_id==8) {
+			knob_reallocation_id=11;
+		}
 	}else{
 		ROS_INFO("no init");
-		chess_2dcoordinates[0][0]=1;
 	}
 /*
 	if(int(GetId()==7)){
 
-	}*/
-
+	}*/	
 
 	return cvPoint((int)visualize2d_x, (int)visualize2d_y);
 }
 
-void Marker::VisualizeChess(IplImage *image, Camera *cam, int chess_2dcoordinates[81][2], CvScalar color) const {
+int Marker::VisualizeChess(IplImage *image, Camera *cam, std::vector<CvPoint> chess_2dcoordinates, CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -90,39 +94,113 @@ void Marker::VisualizeChess(IplImage *image, Camera *cam, int chess_2dcoordinate
 		lim=0;
 	}
 
-	for (double i = -3.5-lim; i < 3.6+lim; i++)
-    {
-    	for (double j = 1.1-lim; j < 8.2+lim; j++)
-    	{
-    		//the squares' centre coordinates (chess square center points)
-    		double square_x=edge_length*i;
-    		double square_y=edge_length*j;
-    		//z_ax don't care
 
-    		//cube base coordinates in 2d plane							
-			visualize3d_points[11][0]=square_x;
-			visualize3d_points[11][1]=square_y;
-			//visualize3d_points[11][2]=;
-			visualize3d_points[10][0]=square_x;
-			visualize3d_points[10][1]=edge_length+square_y;
-			//visualize3d_points[10]2]=;
-			visualize3d_points[9][0]=edge_length+square_x;
-			visualize3d_points[9][1]=square_y;
-			//visualize3d_points[9][2]=;
-			visualize3d_points[8][0]=square_x;
-			visualize3d_points[8][1]=square_y;
-			//visualize3d_points[8][2]=;
+/*	double i,i_end,j,j_end;
+	bool negativ;
+	if(int(GetId())==8){
+		j = 8.1+lim;
+		j_end=1.0-lim; //1.1 last one 
+		negativ=true;
+		ROS_INFO("eide 8");
+	}else{
+		j = 1.1-lim;
+		j_end = 8.2+lim;
+		negativ=false;
+		i = -3.5-lim;
+		i_end = 3.6+lim;
+		ROS_INFO("eide 7");
+	}*/
 
-			cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
-			cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-			//ROS_INFO("mpainoun %f %f",visualize2d_points[8][0], visualize2d_points[8][1]);
-			CvPoint knob_coord;
-			knob_coord=UpdateChessboard(i,j,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+	if(int(GetId())==7){
+ROS_INFO("eide 7");
+		int knob_id_num=0;
+		for (double i = -3.5-lim; i < 3.6+lim; i++)
+	    {
+	    	for (double j = 1.1-lim; j < 8.2+lim; j++)
+	    	{
+	    		//the squares' centre coordinates (chess square center points)
+	    		double square_x=edge_length*i;
+	    		double square_y=edge_length*j;
+	    		//z_ax don't care
 
-			//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
-			ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
-    	}
-    }
+	    		//cube base coordinates in 2d plane							
+				visualize3d_points[11][0]=square_x;
+				visualize3d_points[11][1]=square_y;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=square_x;
+				visualize3d_points[10][1]=edge_length+square_y;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+square_x;
+				visualize3d_points[9][1]=square_y;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=square_x;
+				visualize3d_points[8][1]=square_y;
+				//visualize3d_points[8][2]=;
+
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+
+				CvPoint knob_points;
+				//knob_points=UpdateChessboard(int(GetId()),knob_id_num,i,j,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+				
+				ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
+
+	/*			chess_2dcoordinates[knob_id_num].x=knob_points.x;
+				chess_2dcoordinates[knob_id_num].y=knob_points.y;*/
+				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
+				//chess_2dcoordinates[0].x=1;
+				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
+				//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
+				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
+	    		knob_id_num++;
+	    	}
+	    }
+	}else if(int(GetId())==8){  //ROTATED MATRIX - TODO REDUCE CODE -> ONE PART 2D ARRAY LOOP
+		ROS_INFO("eide 8");
+		int knob_id_num=0;
+		for (double j = 8.1+lim; j>1.0-lim ; j--)
+	    {	
+			for (double i = -3.5-lim; i < 3.6+lim; i++)
+	    	{	    
+	    		//the squares' centre coordinates (chess square center points)
+	    		double square_x=edge_length*i;
+	    		double square_y=edge_length*j;
+	    		//z_ax don't care
+
+	    		//cube base coordinates in 2d plane							
+				visualize3d_points[11][0]=square_x;
+				visualize3d_points[11][1]=square_y;
+				//visualize3d_points[11][2]=;
+				visualize3d_points[10][0]=square_x;
+				visualize3d_points[10][1]=edge_length+square_y;
+				//visualize3d_points[10]2]=;
+				visualize3d_points[9][0]=edge_length+square_x;
+				visualize3d_points[9][1]=square_y;
+				//visualize3d_points[9][2]=;
+				visualize3d_points[8][0]=square_x;
+				visualize3d_points[8][1]=square_y;
+				//visualize3d_points[8][2]=;
+
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+
+				CvPoint knob_points;
+				//knob_points=UpdateChessboard(int(GetId()),knob_id_num,i,j,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+				
+				ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
+
+	/*			chess_2dcoordinates[knob_id_num].x=knob_points.x;
+				chess_2dcoordinates[knob_id_num].y=knob_points.y;*/
+				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
+				//chess_2dcoordinates[0].x=1;
+				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
+				//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
+				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
+	    		knob_id_num++;
+	    	}
+	    }
+	} 
+    return 0;
 }
 
 

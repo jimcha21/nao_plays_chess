@@ -69,12 +69,24 @@ namespace alvar {
     }
 
 	void MarkerDetectorImpl::Initialize_Chess2dArray(){
+		CvPoint pt;
 		for(int i=0;i<81;i++){
-			chess_2dcoordinates[i][0]=0;
-			chess_2dcoordinates[i][1]=0;
+			//chess_2dcoordinates[i][0]=0;
+			//chess_2dcoordinates[i][1]=0;
+			pt.x=0;
+			pt.y=0;
+			chess_2dcoordinates.push_back(pt);
 		}
-		ROS_INFO("he mpika kai ekana init");
+		//ROS_INFO("he mpika kai ekana initmegethos %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
 	} 
+
+/*	void MarkerDetectorImpl::Update_Chess2dArray(int updated_array[81][2]){
+		for(int i=0;i<81;i++){
+			chess_2dcoordinates[i][0]=updated_array[i][0];
+			chess_2dcoordinates[i][1]=updated_array[i][1];
+		}
+		//ROS_INFO("updated");
+	} */
 
 	void MarkerDetectorImpl::SetMarkerSizeForId(unsigned long id, double _edge_length) {
 		map_edge_length[id] = _edge_length;
@@ -99,7 +111,6 @@ namespace alvar {
 		// Swap marker tables
 		_swap_marker_tables();
 		_markers_clear();
-//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
 		switch(labeling_method)
 		{
 			case CVSEQ :
@@ -143,7 +154,12 @@ namespace alvar {
 					mn->UpdatePose(blob_corners[track_i], cam, track_orientation, update_pose);
 					_markers_push_back(mn);
 					blob_corners[track_i].clear(); // We don't want to handle this again...
-					if (visualize) mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,0,0));
+					if (visualize){
+						//ROS_INFO("mpainei kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
+						mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,0,0));
+						//mn->Update_Chess2dArray();
+						//ROS_INFO("vgike kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
+					}
 				}
 			}
 		}
@@ -166,7 +182,12 @@ namespace alvar {
                 mn->ros_orientation = orientation;
 				_markers_push_back(mn);
  
-				if (visualize) mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,255,0));
+				if (visualize){
+					//ROS_INFO("mpainei kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
+					mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,255,0));
+					//mn->Update_Chess2dArray();
+					//ROS_INFO("vgike kserw gw to %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1]);
+				}
 			}
 
 			delete mn;

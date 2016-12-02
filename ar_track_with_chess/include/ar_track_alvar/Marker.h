@@ -42,6 +42,12 @@
 #include "filter/kinect_filtering.h"
 #include <Eigen/StdVector>
 
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+
+
+
+using namespace cv;
 namespace alvar {
 
   /**
@@ -99,7 +105,7 @@ namespace alvar {
      */
     void Visualize(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0)) const;
     /*visualize Chessboard's characteristics' coordination points*/
-    void VisualizeChess(IplImage *image, Camera *cam, int chess_2dcoordinates[81][2], CvScalar color=CV_RGB(255,0,0)) const;
+    int VisualizeChess(IplImage *image, Camera *cam, std::vector<CvPoint> chess_2dcoordinates, CvScalar color=CV_RGB(255,0,0)) const;
 
     /** \brief Method for resizing the marker dimensions  */
     void SetMarkerSize(double _edge_length = 0, int _res = 0, double _margin = 0);
@@ -171,7 +177,7 @@ namespace alvar {
     double edge_length;
     int res;
     double margin;
-    int chess_2dcoordinates[81][2];
+    std::vector<CvPoint> chess_2dcoordinates; //chess_2dcoordinates[81][2];
     CvMat *marker_content;
 
   public:
