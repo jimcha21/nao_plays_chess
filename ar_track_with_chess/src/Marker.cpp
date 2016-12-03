@@ -259,10 +259,11 @@ void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2
 
 void Marker::DrawChessCoordinates(IplImage *image, Camera *cam, CvPoint chessknob_point, CvScalar color) const {
 	
-	cvCircle(image,chessknob_point,1,color,5,8,0);
-	//cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
-	//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
-
+	if( chessknob_point.x <= cam->x_res && chessknob_point.y <= cam->y_res ){ // overflow check
+		cvCircle(image,chessknob_point,1,color,5,8,0);
+		//cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
+		//ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+	}
 }
 
 void Marker::VisualizeMarkerContent(IplImage *image, Camera *cam, double datatext_point[2], double content_point[2]) const {
