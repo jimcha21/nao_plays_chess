@@ -62,7 +62,7 @@ CvPoint FindWightedMidPoint(int track_id,int knob_id_num, double visualize2d_x,d
 			marker_weight=1-marker_weight;
 		}
 	}else if(knob_id_num==29 || knob_id_num==30 || knob_id_num==38 || knob_id_num==39 || knob_id_num==47 ||
-	 knob_id_num==2 || knob_id_num==3 || knob_id_num==11 || knob_id_num==12 || knob_id_num==20 || knob_id_num==21){ //in front of marker 7
+	 knob_id_num==2 || knob_id_num==3 || knob_id_num==11 || knob_id_num==12 || knob_id_num==20 || knob_id_num==21){ //in front of marker 7 zone 2
 		marker_weight=0.7;
 		if(track_id==8){
 			marker_weight=1-marker_weight;
@@ -75,7 +75,7 @@ CvPoint FindWightedMidPoint(int track_id,int knob_id_num, double visualize2d_x,d
 			marker_weight=1-marker_weight;
 		}	
 	}else if(knob_id_num==62 || knob_id_num==61 || knob_id_num==60 || knob_id_num==59 || knob_id_num==58 || knob_id_num==57 
-	|| knob_id_num==53 || knob_id_num==52 || knob_id_num==51 || knob_id_num==50 || knob_id_num==49){ //in front of marker 8
+	|| knob_id_num==53 || knob_id_num==52 || knob_id_num==51 || knob_id_num==50 || knob_id_num==49){ //in front of marker 8 zone
 		marker_weight=0.7;
 		if(track_id==7){
 			marker_weight=1-marker_weight;

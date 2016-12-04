@@ -11,16 +11,20 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "opencv2/core/core.hpp"
 #include <opencv2/xfeatures2d/nonfree.hpp>
+#include "vision/ChessVector.h"
+
 
 using namespace cv;
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
-void chatterCallback(const sensor_msgs::Image::ConstPtr& msg)
+void chatterCallback(const vision::ChessVector& msg)
 {
   //ROS_INFO("I heard: [%s]", msg->data.c_str());
-  ROS_INFO("frame received: ROWS[%d]xCOLUMNS[%d]", msg->width,msg->height);
-  
+  //ROS_INFO("frame received: ROWS[%d]xCOLUMNS[%d]", msg->width,msg->height);
+  ROS_INFO("KATI PHRE");
+  ROS_INFO("phre %d %d",msg.p_vector[0].x,msg.p_vector[0].y);ROS_INFO("phre %d %d",msg.p_vector[1].x,msg.p_vector[1].y);
+ // ROS_INFO("phre %d",msg.size());
   //CvImagePtr toCvCopy(msg->data,msg->encoding);
 
   //ROS_INFO("encoding received: [%s]", msg->encoding.c_str()); //rgb8
@@ -84,7 +88,7 @@ int main(int argc, char **argv)
    * away the oldest ones.
    */
   //ros::Subscriber sub = n.subscribe("chatter", 1000, chatterCallback);
-  ros::Subscriber sub = n.subscribe("naoqi_driver_node/camera/front/image_raw", 10, chatterCallback);
+  ros::Subscriber sub = n.subscribe("chess_points", 10, chatterCallback);
   /**
    * ros::spin() will enter a loop, pumping callbacks.  With this version, all
    * callbacks will be called from within this thread (the main one).  ros::spin()

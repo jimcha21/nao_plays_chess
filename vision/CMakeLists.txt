@@ -51,6 +51,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
    FILES
    Num.msg
+   ChessPoint.msg
+   ChessVector.msg
 )
 
 ## Declare ROS messages and services

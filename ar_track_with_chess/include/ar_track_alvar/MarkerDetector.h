@@ -132,6 +132,15 @@ public:
 			   LabelingMethod labeling_method=CVSEQ,
 			   bool update_pose=true);
 
+	std::vector<CvPoint> DetectChess(IplImage *image,
+			   Camera *cam,
+			   bool track=false,
+			   bool visualize=false,
+			   double max_new_marker_error=0.08,
+			   double max_track_error=0.2,
+			   LabelingMethod labeling_method=CVSEQ,
+			   bool update_pose=true);
+
 	int DetectAdditional(IplImage *image, Camera *cam, bool visualize=false, double max_track_error=0.2);
 };
 

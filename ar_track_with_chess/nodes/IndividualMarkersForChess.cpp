@@ -15,6 +15,10 @@
 #include <dynamic_reconfigure/server.h>
 #include <ar_track_alvar/ParamsConfig.h>
 
+#include "vision/ChessVector.h"
+#include "vision/ChessPoint.h"
+
+
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp> //remove those 2 if you are in paionaios..
 
@@ -25,13 +29,22 @@ bool init=true;
 Camera *cam;
 cv_bridge::CvImagePtr cv_ptr_;
 image_transport::Subscriber cam_sub_;
+
+//ROS publishers
 ros::Publisher arMarkerPub_;
 ros::Publisher rvizMarkerPub_;
+ros::Publisher chessPointsPub_;
+
 ar_track_alvar_msgs::AlvarMarkers arPoseMarkers_;
 visualization_msgs::Marker chessSquares_,chessPoints_;
+
 tf::TransformListener *tf_listener;
 tf::TransformBroadcaster *tf_broadcaster;
+
 MarkerDetector<MarkerData> marker_detector;
+
+vision::ChessPoint chess_point;
+vision::ChessVector chess_vector;
 
 bool enableSwitched = false;
 bool enabled = true;
@@ -70,13 +83,13 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 		try{
 			tf::StampedTransform CamToOutput;
 			//ROS_INFO("%s" , "mpe");
-    			try{
-					tf_listener->waitForTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, ros::Duration(1.0));
-					tf_listener->lookupTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, CamToOutput);
-   				}
-    			catch (tf::TransformException ex){
-      				ROS_ERROR("%s",ex.what());
-    			}
+			try{
+				tf_listener->waitForTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, ros::Duration(1.0));
+				tf_listener->lookupTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, CamToOutput);
+				}
+			catch (tf::TransformException ex){
+  				ROS_ERROR("%s",ex.what());
+			}
 
     		//ROS_INFO("CamToOutput x=%f ,y=%f , z=%f\n",CamToOutput.getOrigin()[0],CamToOutput.getOrigin()[1] ,CamToOutput.getOrigin()[2]);
             //ROS_INFO("CamToOutput rotattion x=%f ,y=%f , z=%f , w=%f\n",CamToOutput.getRotation ()[0],CamToOutput.getRotation ()[1] ,CamToOutput.getRotation ()[2],CamToOutput.getRotation ()[3]);
@@ -90,16 +103,29 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             // us a cv::Mat. I'm too lazy to change to cv::Mat throughout right now, so I
             // do this conversion here -jbinney
             IplImage ipl_image = cv_ptr_->image;
+            std::vector<CvPoint> chess_knob_vector_;
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
-				marker_detector.Detect(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
+				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
 				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
 				cv::waitKey(3);
 			}else{
-				marker_detector.Detect(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
+				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
 			}
 
+            vision::ChessPoint chess_point;
+
+			for(int i=0;i<chess_knob_vector_.size();i++){
+				chess_point.x=chess_knob_vector_[i].x;
+				chess_point.y=chess_knob_vector_[i].y;
+				chess_vector.p_vector.push_back(chess_point);
+			}//total 81..
+
+			//publishing the chess 'groundtruth' coordinates..
+			chessPointsPub_.publish(chess_vector);
       	    arPoseMarkers_.markers.clear ();
+
+
 			for (size_t i=0; i<marker_detector.markers->size(); i++) 
 			{
 				//Get the pose relative to the camera
@@ -486,32 +512,33 @@ int main(int argc, char *argv[])
 	marker_detector.SetMarkerSize(marker_size);
 	marker_detector.Initialize_Chess2dArray();
 
-  if (argc > 7)
-    max_frequency = atof(argv[7]);
+	if (argc > 7)
+	    max_frequency = atof(argv[7]);
 
   // Set dynamically configurable parameters so they don't get replaced by default values
-  pn.setParam("marker_size", marker_size);
-  pn.setParam("max_new_marker_error", max_new_marker_error);
-  pn.setParam("max_track_error", max_track_error);
+	pn.setParam("marker_size", marker_size);
+	pn.setParam("max_new_marker_error", max_new_marker_error);
+	pn.setParam("max_track_error", max_track_error);
 
-  if (argc > 7)
-    pn.setParam("max_frequency", max_frequency);
+	if (argc > 7)
+	    pn.setParam("max_frequency", max_frequency);
 
 	cam = new Camera(n, cam_info_topic);
 	tf_listener = new tf::TransformListener(n);
 	tf_broadcaster = new tf::TransformBroadcaster();
 	arMarkerPub_ = n.advertise < ar_track_alvar_msgs::AlvarMarkers > ("ar_pose_marker", 0);
 	rvizMarkerPub_ = n.advertise < visualization_msgs::Marker > ("visualization_marker", 0);
-	
-  // Prepare dynamic reconfiguration
-  dynamic_reconfigure::Server < ar_track_alvar::ParamsConfig > server;
-  dynamic_reconfigure::Server<ar_track_alvar::ParamsConfig>::CallbackType f;
+	chessPointsPub_ = n.advertise < vision::ChessVector > ("chessboard_knob_coordinates", 0);
 
-  f = boost::bind(&configCallback, _1, _2);
-  server.setCallback(f);
+	// Prepare dynamic reconfiguration
+	dynamic_reconfigure::Server < ar_track_alvar::ParamsConfig > server;
+	dynamic_reconfigure::Server<ar_track_alvar::ParamsConfig>::CallbackType f;
+
+	f = boost::bind(&configCallback, _1, _2);
+	server.setCallback(f);
 
 	//Give tf a chance to catch up before the camera callback starts asking for transforms
-  // It will also reconfigure parameters for the first time, setting the default values
+	// It will also reconfigure parameters for the first time, setting the default values
 	ros::Duration(1.0).sleep();
 	ros::spinOnce();	
 	 

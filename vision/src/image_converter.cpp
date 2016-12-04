@@ -10,6 +10,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "opencv2/imgcodecs.hpp"
 
+#include "vision/ChessVector.h"
+#include "vision/ChessPoint.h"
+
 #include "opencv2/core/core.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
@@ -50,6 +53,10 @@ static const std::string OPENCV_WINDOW = "Image window";
 static const std::string OPENCV_WINDOW2 = "Image window2";
 cv::Size checkerboardSize = cv::Size(8, 8);
 
+vision::ChessPoint chess_point;
+vision::ChessVector chess_vector;
+ros::Publisher whaza;
+
 class ImageConverter
 {
   ros::NodeHandle nh_;
@@ -62,9 +69,12 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
-    //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
+    //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
+    image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
     image_pub_ = it_.advertise("/image_converter/output_video", 1);
+      
+    whaza = nh_.advertise <vision::ChessVector>("chess_points",0);
+
 
     cv::namedWindow(OPENCV_WINDOW);
   }
@@ -117,7 +127,8 @@ public:
     //
 
     // Update GUI Window
-    */Mat dst, cdst,src_gray;
+    */
+ /*   Mat dst, cdst,src_gray;
 
     Canny(cv_ptr->image, dst, 50, 200, 3);
     cvtColor(dst, cdst, COLOR_GRAY2BGR);
@@ -131,7 +142,29 @@ public:
     }
     imshow("detected lines", cdst);
 
-    //cv::imshow(OPENCV_WINDOW, cv_ptr->image); //the robot's source image..
+    //cv::imshow(OPENCV_WINDOW, cv_ptr->image); //the robot's source image..*/
+
+   CvPoint chessknob_point;
+   chessknob_point.x=10;
+   chessknob_point.y=10;
+  cv::circle((cv_ptr->image), chessknob_point, 10, CV_RGB(255,0,0));
+
+
+chess_point.x=1;
+chess_point.y=1;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=2;
+chess_point.y=2;
+chess_vector.p_vector.push_back(chess_point);
+
+  whaza.publish(chess_vector);
+
+   // cvCircle(cv_ptr->image,chessknob_point,1, CV_RGB(0, 255,0),5,8,0);
+    //cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
+    //ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+
+
+
     cv::imshow(OPENCV_WINDOW, cv_ptr->image);
     cv::waitKey(3);
     
@@ -144,6 +177,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "image_converter");
   ImageConverter ic;
+
   //ImageConverter2 ic2;
   ros::spin();
   return 0;
