@@ -156,9 +156,18 @@ chess_vector.p_vector.push_back(chess_point);
 chess_point.x=2;
 chess_point.y=2;
 chess_vector.p_vector.push_back(chess_point);
+chess_point.x=3;
+chess_point.y=4;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=4;
+chess_point.y=3;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=5;
+chess_point.y=5;
+chess_vector.p_vector.push_back(chess_point);
 
   whaza.publish(chess_vector);
-
+chess_vector.p_vector.clear();
    // cvCircle(cv_ptr->image,chessknob_point,1, CV_RGB(0, 255,0),5,8,0);
     //cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
     //ROS_INFO("1red eytheia ? me kentro ? %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);

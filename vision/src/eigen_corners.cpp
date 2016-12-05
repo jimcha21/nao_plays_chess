@@ -20,6 +20,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
 
+#include "vision/ChessVector.h"
+#include "vision/ChessPoint.h"
+
 
 using namespace cv;
 using namespace std;
@@ -31,6 +34,9 @@ static const std::string OPENCV_WINDOW2 = "Image window2";
 Mat src, src_gray;
 Mat myHarris_dst;Mat Mc;
 Mat myShiTomasi_dst; Mat result_image;
+std::vector<cv::Point> chess_knob_vector_;
+std::vector<cv::Point> image_process_vector_;
+
 int thresh = 200;
 int max_thresh = 255;
 
@@ -46,8 +52,6 @@ double myShiTomasi_minVal; double myShiTomasi_maxVal;
 
 RNG rng(12345);
 
-const char* myHarris_window = "My Harris corner detector";
-const char* myShiTomasi_window = "My Shi Tomasi corner detector";
 
 /// Function headers
 void myShiTomasi_function( int, void* );
@@ -55,13 +59,24 @@ void myHarris_function( int, void* );
 void cornerHarris_demo( int, void* );
 void best_corners( int, void*,bool useHarrisDetector,int compar);
 
-/**
- * @function main
- */
+//******************************************************************************************
+
+void chessboardVectorTopic(const vision::ChessVector& data){
+  cv::Point pt;
+  chess_knob_vector_.clear();
+  for(int i;i<data.p_vector.size();i++){ //till 81..
+    pt.x=data.p_vector[i].x;
+    pt.y=data.p_vector[i].y;
+    chess_knob_vector_.push_back(pt);
+  }
+  ROS_INFO("SIZE %d = 81 ?",chess_knob_vector_.size());
+
+}
 
 class ImageConverter
 {
   ros::NodeHandle nh_;
+  ros::Subscriber chess_sub;
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
   image_transport::Publisher image_pub_;
@@ -71,9 +86,11 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
-    //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
+    //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
+    image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
     //image_pub_ = it_.advertise("/image_converter/output_video", 1);
+
+    chess_sub = nh_.subscribe("chessboard_knob_coordinates", 10, chessboardVectorTopic);
 
     cv::namedWindow(OPENCV_WINDOW);
   }
@@ -85,7 +102,9 @@ public:
 
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
+      
       cv_bridge::CvImagePtr cv_ptr;
+
       try
       {
         //The input from the robot is encoded with RGB8.
@@ -97,13 +116,14 @@ public:
         return;
       }
 
-      cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );
-      
+      cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );      
       src=cv_ptr->image.clone();
 
 
       /// Set some parameters
       int blockSize = 3; int apertureSize = 3, choice=3; //1 for harris, else for shatosshi
+
+      image_process_vector_.clear();
 
       if(choice==1){
           /// My Harris matrix -- Using cornerEigenValsAndVecs
@@ -125,8 +145,8 @@ public:
           minMaxLoc( Mc, &myHarris_minVal, &myHarris_maxVal, 0, 0, Mat() );
 
           // Create Window and Trackbar 
-          namedWindow( myHarris_window, WINDOW_AUTOSIZE );
-          createTrackbar( " Quality Level:", myHarris_window, &myHarris_qualityLevel, max_qualityLevel, myHarris_function );
+          namedWindow( "My Harris corner detector", WINDOW_AUTOSIZE );
+          createTrackbar( " Quality Level:", "My Harris corner detector", &myHarris_qualityLevel, max_qualityLevel, myHarris_function );
           myHarris_function( 0, 0 );
       }
       else if(choice==2){
@@ -137,28 +157,21 @@ public:
           minMaxLoc( myShiTomasi_dst, &myShiTomasi_minVal, &myShiTomasi_maxVal, 0, 0, Mat() );
 
           // Create Window and Trackbar 
-          namedWindow( myShiTomasi_window, WINDOW_AUTOSIZE );
-          createTrackbar( " Quality Level:", myShiTomasi_window, &myShiTomasi_qualityLevel, max_qualityLevel, myShiTomasi_function );
+          namedWindow("My Shi Tomasi corner detector", WINDOW_AUTOSIZE );
+          createTrackbar( " Quality Level:", "My Shi Tomasi corner detector", &myShiTomasi_qualityLevel, max_qualityLevel, myShiTomasi_function );
           myShiTomasi_function( 0, 0 );
+
       }else{
+
         best_corners(0,0,true,1);
-        best_corners(0,0,false,2);
+        //  best_corners(0,0,false,2);
         
       }
       
+      ROS_INFO("vrike %d",image_process_vector_.size());
 
-
-
-
-
-
-
-
-
-
-      
       cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-      //cv::imshow(OPENCV_WINDOW,result_image);
+      cv::imshow(OPENCV_WINDOW,result_image);
       cv::waitKey(3);
 
       // Output modified video stream
@@ -170,11 +183,11 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "image_converter");
   ImageConverter ic;
+
+
   ros::spin();
   return 0;
 }
-
-
 
 /**
  * @function myShiTomasi_function
@@ -182,6 +195,7 @@ int main(int argc, char** argv)
 void myShiTomasi_function( int, void* )
 {
   result_image = src.clone();
+  
 
   if( myShiTomasi_qualityLevel < 1 ) { myShiTomasi_qualityLevel = 1; }
 
@@ -189,10 +203,14 @@ void myShiTomasi_function( int, void* )
      { for( int i = 0; i < src_gray.cols; i++ )
           {
             if( myShiTomasi_dst.at<float>(j,i) > myShiTomasi_minVal + ( myShiTomasi_maxVal - myShiTomasi_minVal )*myShiTomasi_qualityLevel/max_qualityLevel )
-              { circle( result_image, Point(i,j), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 ); }
+              {
+                  circle( result_image, Point(i,j), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );
+                  image_process_vector_.push_back(cv::Point(i,j));
+                  //ROS_INFO("point %d %d",i,j);
+              }
           }
      }
-  //cv::imshow( myShiTomasi_window, result_image );
+  //cv::imshow( "My Shi Tomasi corner detector", result_image );
 }
 
 /**
@@ -200,7 +218,7 @@ void myShiTomasi_function( int, void* )
  */
 void myHarris_function( int, void* )
 {
-  result_image = src.clone();
+  result_image = src.clone();  
 
   if( myHarris_qualityLevel < 1 ) { myHarris_qualityLevel = 1; }
 
@@ -208,10 +226,13 @@ void myHarris_function( int, void* )
      { for( int i = 0; i < src_gray.cols; i++ )
           {
             if( Mc.at<float>(j,i) > myHarris_minVal + ( myHarris_maxVal - myHarris_minVal )*myHarris_qualityLevel/max_qualityLevel )
-              { circle( result_image, Point(i,j), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 ); }
+              { 
+                circle( result_image, Point(i,j), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );
+                image_process_vector_.push_back(cv::Point(i,j));
+              }
           }
      }
-  //cv::imshow( myHarris_window, result_image );
+  //cv::imshow( "My Harris corner detector", result_image );
 }
 //classic corner harris
 void cornerHarris_demo( int, void* )
@@ -288,7 +309,8 @@ void best_corners( int, void*,bool useHarrisDetector,int compar)
 
     for( size_t i = 0; i < corners.size(); i++ )
     {
-    cv::circle( src_gray, corners[i], 5, cv::Scalar( 255. ), -1 );
+        cv::circle( src_gray, corners[i], 5, cv::Scalar( 255. ), -1 );
+        image_process_vector_.push_back(cv::Point(corners[i].x,corners[i].y));
     }
 
     //cv::namedWindow( "argv[1]", CV_WINDOW_NORMAL );

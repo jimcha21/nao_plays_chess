@@ -23,7 +23,13 @@ void chatterCallback(const vision::ChessVector& msg)
   //ROS_INFO("I heard: [%s]", msg->data.c_str());
   //ROS_INFO("frame received: ROWS[%d]xCOLUMNS[%d]", msg->width,msg->height);
   ROS_INFO("KATI PHRE");
-  ROS_INFO("phre %d %d",msg.p_vector[0].x,msg.p_vector[0].y);ROS_INFO("phre %d %d",msg.p_vector[1].x,msg.p_vector[1].y);
+  ROS_INFO("phre %d",msg.p_vector.size());
+  for(int i;i<msg.p_vector.size();i++){
+    ROS_INFO("phre %d %d",msg.p_vector[i].x,msg.p_vector[i].y);
+
+
+  } 
+  //ROS_INFO("phre %d %d",msg.p_vector[0].x,msg.p_vector[0].y);ROS_INFO("phre %d %d",msg.p_vector[1].x,msg.p_vector[1].y);
  // ROS_INFO("phre %d",msg.size());
   //CvImagePtr toCvCopy(msg->data,msg->encoding);
 

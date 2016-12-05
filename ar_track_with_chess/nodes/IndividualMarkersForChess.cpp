@@ -123,8 +123,9 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 			//publishing the chess 'groundtruth' coordinates..
 			chessPointsPub_.publish(chess_vector);
-      	    arPoseMarkers_.markers.clear ();
 
+			chess_vector.p_vector.clear();
+      	    arPoseMarkers_.markers.clear();
 
 			for (size_t i=0; i<marker_detector.markers->size(); i++) 
 			{
