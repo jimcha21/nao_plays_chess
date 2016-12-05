@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   image_transport
+  ar_track_alvar
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,22 +49,21 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-   FILES
-   Num.msg
-   ChessPoint.msg
-   ChessVector.msg
-)
+#add_message_files(
+#   FILES
+#   ChessPoint.msg
+#   ChessVector.msg
+#)
 
 ## Declare ROS messages and services
-add_message_files(DIRECTORY msg FILES Num.msg)
+#add_message_files(DIRECTORY msg FILES Num.msg)
 #add_service_files(DIRECTORY srv FILES AddTwoInts.srv)
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   AddTwoInts.srv
- )
+# add_service_files(
+#   FILES
+#   AddTwoInts.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -79,6 +79,7 @@ add_message_files(DIRECTORY msg FILES Num.msg)
 generate_messages(
   DEPENDENCIES
    std_msgs
+   ar_track_alvar
 )
 
 ################################################
@@ -200,28 +201,32 @@ include_directories(
 find_package( OpenCV REQUIRED )
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(talker src/talker.cpp)
-target_link_libraries(talker ${catkin_LIBRARIES})
-add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+add_executable(houghlines_onChess nodes/houghlines_onChess.cpp)
+target_link_libraries(houghlines_onChess ${catkin_LIBRARIES})
+target_link_libraries(houghlines_onChess ${OpenCV_LIBS} )
+add_dependencies(houghlines_onChess ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS})
 
-add_executable(listener src/listener.cpp)
-target_link_libraries(listener ${catkin_LIBRARIES})
-target_link_libraries(listener ${OpenCV_LIBS} )
-add_dependencies(listener beginner_tutorials_generate_messages_cpp)
+add_executable(shitomashi_goodFeatures_chesspoints nodes/shitomashi_goodFeatures_chesspoints.cpp)
+target_link_libraries(shitomashi_goodFeatures_chesspoints ${catkin_LIBRARIES})
+target_link_libraries(shitomashi_goodFeatures_chesspoints ${OpenCV_LIBS} )
+add_dependencies(shitomashi_goodFeatures_chesspoints ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS})
 
 add_executable(image_converter src/image_converter.cpp)
 target_link_libraries(image_converter ${catkin_LIBRARIES})
-target_link_libraries(image_converter ${OpenCV_LIBS} )
 add_dependencies(image_converter beginner_tutorials_generate_messages_cpp)
 
-add_executable(eigen_corners src/eigen_corners.cpp)
-target_link_libraries(eigen_corners ${catkin_LIBRARIES})
-target_link_libraries(eigen_corners ${OpenCV_LIBS} )
-add_dependencies(eigen_corners beginner_tutorials_generate_messages_cpp)
+#add_executable(talker src/talker.cpp)
+#target_link_libraries(talker ${catkin_LIBRARIES})
+#add_dependencies(talker beginner_tutorials_generate_messages_cpp)
 
-add_executable(add_two_ints_server src/add_two_ints_server.cpp)
-target_link_libraries(add_two_ints_server ${catkin_LIBRARIES})
-add_dependencies(add_two_ints_server beginner_tutorials_gencpp)
+#add_executable(listener src/listener.cpp)
+#target_link_libraries(listener ${catkin_LIBRARIES})
+#target_link_libraries(listener ${OpenCV_LIBS} )
+#add_dependencies(listener beginner_tutorials_generate_messages_cpp)
+
+#add_executable(add_two_ints_server src/add_two_ints_server.cpp)
+#target_link_libraries(add_two_ints_server ${catkin_LIBRARIES})
+#add_dependencies(add_two_ints_server beginner_tutorials_gencpp)
 
 #	UNSTABLE STUFF HERE
 #add_executable(camera_calibration src/camera_calibration.cpp)
@@ -229,6 +234,6 @@ add_dependencies(add_two_ints_server beginner_tutorials_gencpp)
 #add_dependencies(camera_calibration beginner_tutorials_gencpp)
 
 
-add_executable(add_two_ints_client src/add_two_ints_client.cpp)
-target_link_libraries(add_two_ints_client ${catkin_LIBRARIES})
-add_dependencies(add_two_ints_client beginner_tutorials_gencpp)
+#add_executable(add_two_ints_client src/add_two_ints_client.cpp)
+#target_link_libraries(add_two_ints_client ${catkin_LIBRARIES})
+#add_dependencies(add_two_ints_client beginner_tutorials_gencpp)

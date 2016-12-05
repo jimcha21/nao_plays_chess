@@ -29,8 +29,8 @@ using namespace std;
 static const std::string OPENCV_WINDOW = "Image window";
 static const std::string OPENCV_WINDOW2 = "Image window2";
 Mat src, src_gray;
-Mat myHarris_dst;Mat Mc;
-Mat myShiTomasi_dst; Mat result_image,result_image2;
+Mat myHarris_dst, Mc;
+Mat myShiTomasi_dst,result_image,result_image2;
 
 std::vector<cv::Point> chess_knob_vector_;
 std::vector<cv::Point> chess_processed_points_;
@@ -39,6 +39,7 @@ std::vector<cv::Point3d> temp_vector;
 
 int thresh = 200;
 int max_thresh = 255;
+int hough_thres=150;
 
 int myShiTomasi_qualityLevel = 80;
 int myHarris_qualityLevel = 50;
@@ -117,7 +118,7 @@ public:
           return;
       }
 
-      cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );      
+      //cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );      
       //src=cv_ptr->image.clone();
 
       src = imread("src/vision/src/3.jpg", 1);
@@ -191,11 +192,15 @@ public:
           //circle(result_image2, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           ROS_INFO("she %d -> %d %d",chess_featured_points_[j].x,chess_featured_points_[j].y);
       }
-*/
+
       for( int j = 0; j < chess_knob_vector_.size(); j++ ){
           circle(src, Point(chess_knob_vector_[j].x,chess_knob_vector_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           //ROS_INFO("she %d -> %d %d",chess_knob_vector_[j].x,chess_knob_vector_[j].y);
       }
+*/
+
+/*PROCESS HERE WITH PROCESSED POINTS AND GROUNDTRUTH POINTS - MIDPOINT?REJECTION?*/
+      /*AND THEN PUBLISH THEM*/
 
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
       //cv::imshow("OPENCV_WINDOW",result_image);
