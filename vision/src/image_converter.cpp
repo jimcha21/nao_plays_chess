@@ -71,7 +71,7 @@ public:
     // Subscrive to input video feed and publish output video feed
     //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/front/image_raw", 10, &ImageConverter::imageCb, this);
     image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
-    image_pub_ = it_.advertise("/image_converter/output_video", 1);
+    //image_pub_ = it_.advertise("/image_converter/output_video", 1);
       
     whaza = nh_.advertise <vision::ChessVector>("chess_points",0);
 
@@ -144,29 +144,46 @@ public:
 
     //cv::imshow(OPENCV_WINDOW, cv_ptr->image); //the robot's source image..*/
 
-   CvPoint chessknob_point;
-   chessknob_point.x=10;
-   chessknob_point.y=10;
-  cv::circle((cv_ptr->image), chessknob_point, 10, CV_RGB(255,0,0));
+CvPoint chessknob_point;
+chessknob_point.x=10;
+chessknob_point.y=10;
+cv::circle((cv_ptr->image), chessknob_point, 10, CV_RGB(255,0,0));
 
 
-chess_point.x=1;
-chess_point.y=1;
+chess_point.x=220;
+chess_point.y=646;
 chess_vector.p_vector.push_back(chess_point);
-chess_point.x=2;
-chess_point.y=2;
+chess_point.x=185;
+chess_point.y=690;
 chess_vector.p_vector.push_back(chess_point);
-chess_point.x=3;
-chess_point.y=4;
+chess_point.x=300;
+chess_point.y=688;
 chess_vector.p_vector.push_back(chess_point);
-chess_point.x=4;
-chess_point.y=3;
+chess_point.x=318;
+chess_point.y=646;
 chess_vector.p_vector.push_back(chess_point);
-chess_point.x=5;
-chess_point.y=5;
+chess_point.x=424;
+chess_point.y=642;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=411;
+chess_point.y=688;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=727;
+chess_point.y=644;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=749;
+chess_point.y=688;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=864;
+chess_point.y=688;
+chess_vector.p_vector.push_back(chess_point);
+chess_point.x=832;
+chess_point.y=646;
 chess_vector.p_vector.push_back(chess_point);
 
-  whaza.publish(chess_vector);
+
+
+whaza.publish(chess_vector);
 chess_vector.p_vector.clear();
    // cvCircle(cv_ptr->image,chessknob_point,1, CV_RGB(0, 255,0),5,8,0);
     //cvCircle(image,cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),1,color,5,8,0);
@@ -178,7 +195,7 @@ chess_vector.p_vector.clear();
     cv::waitKey(3);
     
     // Output modified video stream
-    image_pub_.publish(cv_ptr->toImageMsg());
+   // image_pub_.publish(cv_ptr->toImageMsg());
   }
 };
 
