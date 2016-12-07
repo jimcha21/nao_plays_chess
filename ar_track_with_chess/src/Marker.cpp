@@ -81,12 +81,17 @@ CvPoint FindWightedMidPoint(int track_id,int knob_id_num, double visualize2d_x,d
 			marker_weight=1-marker_weight;
 		}	
 	}//additional case -  chess right bottom corner, gives advantage to marker 8
-	else if(knob_id_num==65 || knob_id_num==64 ||knob_id_num==72 || knob_id_num==73 || knob_id_num==74){
+	else if(knob_id_num==65 || knob_id_num==64 || knob_id_num==73 || knob_id_num==74){
 		marker_weight=0.8;
 		if(track_id==7){
 			marker_weight=1-marker_weight;
 		}
-	}
+	}/*else if(knob_id_num==72 ){ // bottor-right point
+		marker_weight=0.75;
+		if(track_id==7){
+			marker_weight=1-marker_weight;
+		}
+	}*/
 	//else weight = 0.5
 
 	//the exact midpoint

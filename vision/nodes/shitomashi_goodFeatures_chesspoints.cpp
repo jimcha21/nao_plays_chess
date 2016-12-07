@@ -30,18 +30,21 @@ static const std::string OPENCV_WINDOW = "Image window";
 static const std::string OPENCV_WINDOW2 = "Image window2";
 Mat src, src_gray;
 Mat myHarris_dst, Mc;
-Mat myShiTomasi_dst,result_image,result_image2;
+Mat myShiTomasi_dst,result_image,result_image2,shi_image,feat_image,final_image;
 
-std::vector<cv::Point> chess_knob_vector_;
+std::vector<cv::Point> chess_topic_points;
 std::vector<cv::Point> chess_processed_points_;
 std::vector<cv::Point> chess_featured_points_;
 std::vector<cv::Point3d> temp_vector;
 
+bool debug_mode=false;
+int confidence_area_pix=10;
+int maxCorners = 50; // depends on room brightness .. reduce the value if the room is too bright ..
 int thresh = 200;
 int max_thresh = 255;
 int hough_thres=150;
 
-int myShiTomasi_qualityLevel = 80;
+int myShiTomasi_qualityLevel = 40;
 int myHarris_qualityLevel = 50;
 int max_qualityLevel = 100;
 double myHarris_minVal, myHarris_maxVal;
@@ -52,6 +55,7 @@ RNG rng(12345);
 
 /// Function headers
 void filteredArray();
+bool checkifItsInsidetheSquare(Mat,Point,bool);
 void myShiTomasi_function( int, void* );
 void myHarris_function( int, void* );
 void cornerHarris_demo( int, void* );
@@ -62,12 +66,13 @@ int findMin(int po[100][3]);
 
 void chessboardVectorTopic(const vision::ChessVector& data){
   cv::Point pt;
-  chess_knob_vector_.clear();
+  chess_topic_points.clear();
   //ROS_INFO("size %d",data.p_vector.size());
+ //ROS_INFO("ta prwta %d %d ",data.p_vector[0].x,data.p_vector[0].y);
   for(int i=0;i<data.p_vector.size();i++){ //till 81..
     pt.x=data.p_vector[i].x;
     pt.y=data.p_vector[i].y;
-    chess_knob_vector_.push_back(pt);
+    chess_topic_points.push_back(pt);
   }
 }
 
@@ -85,10 +90,10 @@ public:
   {
           // Subscrive to input video feed and publish output video feed
 
-          //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
-          image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
-          chess_sub = nh_.subscribe("chess_points", 10, chessboardVectorTopic); //chessboard subscriber
-
+          chess_sub = nh_.subscribe("chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
+          image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
+          //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
+          
           //image_pub_ = it_.advertise("/image_converter/output_video", 1);
           cv::namedWindow(OPENCV_WINDOW);
   }
@@ -103,11 +108,18 @@ public:
   {
 
       cv_bridge::CvImagePtr cv_ptr;
-      ROS_INFO("received %d = 81 ?",chess_knob_vector_.size());
-      for(int i=0;i<chess_knob_vector_.size();i++)
-      { ROS_INFO("VECTOR %d %d",chess_knob_vector_[i].x,chess_knob_vector_[i].y);}
-  
-      try
+
+
+/* //testing smth   
+   int fwt=0;
+      ROS_INFO("1 %d",fwt++);
+      ROS_INFO("2 %d",fwt);
+      ROS_INFO("3 %d",++fwt);
+      ROS_INFO("4 %d",fwt);
+      fwt+=1;
+      ROS_INFO("5 %d",fwt);*/
+
+       try
       {
           //The input from the robot is encoded with RGB8.
           cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -119,17 +131,31 @@ public:
       }
 
       //cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );      
-      //src=cv_ptr->image.clone();
-
-      src = imread("src/vision/src/3.jpg", 1);
-      if(src.empty())
-      {
-        ROS_INFO("can not open the image");// << filename << endl;
-        return ;
+      
+      if(!debug_mode){
+        src=cv_ptr->image.clone();
+      }else{
+        src = imread("src/vision/src/3.jpg", 1);
+        if(src.empty())
+        {
+          ROS_INFO("can not open the image");// << filename << endl;
+          return ;
+        }
       }
 
       cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
      
+      ROS_INFO("received %d points",chess_topic_points.size());
+/*      if(chess_topic_points.size()>0){ // received the points from the topic
+      //ROS_INFO("VECTOR %d %d",chess_topic_points[0].x,chess_topic_points[0].y);
+        checkifItsInsidetheSquare(src,Point(1,2),true);
+        /*for(int i=0;i<chess_topic_points.size();i++)
+        { 
+          ROS_INFO("VECTOR %d %d",chess_topic_points[i].x,chess_topic_points[i].y);
+        }*/
+    //  }*/
+
+
       /// Set some parameters
       int blockSize = 3; int apertureSize = 3, choice=2; //1 for harris, else for shatosshi
 
@@ -171,46 +197,96 @@ public:
 
       }
 
-      best_corners(0,0,true,1); //With corner Harris enabled -
       //best_corners(0,0,false,2); 
-      
-      
-      //ROS_INFO("vrike %d",chess_featured_points_.size());
+      best_corners(0,0,true,1); //With corner Harris enabled -
+     
+      //ROS_INFO("found total %d",chess_featured_points_.size());
       //ROS_INFO("found total %d points",temp_vector.size());
 
-      //filtered array of points
       filteredArray();
+
       //ROS_INFO("reduced the amount of point to %d ",chess_processed_points_.size());
+      
+      std::vector<cv::Point> chess_final_points;
+      cv::Point pt;
+      final_image = src.clone(); 
+      int min,distance;
+      bool min_found,min_found2;
 
-/*      result_image2 = src.clone(); 
+      if(chess_topic_points.size()>0){
+        for(int i=0;i<chess_topic_points.size();i++){
+          //init point
+          pt=cv::Point(chess_topic_points[i].x,chess_topic_points[i].y);
+          min=9999;
+          min_found=false;
+          min_found2=false;
+          for(int j=0;j<chess_processed_points_.size();j++){
+              distance=sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
+              if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
+                min=sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
+                //pt=cv::Point((int)(chess_topic_points[i].x+chess_processed_points_[j].x)/2,(int)(chess_topic_points[i].y+chess_processed_points_[j].y)/2);
+                pt=cv::Point(chess_processed_points_[j].x,chess_processed_points_[j].y);
+                min_found=true;
+                //ROS_INFO("min found at %d %d",i,j);
+              }
+          }
+
+          //Merge the extra featured points that were detected along with the Shitomashi Corner detections.. 
+          for(int j=0;j<chess_featured_points_.size();j++){ //80 in total
+              distance=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
+              if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
+                min=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
+                pt=cv::Point(chess_featured_points_[j].x,chess_featured_points_[j].y);
+                min_found2=true;
+                min_found=false;
+                //ROS_INFO("MPIKE");
+              }
+          }
+
+          //chess_final_points.push_back(cv::Point(chess_topic_points[i].x,chess_topic_points[i].y));
+          chess_final_points.push_back(pt);
+          if(min_found){ //random color on points detected correctly from shitomashi function - red color on points that shitomashi function didn't found and received from the topic ..
+            circle(final_image, Point(pt.x,pt.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
+          }else if(min_found2){ //random color on points detected correctly from shitomashi function - red color on points that shitomashi function didn't found and received from the topic ..
+            circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
+          }
+          else{
+            circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,0,255 ), -1, 8, 0 );    
+          }
+           
+        }
+      }
+
+      shi_image = src.clone(); 
+
       for( int j = 0; j < chess_processed_points_.size(); j++ ){
-          //circle(result_image2, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          ROS_INFO("he %d -> %d %d",chess_processed_points_[j].x,chess_processed_points_[j].y);
+          circle(shi_image, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
+          //ROS_INFO("he %d -> %d %d",chess_processed_points_[j].x,chess_processed_points_[j].y);
       }
 
+      feat_image = src.clone(); 
       for( int j = 0; j < chess_featured_points_.size(); j++ ){
-          //circle(result_image2, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          ROS_INFO("she %d -> %d %d",chess_featured_points_[j].x,chess_featured_points_[j].y);
+          circle(feat_image, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
+          //ROS_INFO("she %d -> %d %d",chess_featured_points_[j].x,chess_featured_points_[j].y);
       }
 
-      for( int j = 0; j < chess_knob_vector_.size(); j++ ){
-          circle(src, Point(chess_knob_vector_[j].x,chess_knob_vector_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          //ROS_INFO("she %d -> %d %d",chess_knob_vector_[j].x,chess_knob_vector_[j].y);
+      for( int j = 0; j < chess_topic_points.size(); j++ ){
+          circle(src, Point(chess_topic_points[j].x,chess_topic_points[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
+          //ROS_INFO("she %d -> %d %d",chess_topic_points[j].x,chess_topic_points[j].y);
       }
-*/
 
-/*PROCESS HERE WITH PROCESSED POINTS AND GROUNDTRUTH POINTS - MIDPOINT?REJECTION?*/
-      /*AND THEN PUBLISH THEM*/
 
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-      //cv::imshow("OPENCV_WINDOW",result_image);
-      cv::imshow("OPENCV_WINDOW",src);
-      //cv::imshow("OPENCV_WINDOW2",result_image2);
+      cv::imshow("OPENCV_WINDOW",shi_image);
+    //  cv::imshow("GROUNDTRUTH",src);
+    //  cv::imshow("FEATURED",feat_image);
+      cv::imshow("FINAL",final_image);
       cv::waitKey(3);
 
       // Output modified video stream
       //image_pub_.publish(cv_ptr->toImageMsg());
 
+      chess_final_points.clear();
       chess_featured_points_.clear(); //no need to check for overflow..
       chess_processed_points_.clear();
       temp_vector.clear(); //vector3d
@@ -230,6 +306,34 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////????/////////////////////////////////////////////////////????/////////////////////////////////////////////////////????/////////////////////////////
+
+bool checkifItsInsidetheSquare(Mat kati,Point poin,bool chessboard_contour){
+  CvPoint left_bottom_p,left_top_p,right_top_p,right_bottom_p;
+  if(chessboard_contour){
+      left_bottom_p.x=chess_topic_points[0].x-10;
+      left_bottom_p.y=chess_topic_points[0].y+10;
+      left_top_p.x=chess_topic_points[8].x-10;
+      left_top_p.y=chess_topic_points[8].y-10;
+      right_bottom_p.x=chess_topic_points[72].x+20;
+      right_bottom_p.y=chess_topic_points[72].y+20;
+      right_top_p.x=chess_topic_points[80].x+10;
+      right_top_p.y=chess_topic_points[80].y-10;
+  }
+  ROS_INFO("%d %d %d %d %d %d %d",left_bottom_p.x,left_bottom_p.y,left_top_p.x,left_top_p.y,right_bottom_p.x,right_bottom_p.y,right_top_p.x,right_top_p.y);
+  line( kati, Point(chess_topic_points[0].x,chess_topic_points[0].y),Point(chess_topic_points[8].x,chess_topic_points[8].y), Scalar(0,0,255), 1, LINE_AA);
+  line( kati, Point(chess_topic_points[72].x,chess_topic_points[72].y),Point(chess_topic_points[80].x,chess_topic_points[80].y), Scalar(0,0,255), 1, LINE_AA);
+  line( kati, Point(chess_topic_points[0].x,chess_topic_points[0].y),Point(chess_topic_points[72].x,chess_topic_points[72].y), Scalar(0,0,255), 1, LINE_AA);
+  line( kati, Point(chess_topic_points[80].x,chess_topic_points[80].y),Point(chess_topic_points[8].x,chess_topic_points[8].y), Scalar(0,0,255), 1, LINE_AA);
+  
+  line( kati, left_bottom_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
+  line( kati, right_bottom_p,right_top_p, Scalar(0,0,255), 1, LINE_AA);
+  line( kati, left_bottom_p,right_bottom_p, Scalar(0,0,255), 1, LINE_AA);
+  line( kati, right_top_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
+  cv::imshow("aaa", kati);
+
+
+  return false;
+}
 
 void filteredArray() {
 
@@ -331,13 +435,17 @@ void cornerHarris_demo( int, void* )
 }
 
 void best_corners( int, void*,bool useHarrisDetector,int compar)
-{
+{        /*for(int i=0;i<chess_topic_points.size();i++)
+        { 
+          ROS_INFO("VECTOR %d %d",chess_topic_points[i].x,chess_topic_points[i].y);
+        }*/
      
     std::vector< cv::Point2f > corners;
 
     // maxCorners – The maximum number of corners to return. If there are more corners
     // than that will be found, the strongest of them will be returned
-    int maxCorners = 5; 
+    
+    //int maxCorners = 40; 
 
     // qualityLevel – Characterizes the minimal accepted quality of image corners;
     // the value of the parameter is multiplied by the by the best corner quality
@@ -378,11 +486,11 @@ void best_corners( int, void*,bool useHarrisDetector,int compar)
     //cv::namedWindow( "argv[1]", CV_WINDOW_NORMAL );
       
     if(compar==1){
-      cv::imshow( "argv[1]", src_gray );
+      cv::imshow( "with corner harris", src_gray );
     }else{
       cv::imshow( "without harrris", src_gray );
     }
-    result_image=src_gray.clone();
+    //result_image=src_gray.clone();
     //cv::waitKey(0);
 
 }
