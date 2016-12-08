@@ -54,6 +54,7 @@ RNG rng(12345);
 
 
 /// Function headers
+int *square_CornPoints(std::string str ,int num);
 void filteredArray();
 bool checkifItsInsidetheSquare(Mat,Point,bool);
 void myShiTomasi_function( int, void* );
@@ -275,9 +276,107 @@ public:
           //ROS_INFO("she %d -> %d %d",chess_topic_points[j].x,chess_topic_points[j].y);
       }
 
+      //choosing a chess square ..
+      int *sq_points;
+      sq_points=square_CornPoints("e",1);
+      //ROS_INFO("shmeia %d %d %d %d",sq_points[0],sq_points[1],sq_points[2],sq_points[3]);
+      //
+ if(chess_topic_points.size()>0){
+
+
+/*      int diste[4][2];
+      diste[0][0]=(int)sqrt(pow(chess_final_points[sq_points[0]].x,2)+pow(chess_final_points[sq_points[0]].y,2));
+      diste[0][1]=sq_points[0];
+      diste[1][0]=(int)sqrt(pow(chess_final_points[sq_points[1]].x,2)+pow(chess_final_points[sq_points[1]].y,2));
+      diste[1][1]=sq_points[1];
+      diste[2][0]=(int)sqrt(pow(chess_final_points[sq_points[2]].x,2)+pow(chess_final_points[sq_points[2]].y,2));
+      diste[2][1]=sq_points[2];
+      diste[3][0]=(int)sqrt(pow(chess_final_points[sq_points[3]].x,2)+pow(chess_final_points[sq_points[3]].y,2));
+      diste[3][1]=sq_points[3];
+      ROS_INFO("distance %d %d - %d %d - %d %d - %d %d",diste[0][1],diste[0][0],diste[1][1],diste[1][0],diste[2][1],diste[2][0],diste[3][1],diste[3][0]);
+
+      //bubblesorting the point distances
+      int swap;
+      for(intc=0;c<3;c++){
+        for(int d=0;d<4-c-1;d++){
+          if (diste[d][0] > diste[d+1][0]) // For decreasing order use <
+          {
+            swap       = diste[d][0];
+            diste[d][0]   = diste[d+1][0];
+            diste[d+1][0] = swap;
+            swap       = diste[d][1];
+            diste[d][1]   = diste[d+1][1];
+            diste[d+1][1] = swap;
+          }
+        }
+      }
+      ROS_INFO("SORTED distance %d %d - %d %d - %d %d - %d %d",diste[0][1],diste[0][0],diste[1][1],diste[1][0],diste[2][1],diste[2][0],diste[3][1],diste[3][0]);
+   */
+
+      CvPoint left_bottom_p,left_top_p,right_top_p,right_bottom_p;
+      std::vector<CvPoint> v;
+      left_bottom_p.x=chess_final_points[sq_points[0]].x;
+      left_bottom_p.y=chess_final_points[sq_points[0]].y;
+      v.push_back(left_bottom_p);
+      left_top_p.x=chess_final_points[sq_points[1]].x;
+      left_top_p.y=chess_final_points[sq_points[1]].y;
+      v.push_back(left_top_p);
+      right_top_p.x=chess_final_points[sq_points[3]].x;
+      right_top_p.y=chess_final_points[sq_points[3]].y;
+      v.push_back(right_top_p);
+      right_bottom_p.x=chess_final_points[sq_points[2]].x;
+      right_bottom_p.y=chess_final_points[sq_points[2]].y;
+      v.push_back(right_bottom_p);
+
+      //int a=(float)(right_top_p.y-left_top_p.y)/(float)(right_top_p.x-left_top_p.x);
+
+      //calculation of 4 lines' slope parameters , for line contruction.. 
+      float lamda1 =(float)(left_bottom_p.y-left_top_p.y)/(float)(left_bottom_p.x-left_top_p.x);
+      float lamda2 =(float)(right_bottom_p.y-right_top_p.y)/(float)(right_bottom_p.x-right_top_p.x);
+      float lamda3 =(float)(right_bottom_p.y-left_bottom_p.y)/(float)(right_bottom_p.x-left_bottom_p.x);
+      float lamda4 =(float)(right_top_p.y-left_top_p.y)/(float)(right_top_p.x-left_top_p.x);
+      //ROS_INFO("shmeia %f %f %f %f",lamda1,lamda2,lamda3,lamda4);
+     
+//!include pls extreme case of total 90 degree rotation-> in this situation you must change the point arrangement 
+
+      //estimation of the examination rectangle, which will be filtered by the 4 line equations below..
+      int min_x=9999,max_x=0,min_y=9999,max_y=0;
+      for(int i=0;i<v.size();i++){
+          if(v[i].x<min_x){
+            min_x=v[i].x;
+          }
+          if(v[i].y<min_y){
+            min_y=v[i].y;
+          }
+          if(v[i].x>max_x){
+            max_x=v[i].x;
+          }
+          if(v[i].y>max_y){
+            max_y=v[i].y;
+          }
+      }//ROS_INFO("max x %d max y %d min x %d min y %d",max_x,max_y,min_x,min_y);
+
+      for(int x=min_x;x<=max_x;x++){
+        for(int y=min_y;y<=max_y;y++){
+          if(/*(y>=(int)(lamda1*(x-left_bottom_p.x)+left_bottom_p.y)) &&*/ (x>=(int)(y-left_bottom_p.y+lamda1*left_bottom_p.x)/lamda1)){
+            if(/*(y<=(int)(lamda2*(x-right_bottom_p.x)+right_bottom_p.y))&&*/(x<=(int)(y-right_bottom_p.y+lamda2*right_bottom_p.x)/lamda2)){
+              if((y<=(int)(lamda3*(x-right_bottom_p.x)+right_bottom_p.y))/*&&(x>=(int)(y-right_bottom_p.y+lamda3*right_bottom_p.x)/lamda3)*/){
+                if((y>=(int)(lamda4*(x-right_top_p.x)+right_top_p.y))/*&&(x<=(int)(y-right_top_p.y+lamda4*right_top_p.x)/lamda4)*/){
+                  
+                  //THIS IS THE AREA THAT WILL BE EXAMINED
+                  final_image.at<cv::Vec3b>(y,x)[0] = 255;
+                  final_image.at<cv::Vec3b>(y,x)[1] = 255;
+                  final_image.at<cv::Vec3b>(y,x)[2] = 255;
+            
+          }}}}
+        }
+      }
+      v.clear();
+    
+}
 
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-      cv::imshow("OPENCV_WINDOW",shi_image);
+    //  cv::imshow("OPENCV_WINDOW",shi_image);
     //  cv::imshow("GROUNDTRUTH",src);
     //  cv::imshow("FEATURED",feat_image);
       cv::imshow("FINAL",final_image);
@@ -286,6 +385,7 @@ public:
       // Output modified video stream
       //image_pub_.publish(cv_ptr->toImageMsg());
 
+  
       chess_final_points.clear();
       chess_featured_points_.clear(); //no need to check for overflow..
       chess_processed_points_.clear();
@@ -306,6 +406,33 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////????/////////////////////////////////////////////////////????/////////////////////////////////////////////////////????/////////////////////////////
+
+int *square_CornPoints(std::string str ,int num){
+    static int sq_points[4];
+    int mul=0;
+    if(str.compare("a")==0){
+      mul=0;
+    }else if(str.compare("b")==0){
+      mul=1;
+    }else if(str.compare("c")==0){
+      mul=2;
+    }else if(str.compare("d")==0){
+      mul=3;
+    }else if(str.compare("e")==0){
+      mul=4;
+    }else if(str.compare("f")==0){
+      mul=5;
+    }else if(str.compare("g")==0){
+      mul=6;
+    }else if(str.compare("h")==0){
+      mul=7;
+    }
+    sq_points[0]=(num-1)+mul*9;
+    sq_points[1]=num+mul*9;
+    sq_points[2]=(num-1)+mul*9+9;
+    sq_points[3]=num+mul*9+9;
+    return sq_points;
+}
 
 bool checkifItsInsidetheSquare(Mat kati,Point poin,bool chessboard_contour){
   CvPoint left_bottom_p,left_top_p,right_top_p,right_bottom_p;
