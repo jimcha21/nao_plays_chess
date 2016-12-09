@@ -43,6 +43,7 @@ int maxCorners = 50; // depends on room brightness .. reduce the value if the ro
 int thresh = 200;
 int max_thresh = 255;
 int hough_thres=150;
+float squareDensity[8][8][3]; //0 for black, 1 for white , 2 for und
 
 int myShiTomasi_qualityLevel = 40;
 int myHarris_qualityLevel = 50;
@@ -54,7 +55,7 @@ RNG rng(12345);
 
 
 /// Function headers
-int *square_CornPoints(std::string str ,int num);
+int *square_CornPoints(/*std::string str*/int int_letter ,int num);
 void filteredArray();
 bool checkifItsInsidetheSquare(Mat,Point,bool);
 void myShiTomasi_function( int, void* );
@@ -81,6 +82,7 @@ class ImageConverter
 {
   ros::NodeHandle nh_;
   ros::Subscriber chess_sub;
+  ros::Publisher mapped_chesspoints;  
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
   image_transport::Publisher image_pub_;
@@ -92,16 +94,17 @@ public:
           // Subscrive to input video feed and publish output video feed
 
           chess_sub = nh_.subscribe("chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
+          mapped_chesspoints = nh_.advertise<vision::ChessVector>("mapped_chessboard_knob_coordinates",0);
           image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
           //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
           
           //image_pub_ = it_.advertise("/image_converter/output_video", 1);
-          cv::namedWindow(OPENCV_WINDOW);
+          cv::namedWindow("FINAL");
   }
 
   ~ImageConverter()
   {
-          cv::destroyWindow(OPENCV_WINDOW);
+          cv::destroyWindow("FINAL");
   }
 
 
@@ -109,7 +112,6 @@ public:
   {
 
       cv_bridge::CvImagePtr cv_ptr;
-
 
 /* //testing smth   
    int fwt=0;
@@ -136,7 +138,7 @@ public:
       if(!debug_mode){
         src=cv_ptr->image.clone();
       }else{
-        src = imread("src/vision/src/3.jpg", 1);
+        src = imread("src/vision/src/data/3.jpg", 1);
         if(src.empty())
         {
           ROS_INFO("can not open the image");// << filename << endl;
@@ -146,7 +148,7 @@ public:
 
       cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
      
-      ROS_INFO("received %d points",chess_topic_points.size());
+      //ROS_INFO("received %d points",chess_topic_points.size());
 /*      if(chess_topic_points.size()>0){ // received the points from the topic
       //ROS_INFO("VECTOR %d %d",chess_topic_points[0].x,chess_topic_points[0].y);
         checkifItsInsidetheSquare(src,Point(1,2),true);
@@ -258,8 +260,14 @@ public:
         }
       }
 
-      shi_image = src.clone(); 
+      // Drawing the chess points on the source frame..
 
+/*      for( int j = 0; j < chess_topic_points.size(); j++ ){
+          circle(src, Point(chess_topic_points[j].x,chess_topic_points[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
+          //ROS_INFO("she %d -> %d %d",chess_topic_points[j].x,chess_topic_points[j].y);
+      }
+
+      shi_image = src.clone(); 
       for( int j = 0; j < chess_processed_points_.size(); j++ ){
           circle(shi_image, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           //ROS_INFO("he %d -> %d %d",chess_processed_points_[j].x,chess_processed_points_[j].y);
@@ -269,19 +277,18 @@ public:
       for( int j = 0; j < chess_featured_points_.size(); j++ ){
           circle(feat_image, Point(chess_processed_points_[j].x,chess_processed_points_[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           //ROS_INFO("she %d -> %d %d",chess_featured_points_[j].x,chess_featured_points_[j].y);
-      }
+      }*/
 
-      for( int j = 0; j < chess_topic_points.size(); j++ ){
-          circle(src, Point(chess_topic_points[j].x,chess_topic_points[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          //ROS_INFO("she %d -> %d %d",chess_topic_points[j].x,chess_topic_points[j].y);
-      }
+ if(chess_topic_points.size()>5000){ 
+
+  for(int ch_line=1;ch_line<=2;ch_line++){
+      for(int ch_column=1;ch_column<=4;ch_column++){
+      //ROS_INFO("ara ta prohgoumena einai %f %f %f",squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);
 
       //choosing a chess square ..
       int *sq_points;
-      sq_points=square_CornPoints("e",1);
-      //ROS_INFO("shmeia %d %d %d %d",sq_points[0],sq_points[1],sq_points[2],sq_points[3]);
-      //
- if(chess_topic_points.size()>0){
+      sq_points=square_CornPoints(/*"a",*/ch_column,ch_line); //added decimal (int,int) square identification.. // 
+     //ROS_INFO("points %d %d %d %d",sq_points[0],sq_points[1],sq_points[2],sq_points[3]);
 
 
 /*      int diste[4][2];
@@ -356,36 +363,80 @@ public:
           }
       }//ROS_INFO("max x %d max y %d min x %d min y %d",max_x,max_y,min_x,min_y);
 
+      int areaIn_pixels=0;
+      int whites=0;
+      int blacks=0;
+      int unenti=0;
+
       for(int x=min_x;x<=max_x;x++){
         for(int y=min_y;y<=max_y;y++){
           if(/*(y>=(int)(lamda1*(x-left_bottom_p.x)+left_bottom_p.y)) &&*/ (x>=(int)(y-left_bottom_p.y+lamda1*left_bottom_p.x)/lamda1)){
             if(/*(y<=(int)(lamda2*(x-right_bottom_p.x)+right_bottom_p.y))&&*/(x<=(int)(y-right_bottom_p.y+lamda2*right_bottom_p.x)/lamda2)){
               if((y<=(int)(lamda3*(x-right_bottom_p.x)+right_bottom_p.y))/*&&(x>=(int)(y-right_bottom_p.y+lamda3*right_bottom_p.x)/lamda3)*/){
                 if((y>=(int)(lamda4*(x-right_top_p.x)+right_top_p.y))/*&&(x<=(int)(y-right_top_p.y+lamda4*right_top_p.x)/lamda4)*/){
-                  
+                  areaIn_pixels++;
                   //THIS IS THE AREA THAT WILL BE EXAMINED
-                  final_image.at<cv::Vec3b>(y,x)[0] = 255;
+                  if(final_image.at<cv::Vec3b>(y,x)[0]<=60&&final_image.at<cv::Vec3b>(y,x)[1]<=60&&final_image.at<cv::Vec3b>(y,x)[2]<=60){
+                    blacks++;
+                  }else if(final_image.at<cv::Vec3b>(y,x)[0]>=190&&final_image.at<cv::Vec3b>(y,x)[1]>=190&&final_image.at<cv::Vec3b>(y,x)[2]>=190){
+                    whites++;
+                  }else{
+                    unenti++;
+                  }
+                  /*final_image.at<cv::Vec3b>(y,x)[0] = 255;
                   final_image.at<cv::Vec3b>(y,x)[1] = 255;
-                  final_image.at<cv::Vec3b>(y,x)[2] = 255;
-            
+                  final_image.at<cv::Vec3b>(y,x)[2] = 255;*/
           }}}}
         }
+      }
+      if(areaIn_pixels!=0){
+        //ROS_INFO("EXAMINED AN AREA OF %d PIXELS -> BLACKS-> %f WHITES-> %f unenti-> %f",areaIn_pixels,(float)blacks/areaIn_pixels,(float)whites/areaIn_pixels,(float)unenti/areaIn_pixels);
+       // if(!(squareDensity[0][0][0]==0&&squareDensity[0][0][1]==0&&squareDensity[0][0][2]==0)){
+          if(abs(squareDensity[ch_line-1][ch_column-1][0]-(float)blacks/areaIn_pixels)>0.60){
+            ROS_INFO("yparxei diafora sta black! sto %d %d = %f ", ch_line, ch_column,abs(squareDensity[ch_line-1][ch_column-1][0]-(float)blacks/areaIn_pixels));
+          }
+          if(abs(squareDensity[ch_line-1][ch_column-1][1]-(float)whites/areaIn_pixels)>0.60){
+            ROS_INFO("yparxei diafora sta white! sto %d %d = %f ", ch_line, ch_column,abs(squareDensity[ch_line-1][ch_column-1][1]-(float)whites/areaIn_pixels));
+          }
+          if(abs(squareDensity[ch_line-1][ch_column-1][2]-(float)unenti/areaIn_pixels)>0.60){
+            ROS_INFO("yparxei diafora sta unid! sto %d %d = %f ", ch_line, ch_column,abs(squareDensity[ch_line-1][ch_column-1][2]-(float)unenti/areaIn_pixels));
+          }
+        //}
+        squareDensity[ch_line-1][ch_column-1][0]=(float)blacks/areaIn_pixels;
+        squareDensity[ch_line-1][ch_column-1][1]=(float)whites/areaIn_pixels;
+        squareDensity[ch_line-1][ch_column-1][2]=(float)unenti/areaIn_pixels;        
       }
       v.clear();
     
 }
+}}
 
-      //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
-    //  cv::imshow("OPENCV_WINDOW",shi_image);
-    //  cv::imshow("GROUNDTRUTH",src);
-    //  cv::imshow("FEATURED",feat_image);
+      //  cv::imshow(OPENCV_WINDOW, cv_ptr->image);
+      //  cv::imshow("OPENCV_WINDOW",shi_image);
+      //  cv::imshow("GROUNDTRUTH",src);
+      //  cv::imshow("FEATURED",feat_image);
       cv::imshow("FINAL",final_image);
       cv::waitKey(3);
+
+      //Publishers..
 
       // Output modified video stream
       //image_pub_.publish(cv_ptr->toImageMsg());
 
-  
+      // Output the corrected-mapped chesspoints to ROS env..
+      vision::ChessVector chess_vector;
+      vision::ChessPoint chess_point;
+
+      for(int i=0;i<chess_final_points.size();i++){
+        chess_point.x=chess_final_points[i].x;
+        chess_point.y=chess_final_points[i].y;
+        chess_vector.p_vector.push_back(chess_point);
+      }//total 81..
+
+      //publishing the chess 'groundtruth' coordinates..
+      mapped_chesspoints.publish(chess_vector);
+      
+      chess_vector.p_vector.clear();
       chess_final_points.clear();
       chess_featured_points_.clear(); //no need to check for overflow..
       chess_processed_points_.clear();
@@ -399,34 +450,44 @@ public:
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "image_reveiver");
+  ros::init(argc, argv, "shitomashi_with_goodFeatures_node");
   ImageConverter ic;
+  for(int i=0;i<8;i++){
+      for(int j=0;j<8;j++){
+        squareDensity[i][j][0]=0;
+        squareDensity[i][j][1]=0;
+        squareDensity[i][j][2]=0;
+      }
+  }
   ros::spin();
   return 0;
 }
 
 ////////////////////////????/////////////////////////////////////////////////////????/////////////////////////////////////////////////////????/////////////////////////////
 
-int *square_CornPoints(std::string str ,int num){
+int *square_CornPoints(/*std::string letter,*/int int_letter, int num){
     static int sq_points[4];
     int mul=0;
-    if(str.compare("a")==0){
+/*    if(letter.compare("a")==0){
       mul=0;
-    }else if(str.compare("b")==0){
+    }else if(letter.compare("b")==0){
       mul=1;
-    }else if(str.compare("c")==0){
+    }else if(letter.compare("c")==0){
       mul=2;
-    }else if(str.compare("d")==0){
+    }else if(letter.compare("d")==0){
       mul=3;
-    }else if(str.compare("e")==0){
+    }else if(letter.compare("e")==0){
       mul=4;
-    }else if(str.compare("f")==0){
+    }else if(letter.compare("f")==0){
       mul=5;
-    }else if(str.compare("g")==0){
+    }else if(letter.compare("g")==0){
       mul=6;
-    }else if(str.compare("h")==0){
+    }else if(letter.compare("h")==0){
       mul=7;
-    }
+    }*/
+
+    mul=int_letter-1;
+
     sq_points[0]=(num-1)+mul*9;
     sq_points[1]=num+mul*9;
     sq_points[2]=(num-1)+mul*9+9;
@@ -612,11 +673,11 @@ void best_corners( int, void*,bool useHarrisDetector,int compar)
 
     //cv::namedWindow( "argv[1]", CV_WINDOW_NORMAL );
       
-    if(compar==1){
+/*    if(compar==1){
       cv::imshow( "with corner harris", src_gray );
     }else{
       cv::imshow( "without harrris", src_gray );
-    }
+    }*/
     //result_image=src_gray.clone();
     //cv::waitKey(0);
 

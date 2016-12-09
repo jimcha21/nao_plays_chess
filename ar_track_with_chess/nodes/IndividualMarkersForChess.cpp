@@ -107,8 +107,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
-				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
-				cv::waitKey(3);
+				//cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
+				//cv::waitKey(3);
 			}else{
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
 			}
@@ -121,7 +121,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 				chess_vector.p_vector.push_back(chess_point);
 			}//total 81..
 
-			//publishing the chess 'groundtruth' coordinates..
+			//publishing the chess 'estimated' coordinates..
 			chessPointsPub_.publish(chess_vector);
 
 			chess_vector.p_vector.clear();

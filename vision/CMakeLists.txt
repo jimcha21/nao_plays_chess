@@ -201,6 +201,11 @@ include_directories(
 find_package( OpenCV REQUIRED )
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+add_executable(movements_detection nodes/movements_detection.cpp)
+target_link_libraries(movements_detection ${catkin_LIBRARIES})
+target_link_libraries(movements_detection ${OpenCV_LIBS} )
+add_dependencies(movements_detection ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS})
+
 add_executable(houghlines_onChess nodes/houghlines_onChess.cpp)
 target_link_libraries(houghlines_onChess ${catkin_LIBRARIES})
 target_link_libraries(houghlines_onChess ${OpenCV_LIBS} )
@@ -237,3 +242,7 @@ add_dependencies(image_converter beginner_tutorials_generate_messages_cpp)
 #add_executable(add_two_ints_client src/add_two_ints_client.cpp)
 #target_link_libraries(add_two_ints_client ${catkin_LIBRARIES})
 #add_dependencies(add_two_ints_client beginner_tutorials_gencpp)
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
