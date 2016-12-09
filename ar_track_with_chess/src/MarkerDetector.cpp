@@ -77,10 +77,10 @@ namespace alvar {
 		}
 	} 
 
-	/*	void MarkerDetectorImpl::Update_Chess2dArray(int updated_array[81][2]){
+/*	void MarkerDetectorImpl::Update_Chess2dArray(){
 		for(int i=0;i<81;i++){
-			chess_2dcoordinates[i][0]=updated_array[i][0];
-			chess_2dcoordinates[i][1]=updated_array[i][1];
+			chess_2dcoordinates[i].x=480;
+			chess_2dcoordinates[i].y=640;
 		}
 		//ROS_INFO("updated");
 	} */
@@ -152,7 +152,7 @@ namespace alvar {
 					_markers_push_back(mn);
 					blob_corners[track_i].clear(); // We don't want to handle this again...
 					if (visualize){
-						chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,0,0));
+						chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(0,255,0));
 						//mn->Update_Chess2dArray();
 						ROS_INFO("vgike kserw gw to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
 					}
@@ -178,15 +178,16 @@ namespace alvar {
                 mn->ros_orientation = orientation;
 				_markers_push_back(mn); 
 				if (visualize){
-					chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(255,255,0));
+					chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(0,0,255));
 					//mn->Update_Chess2dArray();
 					ROS_INFO("vgike kserw gw to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
 				}
 			}
-
+			
 			delete mn;
 		}
 
+		ROS_INFO("end");
 		return chess_2dcoordinates;
 	}
 

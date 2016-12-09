@@ -201,6 +201,11 @@ include_directories(
 find_package( OpenCV REQUIRED )
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+add_executable(NAO_behavior_node nodes/NAO_behavior_node.cpp)
+target_link_libraries(NAO_behavior_node ${catkin_LIBRARIES})
+target_link_libraries(NAO_behavior_node ${OpenCV_LIBS} )
+add_dependencies(NAO_behavior_node ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS})
+
 add_executable(movements_detection nodes/movements_detection.cpp)
 target_link_libraries(movements_detection ${catkin_LIBRARIES})
 target_link_libraries(movements_detection ${OpenCV_LIBS} )

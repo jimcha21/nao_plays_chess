@@ -11,8 +11,8 @@
 	<arg name="med_filt_size" default="10" />
 	<arg name="bundle_files" default="$(find ar_track_alvar)/bundles/truthTableLeg.xml $(find ar_track_alvar)/bundles/table_8_9_10.xml" /> -->
 
-	<node name="shitomashi_with_goodFeatures_node" pkg="vision" type="shitomashi_goodFeatures_chesspoints"/>
-	<node name="movement_detection_node" pkg="vision" type="movements_detection"/>
+	<node name="shitomashi_with_goodFeatures_node" pkg="vision" type="shitomashi_goodFeatures_chesspoints" respawn="false" output="screen"/>
+	<node name="movement_detection_node" pkg="vision" type="movements_detection" respawn="false" output="screen"/>
 
 <!-- 	<node name="ar_track_alvar_front" pkg="ar_track_alvar" type="individualMarkersForChess" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic_front) $(arg cam_info_topic_front) $(arg output_frame)" /> -->
 

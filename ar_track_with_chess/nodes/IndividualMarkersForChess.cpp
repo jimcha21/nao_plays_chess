@@ -107,8 +107,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
-				//cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
-				//cv::waitKey(3);
+/*				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
+				cv::waitKey(3);*/
 			}else{
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
 			}
@@ -116,14 +116,18 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             vision::ChessPoint chess_point;
 
 			for(int i=0;i<chess_knob_vector_.size();i++){
+				if(chess_knob_vector_[i].x<0 || chess_knob_vector_[i].y<0){
+					continue; // bypass the invisible-outofrange points..
+				}
 				chess_point.x=chess_knob_vector_[i].x;
 				chess_point.y=chess_knob_vector_[i].y;
 				chess_vector.p_vector.push_back(chess_point);
-			}//total 81..
+			}//total 81.. (- the outofrange points)
 
 			//publishing the chess 'estimated' coordinates..
 			chessPointsPub_.publish(chess_vector);
 
+			chess_knob_vector_.clear();
 			chess_vector.p_vector.clear();
       	    arPoseMarkers_.markers.clear();
 
