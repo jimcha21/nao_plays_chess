@@ -12,8 +12,8 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "NAO_behavior_node");
 
   ros::NodeHandle n;
-  ros::Publisher chatter_pub = n.advertise<std_msgs::Bool>("take_snaps", 1000);
-  ros::Rate loop_rate(8);
+  ros::Publisher chatter_pub = n.advertise<std_msgs::Bool>("take_snaps", 3);
+  ros::Rate loop_rate(10);
 
   int count = 0;
   while (ros::ok())
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
    
     std_msgs::Bool msg;
 
-    if((count%10==0||count%11==0||count%20==0||count%21==0) && count!=0 && count<22){
+    if((count%10==0||count%20==0) && count!=0 && count<22){
       msg.data = true;
       ROS_INFO("MOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWN");
     }else{
