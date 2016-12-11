@@ -102,13 +102,12 @@ public:
        image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);    
        enable_snap=snap.data;
        //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::movementDetector, this);    
-       ROS_INFO("IRRTHE ?");   
     }
 
     if(frame_received==2){
       cv::imshow("snap one",snap_one);
       cv::imshow("snap two",snap_two);
-   
+/*   
 
       //sub the two images
       Mat new_image3(snap_one.size(), snap_one.type());
@@ -116,13 +115,11 @@ public:
       cv::absdiff(snap_one, snap_two, new_image3);
       cv::imshow("image2-das", new_image3);
       inRange(new_image3, cv::Scalar(30,0,0), cv::Scalar(255,255,255 ), new_image3); //BGR Scalar not RGB sequence
-      cv::imshow("end", new_image3);
+      cv::imshow("end", new_image3);*/
+
+
      cv::waitKey(3);
     }
-
-
-
-   ROS_INFO("end-");
   }
 
 /////////////////////////
@@ -164,13 +161,209 @@ public:
       }else if(frame_received==1){
         frame_received++;
         snap_two=src.clone();
-      } // else..
+        Mat new_image(src.size(), src.type());
+        //new_image3 = new_image2 - new_image1;
+        cv::absdiff(snap_one, snap_two, new_image);
+        cv::imshow("difference", new_image);
+        Mat new_image3;
+        inRange(new_image, cv::Scalar(30,0,0), cv::Scalar(255,255,255 ), new_image3); //BGR Scalar not RGB sequence
+        cv::imshow("color filtered in range", new_image3);
+
+        //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
+      
+       if(chess_topic_points.size()>0){ 
+
+            //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
+                
+
+            for(int ch_line=1;ch_line<=3;ch_line++){
+                for(int ch_column=1;ch_column<=8;ch_column++){
+                //ROS_INFO("ara ta prohgoumena einai %f %f %f",squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);
+
+                //choosing a chess square ..
+                int *sq_points;
+                sq_points=square_CornPoints(/*"a",*/ch_column,ch_line); //added decimal (int,int) square identification.. // 
+               //ROS_INFO("points %d %d %d %d",sq_points[0],sq_points[1],sq_points[2],sq_points[3]);
+
+
+          /*      int diste[4][2];
+                diste[0][0]=(int)sqrt(pow(chess_topic_points[sq_points[0]].x,2)+pow(chess_topic_points[sq_points[0]].y,2));
+                diste[0][1]=sq_points[0];
+                diste[1][0]=(int)sqrt(pow(chess_topic_points[sq_points[1]].x,2)+pow(chess_topic_points[sq_points[1]].y,2));
+                diste[1][1]=sq_points[1];
+                diste[2][0]=(int)sqrt(pow(chess_topic_points[sq_points[2]].x,2)+pow(chess_topic_points[sq_points[2]].y,2));
+                diste[2][1]=sq_points[2];
+                diste[3][0]=(int)sqrt(pow(chess_topic_points[sq_points[3]].x,2)+pow(chess_topic_points[sq_points[3]].y,2));
+                diste[3][1]=sq_points[3];
+                ROS_INFO("distance %d %d - %d %d - %d %d - %d %d",diste[0][1],diste[0][0],diste[1][1],diste[1][0],diste[2][1],diste[2][0],diste[3][1],diste[3][0]);
+
+                //bubblesorting the point distances
+                int swap;
+                for(intc=0;c<3;c++){
+                  for(int d=0;d<4-c-1;d++){
+                    if (diste[d][0] > diste[d+1][0]) // For decreasing order use <
+                    {
+                      swap       = diste[d][0];
+                      diste[d][0]   = diste[d+1][0];
+                      diste[d+1][0] = swap;
+                      swap       = diste[d][1];
+                      diste[d][1]   = diste[d+1][1];
+                      diste[d+1][1] = swap;
+                    }
+                  }
+                }
+                ROS_INFO("SORTED distance %d %d - %d %d - %d %d - %d %d",diste[0][1],diste[0][0],diste[1][1],diste[1][0],diste[2][1],diste[2][0],diste[3][1],diste[3][0]);
+             */
+
+                CvPoint left_bottom_p,left_top_p,right_top_p,right_bottom_p;
+                std::vector<CvPoint> v;
+                left_bottom_p.x=chess_topic_points[sq_points[0]].x;
+                left_bottom_p.y=chess_topic_points[sq_points[0]].y;
+                v.push_back(left_bottom_p);
+                left_top_p.x=chess_topic_points[sq_points[1]].x;
+                left_top_p.y=chess_topic_points[sq_points[1]].y;
+                v.push_back(left_top_p);
+                right_top_p.x=chess_topic_points[sq_points[3]].x;
+                right_top_p.y=chess_topic_points[sq_points[3]].y;
+                v.push_back(right_top_p);
+                right_bottom_p.x=chess_topic_points[sq_points[2]].x;
+                right_bottom_p.y=chess_topic_points[sq_points[2]].y;
+                v.push_back(right_bottom_p);
+
+                //int a=(float)(right_top_p.y-left_top_p.y)/(float)(right_top_p.x-left_top_p.x);
+
+                //calculation of 4 lines' slope parameters , for line contruction.. 
+                float lamda1 =(float)(left_bottom_p.y-left_top_p.y)/(float)(left_bottom_p.x-left_top_p.x);
+                float lamda2 =(float)(right_bottom_p.y-right_top_p.y)/(float)(right_bottom_p.x-right_top_p.x);
+                float lamda3 =(float)(right_bottom_p.y-left_bottom_p.y)/(float)(right_bottom_p.x-left_bottom_p.x);
+                float lamda4 =(float)(right_top_p.y-left_top_p.y)/(float)(right_top_p.x-left_top_p.x);
+                //ROS_INFO("shmeia %f %f %f %f",lamda1,lamda2,lamda3,lamda4);
+               
+          //!include pls extreme case of total 90 degree rotation-> in this situation you must change the point arrangement 
+
+                //estimation of the examination rectangle, which will be filtered by the 4 line equations below..
+                int min_x=9999,max_x=0,min_y=9999,max_y=0;
+                for(int i=0;i<v.size();i++){
+                    if(v[i].x<min_x){
+                      min_x=v[i].x;
+                    }
+                    if(v[i].y<min_y){
+                      min_y=v[i].y;
+                    }
+                    if(v[i].x>max_x){
+                      max_x=v[i].x;
+                    }
+                    if(v[i].y>max_y){
+                      max_y=v[i].y;
+                    }
+                }//ROS_INFO("max x %d max y %d min x %d min y %d",max_x,max_y,min_x,min_y);
+
+                int areaIn_pixels=0;
+                int whites=0;
+                int blacks=0;
+                int unenti=0;
+
+                for(int x=min_x;x<=max_x;x++){
+                    if(x>new_image3.cols){
+                      continue;
+                    }
+                  for(int y=min_y;y<=max_y;y++){
+                    if(y>new_image3.rows){
+                      continue;
+                    }
+                    if(/*(y>=(int)(lamda1*(x-left_bottom_p.x)+left_bottom_p.y)) &&*/ (x>=(int)(y-left_bottom_p.y+lamda1*left_bottom_p.x)/lamda1)){
+                      if(/*(y<=(int)(lamda2*(x-right_bottom_p.x)+right_bottom_p.y))&&*/(x<=(int)(y-right_bottom_p.y+lamda2*right_bottom_p.x)/lamda2)){
+                        if((y<=(int)(lamda3*(x-right_bottom_p.x)+right_bottom_p.y))/*&&(x>=(int)(y-right_bottom_p.y+lamda3*right_bottom_p.x)/lamda3)*/){
+                          if((y>=(int)(lamda4*(x-right_top_p.x)+right_top_p.y))/*&&(x<=(int)(y-right_top_p.y+lamda4*right_top_p.x)/lamda4)*/){
+                            areaIn_pixels++;
+                            
+                            //FOR CV_32F IMAGE (COLOR IMAGE LIKE SOURCE)
+                           /*//THIS IS THE AREA THAT WILL BE EXAMINED
+                            if(new_image3.at<cv::Vec3b>(y,x)[0]<=60&&new_image3.at<cv::Vec3b>(y,x)[1]<=60&&new_image3.at<cv::Vec3b>(y,x)[2]<=60){
+                              blacks++;
+                            }else if(new_image3.at<cv::Vec3b>(y,x)[0]>=190&&new_image3.at<cv::Vec3b>(y,x)[1]>=190&&new_image3.at<cv::Vec3b>(y,x)[2]>=190){
+                              whites++;
+                            }else{
+                              unenti++;
+                            }
+
+                            //for checking area inspection..
+                          new_image3.at<cv::Vec3b>(y,x)[0] = 255;
+                            new_image3.at<cv::Vec3b>(y,x)[1] = 255;
+                            new_image3.at<cv::Vec3b>(y,x)[2] = 255;*/
+
+                            
+                            //FOR CV_8U IMAGE (BINARY LIKE IMAGE - RESULT FROM IMRANGE - NO RGB[][][] ONLY ONE VALUE PER PIXEL=0 OR 255)
+                            //THIS IS THE AREA THAT WILL BE EXAMINED
+                            if(new_image3.at<uchar>(y, x)==0){
+                              blacks++;
+                            }else if(new_image3.at<uchar>(y, x)==255){
+                              whites++;
+                            }
+
+                            //for checking area inspection..
+                            //new_image3.at<uchar>(y, x)=255;
+                    }}}}
+                  }
+                }
+                if(areaIn_pixels!=0){
+                  //ROS_INFO("EXAMINED AN AREA OF %d PIXELS -> BLACKS-> %f WHITES-> %f unenti-> %f",areaIn_pixels,(float)blacks/areaIn_pixels,(float)whites/areaIn_pixels,(float)unenti/areaIn_pixels);
+        
+
+// this for comparing two in a row snaps in specific colour choices.. new_image3 <> src
+      /*            if(frame_received>1){
+                      ROS_INFO("-----------------------------------------------");
+                      float black_diff=0;
+                      float white_diff=0;
+                      float undi_diff=0;
+                      black_diff = (float)abs(squareDensity[ch_line-1][ch_column-1][0]-(float)blacks/areaIn_pixels);
+                      white_diff = (float)abs(squareDensity[ch_line-1][ch_column-1][1]-(float)whites/areaIn_pixels);
+                      undi_diff = (float)abs(squareDensity[ch_line-1][ch_column-1][2]-(float)unenti/areaIn_pixels);
+                      ROS_INFO("b=%f w=%f u=%f",black_diff,white_diff,undi_diff);
+                      if(black_diff>0.60){
+                        ROS_INFO("yparxei diafora sta black! sto %d %d = %f ", ch_line, ch_column,abs(squareDensity[ch_line-1][ch_column-1][0]-(float)blacks/areaIn_pixels));
+                      }else{
+                        ROS_INFO("no diff in black.");
+                      }
+                      if(white_diff>0.60){
+                        ROS_INFO("yparxei diafora sta white! sto %d %d = %f ", ch_line, ch_column,abs(squareDensity[ch_line-1][ch_column-1][1]-(float)whites/areaIn_pixels));
+                      }else{
+                        ROS_INFO("no diff in white.");
+                      }
+                      if(undi_diff>0.60){
+                        ROS_INFO("yparxei diafora sta unid! sto %d %d = %f ", ch_line, ch_column,abs(squareDensity[ch_line-1][ch_column-1][2]-(float)unenti/areaIn_pixels));
+                      }else{
+                        ROS_INFO("no diff in unint.");
+                      }
+                      ROS_INFO("-----------------------------------------------");
+                  }*/
+
+                  squareDensity[ch_line-1][ch_column-1][0]=(float)blacks/areaIn_pixels;
+                  squareDensity[ch_line-1][ch_column-1][1]=(float)whites/areaIn_pixels;
+                  //squareDensity[ch_line-1][ch_column-1][2]=(float)unenti/areaIn_pixels;    
+                  ROS_INFO("%d-%d:Colour amounts %f %f %f ",ch_line,ch_column,squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);    
+                  if(squareDensity[ch_line-1][ch_column-1][0]<0.80){ 
+                    ROS_INFO("\033[1;31mDETECTED!\033[0m\n");
+                  }
+                  else if(squareDensity[ch_line-1][ch_column-1][0]<0.90){
+                    ROS_INFO("\033[1;32mSOMETHING HERE?!\033[0m\n");
+                  }
+
+                  ROS_INFO("-----------------------------------------------");
+                }
+                v.clear();
+                    cv::imshow(OPENCV_WINDOW,new_image3);
+            cv::waitKey(3);
+            }}
+          }
+
+        } // else..
 
 /*      for( int j = 0; j < chess_topic_points.size(); j++ ){
           circle(src, Point(chess_topic_points[j].x,chess_topic_points[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           //ROS_INFO("she %d -> %d %d",chess_topic_points[j].x,chess_topic_points[j].y);
       }*/
-/*      cv::imshow(OPENCV_WINDOW,src);
+/*      cv::imshow(OPENCV_WINDOW,new_image3);
       cv::waitKey(3);*/
 
       chess_topic_points.clear();
