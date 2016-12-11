@@ -13,16 +13,16 @@ int main(int argc, char **argv)
 
   ros::NodeHandle n;
   ros::Publisher chatter_pub = n.advertise<std_msgs::Bool>("take_snaps", 3);
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(5);
 
   int count = 0;
   while (ros::ok())
   { 
-    ROS_INFO("%d",count);
+    //ROS_INFO("%d",count);
    
     std_msgs::Bool msg;
 
-    if((count%10==0||count%20==0) && count!=0 && count<22){
+    if((count%15==0||count%25==0) && count!=0 && count<26){
       msg.data = true;
       ROS_INFO("MOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWN");
     }else{

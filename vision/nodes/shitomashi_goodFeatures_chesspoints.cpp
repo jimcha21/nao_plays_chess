@@ -89,15 +89,11 @@ public:
   ImageConverter()
     : it_(nh_)
   {
-          // Subscrive to input video feed and publish output video feed
-
           chess_sub = nh_.subscribe("chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
           mapped_chesspoints = nh_.advertise<vision::ChessVector>("mapped_chessboard_knob_coordinates",0);
           image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
-          //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
-          
-          //image_pub_ = it_.advertise("/image_converter/output_video", 1);
-          cv::namedWindow("FINAL");
+          //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);             
+          //image_pub_ = it_.advertise("/image_converter/output_video", 1);          
   }
 
   ~ImageConverter()
@@ -249,12 +245,12 @@ public:
 
           //chess_final_points.push_back(cv::Point(chess_topic_points[i].x,chess_topic_points[i].y));
           chess_final_points.push_back(pt);
-          if(min_found){ //random color on points detected correctly from shitomashi function - red color on points that shitomashi function didn't found and received from the topic ..
+          if(min_found){ //random color on points detected correctly from shitomashi function 
             circle(final_image, Point(pt.x,pt.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          }else if(min_found2){ //random color on points detected correctly from shitomashi function - red color on points that shitomashi function didn't found and received from the topic ..
+          }else if(min_found2){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
             circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
           }
-          else{
+          else{//red color on points that shitomashi function didn't found and received from the topic ..
             circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,0,255 ), -1, 8, 0 );    
           }
            
@@ -303,7 +299,7 @@ public:
         chess_vector.p_vector.push_back(chess_point);
       }//total 81..
 
-      //publishing the chess 'groundtruth' coordinates..
+      //publishing the chess 'corrected-mapped' estimated coordinates..
       mapped_chesspoints.publish(chess_vector);
       
       chess_vector.p_vector.clear();
