@@ -1,0 +1,46 @@
+#include <opencv2/highgui/highgui.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
+#include <iostream>
+
+using namespace cv;
+using namespace std;
+
+int hough_tranform(Mat src) {
+
+	if (src.empty())
+	{
+
+		cout << "can not open " << endl;
+		return -1;
+	}
+
+	Mat dst, cdst;
+	Canny(src, dst, 450, 200, 3);
+
+	cvtColor(dst, cdst, COLOR_GRAY2BGR);
+
+	vector<Vec4i> lines;
+	HoughLinesP(dst, lines, 1, CV_PI / 180, 70,50,40);
+
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		Vec4i l = lines[i];
+		line(cdst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, 0);
+	}
+
+	imshow("detected lines", cdst);
+
+}
+
+
+int main() {
+
+	Mat frame;
+	frame = imread("data/easy2.jpg", 1);
+	
+	hough_tranform(frame);
+
+	imshow("my_window", frame);
+	waitKey(0);
+
+}
