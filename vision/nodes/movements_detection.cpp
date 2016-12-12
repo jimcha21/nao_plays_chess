@@ -176,8 +176,8 @@ public:
             //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
                 
 
-            for(int ch_line=1;ch_line<=5;ch_line++){
-                for(int ch_column=1;ch_column<=8;ch_column++){
+            for(int ch_line=1;ch_line<=2;ch_line++){
+                for(int ch_column=1;ch_column<=3;ch_column++){
                 //ROS_INFO("ara ta prohgoumena einai %f %f %f",squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);
 
                 //choosing a chess square ..
@@ -302,7 +302,7 @@ public:
                             }
 
                             //for checking area inspection..
-                            //new_image3.at<uchar>(y, x)=255;
+                            new_image3.at<uchar>(y, x)=255;
                     }}}}
                   }
                 }
