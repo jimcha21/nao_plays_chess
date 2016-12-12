@@ -281,7 +281,7 @@ public:
       //  cv::imshow("OPENCV_WINDOW",shi_image);
       //  cv::imshow("GROUNDTRUTH",src);
       //  cv::imshow("FEATURED",feat_image);
-      //cv::imshow("FINAL",final_image);
+      cv::imshow("FINAL",final_image);
       cv::waitKey(3);
 
       //Publishers..

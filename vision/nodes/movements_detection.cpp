@@ -166,7 +166,7 @@ public:
         cv::absdiff(snap_one, snap_two, new_image);
         cv::imshow("difference", new_image);
         Mat new_image3;
-        inRange(new_image, cv::Scalar(30,0,0), cv::Scalar(255,255,255 ), new_image3); //BGR Scalar not RGB sequence
+        inRange(new_image, cv::Scalar(50,10,10), cv::Scalar(255,255,255 ), new_image3); //BGR Scalar not RGB sequence
         cv::imshow("color filtered in range", new_image3);
 
         //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
@@ -176,7 +176,7 @@ public:
             //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
                 
 
-            for(int ch_line=1;ch_line<=3;ch_line++){
+            for(int ch_line=1;ch_line<=5;ch_line++){
                 for(int ch_column=1;ch_column<=8;ch_column++){
                 //ROS_INFO("ara ta prohgoumena einai %f %f %f",squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);
 
