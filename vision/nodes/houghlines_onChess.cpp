@@ -135,7 +135,7 @@ public:
 
       line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);*/
-       imwrite( "easy_13.jpg", src );
+       //imwrite( "easy_13.jpg", src );
       cv::imshow("OPENCV_WINDOW",src);
       //cv::imshow("OPENCV_WINDOW2",src_gray);
       cv::waitKey(3);
