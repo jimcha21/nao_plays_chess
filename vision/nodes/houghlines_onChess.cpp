@@ -133,15 +133,13 @@ public:
           line( src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
       }
 
-<<<<<<< HEAD
-      line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
+      //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);*/
        //imwrite( "easy_13.jpg", src );
-=======
+
       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
       //imwrite( "easy_13.jpg", src ); //for storing the snapped images..
->>>>>>> f35bfc477400018d80a482b90563371fd3236f51
       cv::imshow("OPENCV_WINDOW",src);
       //cv::imshow("OPENCV_WINDOW2",src_gray);
       cv::waitKey(3);
