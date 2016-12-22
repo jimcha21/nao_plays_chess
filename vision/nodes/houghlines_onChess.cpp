@@ -141,8 +141,8 @@ public:
           //if(l[1]>445 && l[3]>445) //chessboard spatial limiter for hough eytheies lysh
           la=(float)(l[3]-l[1])/(l[2]-l[0]);
           ROS_INFO("la is %f",la);
-          if(abs(la-lambda_down)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar(0,0,255), 3, LINE_AA);}//Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
-          else if(abs(la-lambda_side)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar(0,255,0), 3, LINE_AA);//Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+          if(abs(la-lambda_down)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);}
+          else if(abs(la-lambda_side)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
           }
       }
 }

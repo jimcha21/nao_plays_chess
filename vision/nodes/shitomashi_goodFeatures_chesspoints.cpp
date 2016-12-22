@@ -6,8 +6,6 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
@@ -20,8 +18,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
 
+
 #include "vision/ChessVector.h"
 #include "vision/ChessPoint.h"
+#include "std_msgs/String.h"
 
 using namespace cv;
 using namespace std;
@@ -38,7 +38,7 @@ std::vector<cv::Point> chess_featured_points_;
 std::vector<cv::Point3d> temp_vector;
 
 bool debug_mode=false;
-int confidence_area_pix=5; //points' correction confidence area..
+int confidence_area_pix=10; //points' correction confidence area..
 int maxCorners = 50; // depends on room brightness .. reduce the value if the room is too bright ..
 int thresh = 200;
 int max_thresh = 255;
@@ -72,6 +72,7 @@ void chessboardVectorTopic(const vision::ChessVector& data){
   for(int i=0;i<data.p_vector.size();i++){ //till 81..
     pt.x=data.p_vector[i].x;
     pt.y=data.p_vector[i].y;
+    //pt.state
     chess_topic_points.push_back(pt);
   }
 }
@@ -210,12 +211,19 @@ public:
       std::vector<cv::Point> chess_final_points;
       cv::Point pt;
       final_image = src.clone(); 
+      vision::ChessVector chess_vector;
+      vision::ChessPoint chess_point;
+
       int min,distance;
       bool min_found_from_shi,min_found_from_featured;
 
       if(chess_topic_points.size()>0){
         for(int i=0;i<chess_topic_points.size();i++){
           //init point
+
+          chess_point.x=chess_topic_points[i].x;
+          chess_point.y=chess_topic_points[i].y;
+          chess_point.state="estimated";
           pt=cv::Point(chess_topic_points[i].x,chess_topic_points[i].y);
           min=9999;
           min_found_from_shi=false;
@@ -226,6 +234,9 @@ public:
                 min=distance;//sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
                 //pt=cv::Point((int)(chess_topic_points[i].x+chess_processed_points_[j].x)/2,(int)(chess_topic_points[i].y+chess_processed_points_[j].y)/2);
                 pt=cv::Point(chess_processed_points_[j].x,chess_processed_points_[j].y);
+                chess_point.x=chess_processed_points_[i].x;
+                chess_point.y=chess_processed_points_[i].y;
+                chess_point.state="shi_mapped";
                 min_found_from_shi=true;
                 //ROS_INFO("min found at %d %d me value %d",i,j,min);
               }
@@ -237,6 +248,9 @@ public:
               if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
                 min=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
                 pt=cv::Point(chess_featured_points_[j].x,chess_featured_points_[j].y);
+                chess_point.x=chess_featured_points_[i].x;
+                chess_point.y=chess_featured_points_[i].y;
+                chess_point.state="feat_mapped";
                 min_found_from_featured=true;
                 min_found_from_shi=false;
                 //ROS_INFO("MPIKE");
@@ -244,7 +258,8 @@ public:
           }
 
           //chess_final_points.push_back(cv::Point(chess_topic_points[i].x,chess_topic_points[i].y));
-          chess_final_points.push_back(pt);
+          chess_final_points.push_back(pt);          
+          chess_vector.p_vector.push_back(chess_point);
           if(min_found_from_shi){ //random color on points detected correctly from shitomashi function 
             circle(final_image, Point(pt.x,pt.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           }else if(min_found_from_featured){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
@@ -294,7 +309,7 @@ public:
       // Output modified video stream
       //image_pub_.publish(cv_ptr->toImageMsg());
 
-      // Output the corrected-mapped chesspoints to ROS env..
+/*      // Output the corrected-mapped chesspoints to ROS env.. DONE straight foward within the chess loop..
       vision::ChessVector chess_vector;
       vision::ChessPoint chess_point;
 
@@ -302,7 +317,7 @@ public:
         chess_point.x=chess_final_points[i].x;
         chess_point.y=chess_final_points[i].y;
         chess_vector.p_vector.push_back(chess_point);
-      }//total 81..
+      }//total 81..*/
 
       //publishing the chess 'corrected-mapped' estimated coordinates..
       mapped_chesspoints.publish(chess_vector);
