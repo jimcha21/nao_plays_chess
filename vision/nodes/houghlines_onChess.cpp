@@ -121,17 +121,17 @@ public:
      
       vector<Vec4i> lines;
       HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,50,40);
-      ROS_INFO("brike %d grammes",lines.size());
+      ROS_INFO("%d lines found",lines.size());
       //cv::imshow("m to canny",dst);
 
-      ROS_INFO("O syntelesths iytthnshs einai %d",chess_knob_vector_[0].y);
+      //ROS_INFO("O syntelesths iytthnshs einai %d",chess_knob_vector_[0].y);
 
        float la;
        float lambda_down=(float)(chess_knob_vector_[72].y-chess_knob_vector_[0].y)/(chess_knob_vector_[72].x-chess_knob_vector_[0].x);
        float lambda_side=(float)(chess_knob_vector_[76].y-chess_knob_vector_[72].y)/(chess_knob_vector_[76].x-chess_knob_vector_[72].x);
        ROS_INFO("O syntelesths iytthnshs einai %f sid:%f",lambda_down,lambda_side);
-
-      for( size_t i = 0; i < lines.size(); i++ )
+       int num_lines=0;bool end_case=true;
+      for( size_t i = 0; i < lines.size() && end_case; i++ )
       {
           Vec4i l = lines[i];
           //ROS_INFO("PAEI GIA LINE STO %d %d me %d %d",l[0], l[1], l[2], l[3]);
@@ -140,20 +140,72 @@ public:
           //ROS_INFO("syntelesths dieythhsnsh %f",   (float)(l[3]-l[1])/(float)(l[2]-l[0]) );
           //if(l[1]>445 && l[3]>445) //chessboard spatial limiter for hough eytheies lysh
           la=(float)(l[3]-l[1])/(l[2]-l[0]);
+          //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
           ROS_INFO("la is %f",la);
-          if(abs(la-lambda_down)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);}
-          else if(abs(la-lambda_side)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
-          }
+          if(abs(la-lambda_down)<=1){
+             ROS_INFO("brike mia eytheia me la=%f",la);
+            num_lines++;
+            if(num_lines==15){
+              end_case=false;
+            }
+
+            int x_mid=(int)(l[0]+l[2])/2;
+            int y_mid=(int)(l[1]+l[3])/2;
+
+            float point_distance=9999;
+            int nearest;
+            for(int j=36;j<=44;j++){
+              float temp_dist=(float)sqrt(pow((x_mid-chess_knob_vector_[j].x),2)+pow((y_mid-chess_knob_vector_[j].y),2));
+              if(temp_dist<point_distance){                  
+                point_distance= temp_dist;
+                nearest=j;
+              }
+            }
+            if(nearest==36){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,255 ), 3, LINE_AA);            
+            }else if(nearest==37){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,0 ), 3, LINE_AA);            
+            }else if(nearest==38){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);            
+            }else if(nearest==39){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,255,0 ), 3, LINE_AA);            
+            }else if(nearest==40){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,255 ), 3, LINE_AA);            
+            }else if(nearest==41){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,255 ), 3, LINE_AA);            
+            }else if(nearest==42){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,125 ), 3, LINE_AA);            
+            }else if(nearest==43){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 125,255,0 ), 3, LINE_AA);            
+            }else if(nearest==44){
+              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 125,255,100 ), 3, LINE_AA);            
+            }
+
+            line( src, Point(chess_knob_vector_[36].x,chess_knob_vector_[36].y), Point(chess_knob_vector_[37].x,chess_knob_vector_[37].y),Scalar( 255,0,0 ), 3, LINE_AA);   
+          }/*
+          else if(abs(la-lambda_side)<=1){
+            line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+          }*/
       }
+
+    ROS_INFO("%d filtered lines",num_lines);
 }
       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);*/
        //imwrite( "easy_13.jpg", src );
-
       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);
       //imwrite( "easy_13.jpg", src ); //for storing the snapped images..
-      cv::imshow("OPENCV_WINDOW",src);
+      cv::imshow(OPENCV_WINDOW,src);
       //cv::imshow("OPENCV_WINDOW2",src_gray);
       cv::waitKey(3);
 

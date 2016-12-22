@@ -224,7 +224,7 @@ public:
           chess_point.x=chess_topic_points[i].x;
           chess_point.y=chess_topic_points[i].y;
           chess_point.state="estimated";
-          pt=cv::Point(chess_topic_points[i].x,chess_topic_points[i].y);
+          //pt=cv::Point(chess_topic_points[i].x,chess_topic_points[i].y);
           min=9999;
           min_found_from_shi=false;
           min_found_from_featured=false;
@@ -233,9 +233,9 @@ public:
               if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
                 min=distance;//sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
                 //pt=cv::Point((int)(chess_topic_points[i].x+chess_processed_points_[j].x)/2,(int)(chess_topic_points[i].y+chess_processed_points_[j].y)/2);
-                pt=cv::Point(chess_processed_points_[j].x,chess_processed_points_[j].y);
-                chess_point.x=chess_processed_points_[i].x;
-                chess_point.y=chess_processed_points_[i].y;
+                //pt=cv::Point(chess_processed_points_[j].x,chess_processed_points_[j].y); //dis is r8
+                chess_point.x=chess_processed_points_[j].x;
+                chess_point.y=chess_processed_points_[j].y;
                 chess_point.state="shi_mapped";
                 min_found_from_shi=true;
                 //ROS_INFO("min found at %d %d me value %d",i,j,min);
@@ -247,9 +247,9 @@ public:
               distance=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
               if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
                 min=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
-                pt=cv::Point(chess_featured_points_[j].x,chess_featured_points_[j].y);
-                chess_point.x=chess_featured_points_[i].x;
-                chess_point.y=chess_featured_points_[i].y;
+                //pt=cv::Point(chess_featured_points_[j].x,chess_featured_points_[j].y);
+                chess_point.x=chess_featured_points_[j].x;
+                chess_point.y=chess_featured_points_[j].y;
                 chess_point.state="feat_mapped";
                 min_found_from_featured=true;
                 min_found_from_shi=false;
@@ -258,15 +258,15 @@ public:
           }
 
           //chess_final_points.push_back(cv::Point(chess_topic_points[i].x,chess_topic_points[i].y));
-          chess_final_points.push_back(pt);          
+          //chess_final_points.push_back(pt);          
           chess_vector.p_vector.push_back(chess_point);
           if(min_found_from_shi){ //random color on points detected correctly from shitomashi function 
-            circle(final_image, Point(pt.x,pt.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
+            circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           }else if(min_found_from_featured){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
-            circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
+            circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
           }
           else{//red color on points that shitomashi function didn't found and received from the topic ..
-            circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,0,255 ), -1, 8, 0 );    
+            circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( 0,0,255 ), -1, 8, 0 );    
           }
            
         }
