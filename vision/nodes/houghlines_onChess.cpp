@@ -25,10 +25,10 @@
 
 using namespace cv;
 using namespace std;
-
+RNG rng(12345);
 static const std::string OPENCV_WINDOW = "Image window";
 Mat src, src_gray, dst;
-bool debug_mode;
+bool debug_mode=false;
 
 std::vector<cv::Point> chess_knob_vector_;
 std::vector<cv::Point3d> temp_vector;
@@ -64,7 +64,7 @@ public:
 
           image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
           //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);    
-          chess_sub = nh_.subscribe("chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
+          chess_sub = nh_.subscribe("mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
           //add it
           //houghed_chesspoints = nh_.advertise<vision::ChessVector>("houghed_chessboard_knob_coordinates",0);
         
@@ -111,28 +111,41 @@ public:
         }
       }
       // HOUGH
-      Canny(src, dst, 450, 200, 3);
+
+     if(chess_knob_vector_.size()>0){// line(src, Point(chess_knob_vector_[72].x, chess_knob_vector_[72].y), Point(chess_knob_vector_[80].x, chess_knob_vector_[80].y), Scalar(0,0,255), 3, LINE_AA);
+
+      Canny(src, dst, 550, 200, 3);
       cvtColor( dst, src_gray, COLOR_GRAY2BGR ); 
       //cv::imshow("canny",dst);
       /// Set some parameters
      
       vector<Vec4i> lines;
       HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,50,40);
-      //ROS_INFO("brike %d grammes",lines.size());
+      ROS_INFO("brike %d grammes",lines.size());
+      //cv::imshow("m to canny",dst);
+
+      ROS_INFO("O syntelesths iytthnshs einai %d",chess_knob_vector_[0].y);
+
+       float la;
+       float lambda_down=(float)(chess_knob_vector_[72].y-chess_knob_vector_[0].y)/(chess_knob_vector_[72].x-chess_knob_vector_[0].x);
+       float lambda_side=(float)(chess_knob_vector_[76].y-chess_knob_vector_[72].y)/(chess_knob_vector_[76].x-chess_knob_vector_[72].x);
+       ROS_INFO("O syntelesths iytthnshs einai %f sid:%f",lambda_down,lambda_side);
 
       for( size_t i = 0; i < lines.size(); i++ )
       {
           Vec4i l = lines[i];
           //ROS_INFO("PAEI GIA LINE STO %d %d me %d %d",l[0], l[1], l[2], l[3]);
           //ROS_INFO("diafores  %d %d",   (l[3]-l[1]),(l[2]-l[0]) );
-          /*if(l[2]-l[0]==0){
-            continue;
-          }*/
+          //if(l[2]-l[0]==0) continue;
           //ROS_INFO("syntelesths dieythhsnsh %f",   (float)(l[3]-l[1])/(float)(l[2]-l[0]) );
           //if(l[1]>445 && l[3]>445) //chessboard spatial limiter for hough eytheies lysh
-          line( src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
+          la=(float)(l[3]-l[1])/(l[2]-l[0]);
+          ROS_INFO("la is %f",la);
+          if(abs(la-lambda_down)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar(0,0,255), 3, LINE_AA);}//Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+          else if(abs(la-lambda_side)<=1){line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar(0,255,0), 3, LINE_AA);//Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+          }
       }
-
+}
       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);*/
        //imwrite( "easy_13.jpg", src );

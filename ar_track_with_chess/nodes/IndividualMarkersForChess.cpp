@@ -107,8 +107,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
-/*				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
-				cv::waitKey(3);*/
+				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
+				cv::waitKey(3);
 			}else{
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
 			}
@@ -533,7 +533,7 @@ int main(int argc, char *argv[])
 	tf_broadcaster = new tf::TransformBroadcaster();
 	arMarkerPub_ = n.advertise < ar_track_alvar_msgs::AlvarMarkers > ("ar_pose_marker", 0);
 	rvizMarkerPub_ = n.advertise < visualization_msgs::Marker > ("visualization_marker", 0);
-	chessPointsPub_ = n.advertise < vision::ChessVector > ("chessboard_knob_coordinates", 0);
+	chessPointsPub_ = n.advertise < vision::ChessVector > ("chessboard_estimated_coordinates", 0);
 
 	// Prepare dynamic reconfiguration
 	dynamic_reconfigure::Server < ar_track_alvar::ParamsConfig > server;

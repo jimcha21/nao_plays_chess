@@ -154,7 +154,7 @@ namespace alvar {
 					if (visualize){
 						chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(0,255,0));
 						//mn->Update_Chess2dArray();
-						ROS_INFO("vgike kserw gw to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
+						ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
 					}
 				}
 			}
@@ -180,7 +180,7 @@ namespace alvar {
 				if (visualize){
 					chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates, CV_RGB(0,0,255));
 					//mn->Update_Chess2dArray();
-					ROS_INFO("vgike kserw gw to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
+					ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
 				}
 			}
 			

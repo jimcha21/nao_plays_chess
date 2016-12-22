@@ -175,7 +175,8 @@ ROS_INFO("eide 7");
 ROS_INFO("gia to %d",knob_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+				//DrawChessCoordinates(image, cam, CvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),  CV_RGB(0,255,0));
 				CvPoint knob_points;
 				knob_points=FindWightedMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 				
@@ -186,7 +187,7 @@ ROS_INFO("gia to %d",knob_id_num);
 				
 				ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
 				
-				DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color);
+				DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color); //change it to CV_RGB(255,0,0) for estimation debuging
 				//DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,255,0));
 				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
 				//chess_2dcoordinates[0].x=1;
@@ -225,6 +226,7 @@ ROS_INFO("gia to %d",knob_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+				//DrawChessCoordinates(image, cam, CvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),  CV_RGB(0,0,255));
 				CvPoint knob_points;
 				knob_points=FindWightedMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 				

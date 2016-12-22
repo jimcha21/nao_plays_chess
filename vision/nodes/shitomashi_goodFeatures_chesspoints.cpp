@@ -38,14 +38,14 @@ std::vector<cv::Point> chess_featured_points_;
 std::vector<cv::Point3d> temp_vector;
 
 bool debug_mode=false;
-int confidence_area_pix=10;
+int confidence_area_pix=5; //points' correction confidence area..
 int maxCorners = 50; // depends on room brightness .. reduce the value if the room is too bright ..
 int thresh = 200;
 int max_thresh = 255;
 int hough_thres=150;
 float squareDensity[8][8][3]; //0 for black, 1 for white , 2 for und
 
-int myShiTomasi_qualityLevel = 40;
+int myShiTomasi_qualityLevel = 30;
 int myHarris_qualityLevel = 50;
 int max_qualityLevel = 100;
 double myHarris_minVal, myHarris_maxVal;
@@ -89,7 +89,7 @@ public:
   ImageConverter()
     : it_(nh_)
   {
-          chess_sub = nh_.subscribe("chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
+          chess_sub = nh_.subscribe("chessboard_estimated_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
           mapped_chesspoints = nh_.advertise<vision::ChessVector>("mapped_chessboard_knob_coordinates",0);
           image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
           //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);             
@@ -211,23 +211,23 @@ public:
       cv::Point pt;
       final_image = src.clone(); 
       int min,distance;
-      bool min_found,min_found2;
+      bool min_found_from_shi,min_found_from_featured;
 
       if(chess_topic_points.size()>0){
         for(int i=0;i<chess_topic_points.size();i++){
           //init point
           pt=cv::Point(chess_topic_points[i].x,chess_topic_points[i].y);
           min=9999;
-          min_found=false;
-          min_found2=false;
+          min_found_from_shi=false;
+          min_found_from_featured=false;
           for(int j=0;j<chess_processed_points_.size();j++){
               distance=sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
               if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
-                min=sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
+                min=distance;//sqrt(pow((chess_topic_points[i].x-chess_processed_points_[j].x),2)+pow((chess_topic_points[i].y-chess_processed_points_[j].y),2));
                 //pt=cv::Point((int)(chess_topic_points[i].x+chess_processed_points_[j].x)/2,(int)(chess_topic_points[i].y+chess_processed_points_[j].y)/2);
                 pt=cv::Point(chess_processed_points_[j].x,chess_processed_points_[j].y);
-                min_found=true;
-                //ROS_INFO("min found at %d %d",i,j);
+                min_found_from_shi=true;
+                //ROS_INFO("min found at %d %d me value %d",i,j,min);
               }
           }
 
@@ -237,17 +237,17 @@ public:
               if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
                 min=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
                 pt=cv::Point(chess_featured_points_[j].x,chess_featured_points_[j].y);
-                min_found2=true;
-                min_found=false;
+                min_found_from_featured=true;
+                min_found_from_shi=false;
                 //ROS_INFO("MPIKE");
               }
           }
 
           //chess_final_points.push_back(cv::Point(chess_topic_points[i].x,chess_topic_points[i].y));
           chess_final_points.push_back(pt);
-          if(min_found){ //random color on points detected correctly from shitomashi function 
+          if(min_found_from_shi){ //random color on points detected correctly from shitomashi function 
             circle(final_image, Point(pt.x,pt.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          }else if(min_found2){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
+          }else if(min_found_from_featured){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
             circle(final_image, Point(pt.x,pt.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
           }
           else{//red color on points that shitomashi function didn't found and received from the topic ..
@@ -281,6 +281,11 @@ public:
       //  cv::imshow("OPENCV_WINDOW",shi_image);
       //  cv::imshow("GROUNDTRUTH",src);
       //  cv::imshow("FEATURED",feat_image);
+
+      //line( final_image, Point(chess_final_points[0].x, chess_final_points[0].y), Point(chess_final_points[72].x, chess_final_points[72].y),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+       
+
+
       cv::imshow("FINAL",final_image);
       cv::waitKey(3);
 
