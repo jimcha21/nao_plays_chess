@@ -122,7 +122,7 @@ public:
      
       vector<Vec4i> lines;
       HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,100/*(int)sqrt(pow((chess_knob_vector_[0].x-chess_knob_vector_[72].x),2)+pow((chess_knob_vector_[0].y-chess_knob_vector_[72].y),2))-80*/,40);
-      //ROS_INFO("%d lines found",lines.size());
+      ROS_INFO("%d lines found",lines.size());
       //cv::imshow("m to canny",dst);
 
       float chess_vertical_slopes[9]={};
@@ -194,10 +194,46 @@ public:
           //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
           //line( src, Point(chess_knob_vector_[54].x,chess_knob_vector_[54].y), Point(chess_knob_vector_[55].x,chess_knob_vector_[55].y),Scalar( 255,0,0 ), 3, LINE_AA);   
           //ROS_INFO("la is %f lines %d",la,lines.size());
-       
-          if(abs(chess_vertical_slopes[1]-la)<=0.2){
+          
+          float loves[9][2]={};
+          float love=abs(chess_vertical_slopes[0]-chess_vertical_slopes[1]);
+          float love2=abs(chess_vertical_slopes[1]-chess_vertical_slopes[2]);
+
+          for(int j=0;j<8;j++){
+            float love=abs(chess_vertical_slopes[j]-chess_vertical_slopes[j+1]);
+            if(chess_vertical_slopes[j]>chess_vertical_slopes[j+1]){
+              loves[j][1]=chess_vertical_slopes[j]-love*0.25;
+              loves[j+1][0]=chess_vertical_slopes[j+1]+love*0.25;
+            }else{
+              loves[j][1]=chess_vertical_slopes[j]+love*0.25;
+              loves[j+1][0]=chess_vertical_slopes[j+1]-love*0.25;
+            }
+
+            //side limits
+            if(j==0){
+              loves[j][0]=chess_vertical_slopes[j];
+            }else if(j==7){
+              loves[j+1][1]=chess_vertical_slopes[j];
+            }
+          }
+
+/*          if(chess_vertical_slopes[0]>chess_vertical_slopes[1]){
+            ROS_INFO("elegxei sto diastima tous %f me perithorio panw %f kai katw %f",love,chess_vertical_slopes[0]-love*0.25,chess_vertical_slopes[1]+love*0.25);
+
+          }else{
+            ROS_INFO("elegxei sto diastima tous %f me perithorio panw %f kai katw %f",love,chess_vertical_slopes[1]+love*0.25,chess_vertical_slopes[0]-love*0.25);
+          }*/
+
+
+          ROS_INFO("elegxw ta perithoria %f %f",loves[2][0],loves[2][1]);
+          if(loves[2][0]>loves[2][1]){
+
+          if(la<=loves[2][0]&&la>=loves[2][1]){
             line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
           }
+}else{          if(la>=loves[2][0]&&la<=loves[2][1]){
+            line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+          }}
 
           if(abs(la-lambda_down)<=5){
             // ROS_INFO("line with coord %d %d %d %d",l[0],l[2],l[1],l[3]);
