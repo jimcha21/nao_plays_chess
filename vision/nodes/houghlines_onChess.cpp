@@ -121,32 +121,61 @@ public:
       /// Set some parameters
      
       vector<Vec4i> lines;
-      HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,(int)sqrt(pow((chess_knob_vector_[0].x-chess_knob_vector_[72].x),2)+pow((chess_knob_vector_[0].y-chess_knob_vector_[72].y),2))-80,40);
+      HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,100/*(int)sqrt(pow((chess_knob_vector_[0].x-chess_knob_vector_[72].x),2)+pow((chess_knob_vector_[0].y-chess_knob_vector_[72].y),2))-80*/,40);
       //ROS_INFO("%d lines found",lines.size());
       //cv::imshow("m to canny",dst);
-
-      //ROS_INFO("O syntelesths iytthnshs einai %d",chess_knob_vector_[0].y);
-
 
       float chess_vertical_slopes[9]={};
       int column=0;
       for(int j=0;j<9;j++){        
         int start=0+column,end=8+column;
-        for(int p=0+column;p<9+column;p++){
-          ROS_INFO("p=%d",p);
-          if(chess_knob_vector_[p].state.compare("feat_mapped")==0||chess_knob_vector_[p].state.compare("shi_mapped")==0) ROS_INFO("BRIKE STHN %d grammh to %d hehe",linee,p);
-        }
-        line( src, Point(chess_knob_vector_[start].x,chess_knob_vector_[start].y), Point(chess_knob_vector_[end].x,chess_knob_vector_[end].y),Scalar( 255,0,0 ), 3, LINE_AA); 
-        ROS_INFO("termatise ");
-       // ROS_INFO("line me %d",line);
+        bool logic=false;
+
+        //finding the (ideal-corrected) vertical lines, to extract their slopes..
+        int p=0+column;
+        bool proceed=false;
+        do{
+            //ROS_INFO("p=%d",p);
+            if(!logic){
+              if(chess_knob_vector_[p].state.compare("estimated")==0){
+/*                if(p==9+column){
+                  start=0+column;
+                  proceed=false;                //CRASHING FOR SOME REASON?!@
+                  end=8+column;
+                }else{*/
+                   proceed=true; //this is in case there is/are estimated points in the start of the examination, and we procceed to find the first "corrected one" to initialize the first line point
+              /*  }               */
+              }else{
+                start=p;
+                logic=true;
+                proceed=false;
+              }
+            }else{
+              end=p;
+            }
+            p++;
+        }while((chess_knob_vector_[p].state.compare("estimated")!=0 || proceed) && p<9+column);
+
+        //print line..
+        //line( src, Point(chess_knob_vector_[start].x,chess_knob_vector_[start].y), Point(chess_knob_vector_[end].x,chess_knob_vector_[end].y),Scalar( 255,0,0 ), 3, LINE_AA); 
+        ROS_INFO("AFairw ta %d %d",chess_knob_vector_[end].x,chess_knob_vector_[start].x);
+        chess_vertical_slopes[j]=(float)(chess_knob_vector_[end].y-chess_knob_vector_[start].y)/(chess_knob_vector_[end].x-chess_knob_vector_[start].x);
         column=column+9;
       }
-
+        ROS_INFO("h %d exei %f",1,chess_vertical_slopes[0]);
+        ROS_INFO("h %d exei %f",2,chess_vertical_slopes[1]);
+        ROS_INFO("h %d exei %f",3,chess_vertical_slopes[2]);
+        ROS_INFO("h %d exei %f",4,chess_vertical_slopes[3]);
+        ROS_INFO("h %d exei %f",5,chess_vertical_slopes[4]);
+        ROS_INFO("h %d exei %f",6,chess_vertical_slopes[5]);
+        ROS_INFO("h %d exei %f",7,chess_vertical_slopes[6]);
+        ROS_INFO("h %d exei %f",8,chess_vertical_slopes[7]);
+        ROS_INFO("h %d exei %f",9,chess_vertical_slopes[8]);
        float la;
        float lambda_down=(float)(chess_knob_vector_[72].y-chess_knob_vector_[0].y)/(chess_knob_vector_[72].x-chess_knob_vector_[0].x);
-       float opa=(float)(chess_knob_vector_[73].y-chess_knob_vector_[1].y)/(chess_knob_vector_[73].x-chess_knob_vector_[1].x);
-        float opa1=(float)(chess_knob_vector_[74].y-chess_knob_vector_[2].y)/(chess_knob_vector_[74].x-chess_knob_vector_[2].x);
-         float opa2=(float)(chess_knob_vector_[75].y-chess_knob_vector_[3].y)/(chess_knob_vector_[75].x-chess_knob_vector_[3].x);
+       //float opa=(float)(chess_knob_vector_[73].y-chess_knob_vector_[1].y)/(chess_knob_vector_[73].x-chess_knob_vector_[1].x);
+       //float opa1=(float)(chess_knob_vector_[74].y-chess_knob_vector_[2].y)/(chess_knob_vector_[74].x-chess_knob_vector_[2].x);
+       //float opa2=(float)(chess_knob_vector_[75].y-chess_knob_vector_[3].y)/(chess_knob_vector_[75].x-chess_knob_vector_[3].x);
        //ROS_INFO("O SYNTELESTHS EINAI %f %f %f %f",lambda_down,opa,opa1,opa2);
        float lambda_side=(float)(chess_knob_vector_[76].y-chess_knob_vector_[72].y)/(chess_knob_vector_[76].x-chess_knob_vector_[72].x);
        //ROS_INFO("O syntelesths iytthnshs einai %f sid:%f",lambda_down,lambda_side);
@@ -163,8 +192,12 @@ public:
           //if(l[1]>445 && l[3]>445) //chessboard spatial limiter for hough eytheies lysh
           la=(float)(l[3]-l[1])/(l[2]-l[0]);
           //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
-          line( src, Point(chess_knob_vector_[54].x,chess_knob_vector_[54].y), Point(chess_knob_vector_[55].x,chess_knob_vector_[55].y),Scalar( 255,0,0 ), 3, LINE_AA);   
-          //ROS_INFO("la is %f",la);
+          //line( src, Point(chess_knob_vector_[54].x,chess_knob_vector_[54].y), Point(chess_knob_vector_[55].x,chess_knob_vector_[55].y),Scalar( 255,0,0 ), 3, LINE_AA);   
+          //ROS_INFO("la is %f lines %d",la,lines.size());
+       
+          if(abs(chess_vertical_slopes[1]-la)<=0.2){
+            line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+          }
 
           if(abs(la-lambda_down)<=5){
             // ROS_INFO("line with coord %d %d %d %d",l[0],l[2],l[1],l[3]);
