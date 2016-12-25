@@ -34,6 +34,7 @@ std::vector<vision::ChessPoint> chess_knob_vector_;
 std::vector<cv::Point3d> temp_vector;
 
 int hough_thres=20;
+float vert_slope_threshold=0.25;
 
 //******************************************************************************************
 
@@ -156,7 +157,7 @@ if(chess_knob_vector_.size()==81){
               end=p;
             }
             p++;
-        }while((chess_knob_vector_[p].state.compare("estimated")!=0 || proceed) && p<9+column);
+        }while((chess_knob_vector_[p].state.compare("estimated")!=0 || proceed) && p<9+column && p<81/*!!?!?!see that*/);
         //ROS_INFO("paei gia to allo");
         //print line..
         //line( src, Point(chess_knob_vector_[start].x,chess_knob_vector_[start].y), Point(chess_knob_vector_[end].x,chess_knob_vector_[end].y),Scalar( 255,0,0 ), 3, LINE_AA); 
@@ -165,15 +166,60 @@ if(chess_knob_vector_.size()==81){
         column=column+9;
       }
 
-        ROS_INFO("h %d exei %f",1,chess_vertical_slopes[0]);
-        ROS_INFO("h %d exei %f",2,chess_vertical_slopes[1]);
-        ROS_INFO("h %d exei %f",3,chess_vertical_slopes[2]);
-        ROS_INFO("h %d exei %f",4,chess_vertical_slopes[3]);
-        ROS_INFO("h %d exei %f",5,chess_vertical_slopes[4]);
-        ROS_INFO("h %d exei %f",6,chess_vertical_slopes[5]);
-        ROS_INFO("h %d exei %f",7,chess_vertical_slopes[6]);
-        ROS_INFO("h %d exei %f",8,chess_vertical_slopes[7]);
-        ROS_INFO("h %d exei %f",9,chess_vertical_slopes[8]);
+        float loves[9][2]={};
+        float love=abs(chess_vertical_slopes[0]-chess_vertical_slopes[1]);
+        float love2=abs(chess_vertical_slopes[1]-chess_vertical_slopes[2]);
+
+        for(int j=0;j<9;j++){
+
+          float love=abs(chess_vertical_slopes[j]-chess_vertical_slopes[j+1]);
+          float temp_thr=vert_slope_threshold;
+          if(love>10){
+            vert_slope_threshold=0.05;
+          }
+          if(chess_vertical_slopes[j]<0 && chess_vertical_slopes[j+1]<0){
+            if(chess_vertical_slopes[j]>chess_vertical_slopes[j+1]){
+              loves[j][1]=chess_vertical_slopes[j]-love*vert_slope_threshold;
+              loves[j+1][0]=chess_vertical_slopes[j+1]+love*vert_slope_threshold;
+            }else{
+              loves[j][1]=chess_vertical_slopes[j]+love*vert_slope_threshold;
+              loves[j+1][0]=chess_vertical_slopes[j+1]-love*vert_slope_threshold;
+            }
+          }else if(chess_vertical_slopes[j]>0 && chess_vertical_slopes[j+1]>0){
+            if(chess_vertical_slopes[j]>chess_vertical_slopes[j+1]){
+              loves[j][1]=chess_vertical_slopes[j]+love*vert_slope_threshold;
+              loves[j+1][0]=chess_vertical_slopes[j+1]-love*vert_slope_threshold;
+            }else{
+              loves[j][1]=chess_vertical_slopes[j]-love*vert_slope_threshold;
+              loves[j+1][0]=chess_vertical_slopes[j+1]+love*vert_slope_threshold;
+            }
+          }else if(chess_vertical_slopes[j]<0 && chess_vertical_slopes[j+1]>0){
+            love=abs(chess_vertical_slopes[j])+abs(chess_vertical_slopes[j+1]);
+            if(love>10){
+              vert_slope_threshold=0.05;
+            }
+            loves[j][1]=chess_vertical_slopes[j]-love*vert_slope_threshold;
+            loves[j+1][0]=chess_vertical_slopes[j+1]-love*vert_slope_threshold;
+            
+          }else if(chess_vertical_slopes[j]>0 && chess_vertical_slopes[j+1]<0){/*
+            love=abs(chess_vertical_slopes[j])+abs(chess_vertical_slopes[j+1]);
+            loves[j][1]=chess_vertical_slopes[j]+love*vert_slope_threshold;
+            loves[j+1][0]=chess_vertical_slopes[j+1]-love*vert_slope_threshold;*/
+          }//else 0 slope FLAG~
+          //side limits
+
+          vert_slope_threshold=temp_thr;
+          if(j==0){
+            loves[j][0]=chess_vertical_slopes[j];
+          }else if(j==8){
+            loves[j][1]=chess_vertical_slopes[j];
+          }
+        }
+
+         for(int j=0;j<9;j++){
+          ROS_INFO("slope of %d is %f and limits are %f %f",j+1,chess_vertical_slopes[j],loves[j][0],loves[j][1]);
+         }
+
        float la;
        float lambda_down=(float)(chess_knob_vector_[72].y-chess_knob_vector_[0].y)/(chess_knob_vector_[72].x-chess_knob_vector_[0].x);
        //float opa=(float)(chess_knob_vector_[73].y-chess_knob_vector_[1].y)/(chess_knob_vector_[73].x-chess_knob_vector_[1].x);
@@ -198,33 +244,11 @@ if(chess_knob_vector_.size()==81){
           //line( src, Point(chess_knob_vector_[54].x,chess_knob_vector_[54].y), Point(chess_knob_vector_[55].x,chess_knob_vector_[55].y),Scalar( 255,0,0 ), 3, LINE_AA);   
           //ROS_INFO("la is %f lines %d",la,lines.size());
           
-          float loves[9][2]={};
-          float love=abs(chess_vertical_slopes[0]-chess_vertical_slopes[1]);
-          float love2=abs(chess_vertical_slopes[1]-chess_vertical_slopes[2]);
-
-          for(int j=0;j<8;j++){
-            float love=abs(chess_vertical_slopes[j]-chess_vertical_slopes[j+1]);
-            if(chess_vertical_slopes[j]>chess_vertical_slopes[j+1]){
-              loves[j][1]=chess_vertical_slopes[j]-love*0.25;
-              loves[j+1][0]=chess_vertical_slopes[j+1]+love*0.25;
-            }else{
-              loves[j][1]=chess_vertical_slopes[j]+love*0.25;
-              loves[j+1][0]=chess_vertical_slopes[j+1]-love*0.25;
-            }
-
-            //side limits
-            if(j==0){
-              loves[j][0]=chess_vertical_slopes[j];
-            }else if(j==7){
-              loves[j+1][1]=chess_vertical_slopes[j];
-            }
-          }
-
 /*          if(chess_vertical_slopes[0]>chess_vertical_slopes[1]){
-            ROS_INFO("elegxei sto diastima tous %f me perithorio panw %f kai katw %f",love,chess_vertical_slopes[0]-love*0.25,chess_vertical_slopes[1]+love*0.25);
+            ROS_INFO("elegxei sto diastima tous %f me perithorio panw %f kai katw %f",love,chess_vertical_slopes[0]-love*vert_slope_threshold,chess_vertical_slopes[1]+love*vert_slope_threshold);
 
           }else{
-            ROS_INFO("elegxei sto diastima tous %f me perithorio panw %f kai katw %f",love,chess_vertical_slopes[1]+love*0.25,chess_vertical_slopes[0]-love*0.25);
+            ROS_INFO("elegxei sto diastima tous %f me perithorio panw %f kai katw %f",love,chess_vertical_slopes[1]+love*vert_slope_threshold,chess_vertical_slopes[0]-love*vert_slope_threshold);
           }*/
 
 
