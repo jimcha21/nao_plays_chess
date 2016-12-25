@@ -33,6 +33,8 @@ bool debug_mode=false;
 std::vector<vision::ChessPoint> chess_knob_vector_;
 std::vector<cv::Point3d> temp_vector;
 
+float vertis_la,horis_la;
+int vertis_x,vertis_y,horis_x,horis_y;
 int hough_thres=20;
 float vert_slope_threshold=0.25;
 
@@ -157,7 +159,7 @@ if(chess_knob_vector_.size()==81){
               end=p;
             }
             p++;
-        }while((chess_knob_vector_[p].state.compare("estimated")!=0 || proceed) && p<9+column && p<81/*!!?!?!see that*/);
+        }while((chess_knob_vector_[p].state.compare("estimated")!=0 || proceed) && p<9+column && p<80/*!!?!?!see that*/);
         //ROS_INFO("paei gia to allo");
         //print line..
         //line( src, Point(chess_knob_vector_[start].x,chess_knob_vector_[start].y), Point(chess_knob_vector_[end].x,chess_knob_vector_[end].y),Scalar( 255,0,0 ), 3, LINE_AA); 
@@ -253,7 +255,7 @@ if(chess_knob_vector_.size()==81){
 
 
           //ROS_INFO("elegxw ta perithoria %f %f",loves[2][0],loves[2][1]);
-          if(loves[2][0]>loves[2][1]){
+/*         if(loves[2][0]>loves[2][1]){
             if(la<=loves[2][0]&&la>=loves[2][1]){
               line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,255 ), 3, LINE_AA);
             }
@@ -285,16 +287,79 @@ if(chess_knob_vector_.size()==81){
 
           if(loves[4][0]>loves[4][1]){
             if(la<=loves[4][0]&&la>=loves[4][1]){
-              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);
+              //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);
+              vertis_x=l[0];
+              vertis_y=l[1];
+              vertis_la=la;  
             }
           }else{
             if(la>=loves[4][0]&&la<=loves[4][1]){
-              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);
+              //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);
+              vertis_x=l[0];
+              vertis_y=l[1];
+              vertis_la=la;  
+            }
+          }
+
+          if(loves[5][0]>loves[5][1]){
+            if(la<=loves[5][0]&&la>=loves[5][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,255,0 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[5][0]&&la<=loves[5][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,255,0 ), 3, LINE_AA);
+            }
+          }
+
+          if(loves[6][0]>loves[6][1]){
+            if(la<=loves[6][0]&&la>=loves[6][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,255,255 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[6][0]&&la<=loves[6][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,255,255), 3, LINE_AA);
+            }
+          }
+
+          if(loves[7][0]>loves[7][1]){
+            if(la<=loves[7][0]&&la>=loves[7][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 125,0,0 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[7][0]&&la<=loves[7][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 125,0,0 ), 3, LINE_AA);
+            }
+          }
+
+          if(loves[8][0]>loves[8][1]){
+            if(la<=loves[8][0]&&la>=loves[8][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,125,0 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[8][0]&&la<=loves[8][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,125,0  ), 3, LINE_AA);
+            }
+          }*/
+
+          if(loves[0][0]>loves[0][1]){
+            if(la<=loves[0][0]&&la>=loves[0][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,0 ), 3, LINE_AA);
+                            vertis_x=l[0];
+              vertis_y=l[1];
+              vertis_la=la;  
+            }
+          }else{
+            if(la>=loves[0][0]&&la<=loves[0][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,0  ), 3, LINE_AA);
+                            vertis_x=l[0];
+              vertis_y=l[1];
+              vertis_la=la;  
             }
           }
 
 
-          if(abs(la-lambda_down)<=5){
+
+          if((abs(la-lambda_down)<=5)&&((la>=0&&lambda_down>=0)||(la<=0&&lambda_down<=0))){
             // ROS_INFO("line with coord %d %d %d %d",l[0],l[2],l[1],l[3]);
             num_lines++;
             if(num_lines==10){
@@ -320,8 +385,13 @@ if(chess_knob_vector_.size()==81){
               }
 
             }
+
+
+
+
+
             //ROS_INFO("nearest is %d",nearest);
-            /*if(nearest==36){
+       /*     if(nearest==36){
               //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
               line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
             
@@ -343,15 +413,32 @@ if(chess_knob_vector_.size()==81){
               line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,255,0 ), 3, LINE_AA);            
             }else if(nearest==40){
               //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
-                            line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
-            
-              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,255 ), 3, LINE_AA);            
-            }else if(nearest==41){
-              //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
-                            line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+              //line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+
+//              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,255 ), 3, LINE_AA);
+              horis_x=l[0];
+              horis_y=l[1];
+              horis_la=la;    
+                    //vertis_la is the λ' (line 2)
+      int x_value=(int)( (1/(vertis_la-horis_la)* (-horis_la*horis_x+horis_y+vertis_la*vertis_x-vertis_y)));
+      int y_value=(int)( (1/(vertis_la-horis_la)* (-vertis_la*horis_la*horis_x + vertis_la*horis_y + horis_la*vertis_la*vertis_x - horis_la*vertis_y))); 
+      ROS_INFO("VRIKE SHMEIEO? %d %d",x_value,y_value);
+      circle(src, Point(x_value,y_value), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );           
+            }else */if(nearest==41){
+              line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+                            //line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
             
               line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,255 ), 3, LINE_AA);            
-            }else if(nearest==42){
+              //              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,255 ), 3, LINE_AA);
+              horis_x=l[0];
+              horis_y=l[1];
+              horis_la=la;    
+                    //vertis_la is the λ' (line 2)
+      int x_value=(int)( (1/(vertis_la-horis_la)* (-horis_la*horis_x+horis_y+vertis_la*vertis_x-vertis_y)));
+      int y_value=(int)( (1/(vertis_la-horis_la)* (-vertis_la*horis_la*horis_x + vertis_la*horis_y + horis_la*vertis_la*vertis_x - horis_la*vertis_y))); 
+      ROS_INFO("VRIKE SHMEIEO? %d %d",x_value,y_value);
+      circle(src, Point(x_value,y_value), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );      
+            }/*else if(nearest==42){
               //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
                           line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
             
@@ -378,7 +465,9 @@ if(chess_knob_vector_.size()==81){
     //ROS_INFO("%d filtered lines",num_lines);
 }
 }
-      //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
+
+      //ROS_INFO("the result is %f",(1/(hor)))
+       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);*/
        //imwrite( "easy_13.jpg", src );
       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
