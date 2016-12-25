@@ -87,7 +87,7 @@ public:
 
 /*     for(int i=0;i<chess_knob_vector_.size();i++)
       { ROS_INFO("VECTOR %d %d",chess_knob_vector_[i].x,chess_knob_vector_[i].y);}*/
-  
+  ROS_INFO("PHRE %d",chess_knob_vector_.size());
       try
       {
           //The input from the robot is encoded with RGB8.
@@ -127,6 +127,8 @@ public:
 
       float chess_vertical_slopes[9]={};
       int column=0;
+
+if(chess_knob_vector_.size()==81){
       for(int j=0;j<9;j++){        
         int start=0+column,end=8+column;
         bool logic=false;
@@ -135,7 +137,7 @@ public:
         int p=0+column;
         bool proceed=false;
         do{
-            //ROS_INFO("p=%d",p);
+            ROS_INFO("p=%d kai to chess=%d",p,chess_knob_vector_[p].x);
             if(!logic){
               if(chess_knob_vector_[p].state.compare("estimated")==0){
 /*                if(p==9+column){
@@ -155,13 +157,14 @@ public:
             }
             p++;
         }while((chess_knob_vector_[p].state.compare("estimated")!=0 || proceed) && p<9+column);
-
+        //ROS_INFO("paei gia to allo");
         //print line..
         //line( src, Point(chess_knob_vector_[start].x,chess_knob_vector_[start].y), Point(chess_knob_vector_[end].x,chess_knob_vector_[end].y),Scalar( 255,0,0 ), 3, LINE_AA); 
-        ROS_INFO("AFairw ta %d %d",chess_knob_vector_[end].x,chess_knob_vector_[start].x);
+        //ROS_INFO("AFairw ta %d %d",chess_knob_vector_[end].x,chess_knob_vector_[start].x);
         chess_vertical_slopes[j]=(float)(chess_knob_vector_[end].y-chess_knob_vector_[start].y)/(chess_knob_vector_[end].x-chess_knob_vector_[start].x);
         column=column+9;
       }
+
         ROS_INFO("h %d exei %f",1,chess_vertical_slopes[0]);
         ROS_INFO("h %d exei %f",2,chess_vertical_slopes[1]);
         ROS_INFO("h %d exei %f",3,chess_vertical_slopes[2]);
@@ -225,15 +228,47 @@ public:
           }*/
 
 
-          ROS_INFO("elegxw ta perithoria %f %f",loves[2][0],loves[2][1]);
+          //ROS_INFO("elegxw ta perithoria %f %f",loves[2][0],loves[2][1]);
           if(loves[2][0]>loves[2][1]){
-
-          if(la<=loves[2][0]&&la>=loves[2][1]){
-            line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
+            if(la<=loves[2][0]&&la>=loves[2][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,255 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[2][0]&&la<=loves[2][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,255 ), 3, LINE_AA);
+            }
           }
-}else{          if(la>=loves[2][0]&&la<=loves[2][1]){
-            line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), 3, LINE_AA);
-          }}
+
+          if(loves[3][0]>loves[3][1]){
+            if(la<=loves[3][0]&&la>=loves[3][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,0 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[3][0]&&la<=loves[3][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,255,0 ), 3, LINE_AA);
+            }
+          }
+
+          if(loves[1][0]>loves[1][1]){
+            if(la<=loves[1][0]&&la>=loves[1][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,255 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[1][0]&&la<=loves[1][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,255 ), 3, LINE_AA);
+            }
+          }
+
+          if(loves[4][0]>loves[4][1]){
+            if(la<=loves[4][0]&&la>=loves[4][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);
+            }
+          }else{
+            if(la>=loves[4][0]&&la<=loves[4][1]){
+              line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,0 ), 3, LINE_AA);
+            }
+          }
+
 
           if(abs(la-lambda_down)<=5){
             // ROS_INFO("line with coord %d %d %d %d",l[0],l[2],l[1],l[3]);
@@ -317,6 +352,7 @@ public:
       }
 
     //ROS_INFO("%d filtered lines",num_lines);
+}
 }
       //line( src, Point(70, 691), Point(290,482), Scalar(0,0,255), 3, LINE_AA);
       //cv::imshow(OPENCV_WINDOW, cv_ptr->image);*/
