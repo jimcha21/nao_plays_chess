@@ -38,7 +38,7 @@ std::vector<cv::Point> chess_featured_points_;
 std::vector<cv::Point3d> temp_vector;
 
 bool debug_mode=false;
-int confidence_area_pix=10; //points' correction confidence area..
+int confidence_area_pix=5; //points' correction confidence area..
 int maxCorners = 50; // depends on room brightness .. reduce the value if the room is too bright ..
 int thresh = 200;
 int max_thresh = 255;
