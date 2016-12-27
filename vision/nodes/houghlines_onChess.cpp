@@ -22,6 +22,7 @@
 
 #include "vision/ChessVector.h"
 #include "vision/ChessPoint.h"
+#include "vision/ChessLine.h"
 
 using namespace cv;
 using namespace std;
@@ -35,7 +36,7 @@ std::vector<cv::Point3d> temp_vector;
 
 float vertical_line_sl,horizontal_line_sl;
 int v_x,v_y,h_x,h_y;
-int hough_thres=20;
+int hough_thres=10;
 int num_lines;
 float vert_slope_threshold=0.25;
 
@@ -125,7 +126,7 @@ public:
       /// Set some parameters
      
       vector<Vec4i> lines;
-      HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,100/*(int)sqrt(pow((chess_knob_vector_[0].x-chess_knob_vector_[72].x),2)+pow((chess_knob_vector_[0].y-chess_knob_vector_[72].y),2))-80*/,40);
+      HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,100/*(int)sqrt(pow((chess_knob_vector_[8].x-chess_knob_vector_[80].x),2)+pow((chess_knob_vector_[8].y-chess_knob_vector_[80].y),2))-100*/,40);
       ROS_INFO("%d lines found",lines.size());
       //cv::imshow("m to canny",dst);
 
@@ -235,118 +236,203 @@ public:
         //ROS_INFO("Ara to distance apo akrhs s akrh einai %f",(float)sqrt(pow((chess_knob_vector_[0].x-chess_knob_vector_[72].x),2)+pow((chess_knob_vector_[0].y-chess_knob_vector_[72].y),2)));
         //ROS_INFO("kai to orizontio %f",(float)sqrt(pow((chess_knob_vector_[80].x-chess_knob_vector_[72].x),2)+pow((chess_knob_vector_[80].y-chess_knob_vector_[72].y),2)));
 
-        bool found=false;
+        
 
-        for(int e=0;e<chess_knob_vector_.size();e++){   //detectione of estimated points ~.~
+        for(int e=0;e<chess_knob_vector_.size()/*&&e<15*/;e++){   //detectione of estimated points ~.~
+          
           if(chess_knob_vector_[e].state.compare("estimated")==0){
+          
+            ROS_INFO("paei gia to %d",e);
+            std::vector<vision::ChessLine> vertical_lines;
+            std::vector<vision::ChessLine> horizontal_lines;
+            bool found=false;
             div_t divresult;
             divresult = div (e,9);
-            //ROS_INFO("thelw na vrw to estimated sth thesh %d, dld sthn grammh %d kai sthlh %d",e,divresult.quot,divresult.rem);
-            divresult.quot=5;/* //line
-            divresult.rem=2;  //column*/
-            for( size_t i = 0; i < lines.size() && end_case; i++ )
-            {
+            ROS_INFO("thelw na vrw to estimated sth thesh %d, dld sthn grammh %d kai sthlh %d",e,divresult.quot,divresult.rem);
+/*            divresult.quot=2; //line
+            divresult.rem=6;  //column*/
+/*            int abba=divresult.quot;
+            divresult.quot=divresult.rem;
+            divresult.rem=abba;*/
+
+             //F0r the Vertical lines ~~
+            for( size_t i = 0; i < lines.size() && end_case; i++ ){
               Vec4i l = lines[i];              
               float line_slope=(float)(l[3]-l[1])/(l[2]-l[0]);
               //if(l[2]-l[0]==0) continue;
               //ROS_INFO("syntelesths dieythhsnsh %f",   (float)(l[3]-l[1])/(float)(l[2]-l[0]) );
-ROS_INFO("syntlesths eytheias %f",line_slope);
-              //F0r the Vertical lines ~~
+              //ROS_INFO("syntlesths eytheias %f",line_slope);
+             
+              if(area_limits[divresult.quot][0]>area_limits[divresult.quot][1]){
+                if(line_slope<=area_limits[divresult.quot][0]&&line_slope>=area_limits[divresult.quot][1]){
+                  vision::ChessLine a;//=vision::ChessLine(l[0],l[1],line_slope);
 
-              if(area_limits[divresult.rem][0]>area_limits[divresult.rem][1]){
-                if(line_slope<=area_limits[divresult.rem][0]&&line_slope>=area_limits[divresult.rem][1]){
-                  //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,0 ), 3, LINE_AA);
-                  v_x=l[0];
-                  v_y=l[1];
-                  vertical_line_sl=line_slope;
-                  found=true;  
+                  a.x=l[0];
+                  a.y=l[1];
+                  a.slope=line_slope;  
+
+                  vertical_lines.push_back(a);
+                  //v_x=l[0];
+                  //v_y=l[1];
+                  //vertical_line_sl=line_slope;
+                  found=true;
+                  ROS_INFO("tha sxediasei thn %d",divresult.quot);  
                 }
               }else{
-                if(line_slope>=area_limits[divresult.rem][0]&&line_slope<=area_limits[divresult.rem][1]){
-                  //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 0,0,0  ), 3, LINE_AA);
-                  v_x=l[0];
-                  v_y=l[1];
-                  vertical_line_sl=line_slope;  
+                if(line_slope>=area_limits[divresult.quot][0]&&line_slope<=area_limits[divresult.quot][1]){
+                  vision::ChessLine a;//=vision::ChessLine(l[0],l[1],line_slope);
+
+                  a.x=l[0];
+                  a.y=l[1];
+                  a.slope=line_slope;  
+
+                  vertical_lines.push_back(a);
                   found=true;  
+                  ROS_INFO("tha sxediasei thn %d",divresult.quot); 
                 }
               }
+            }
 
-              //F0r the Horizontal lines ~~
+             //F0r the Horizontal lines ~~
+            for( size_t i = 0; i < lines.size() && end_case; i++ ){
+              Vec4i l = lines[i];              
+              float line_slope=(float)(l[3]-l[1])/(l[2]-l[0]);
               int nearest;
-                              int x_mid=(int)(l[0]+l[2])/2;
-                int y_mid=(int)(l[1]+l[3])/2;
               if((abs(line_slope-bottom_line_slope)<=0.02)/*&&((line_slope>=0&&bottom_line_slope>=0)||(line_slope<=0&&bottom_line_slope<=0))*/){
                 //ROS_INFO("line with coord %d %d %d %d",l[0],l[2],l[1],l[3]);
-                ROS_INFO("mpike mesa me syntlesth %f idanikos(%f) confi = %f",line_slope,bottom_line_slope,confidence);
+                //ROS_INFO("mpike mesa me syntlesth %f idanikos(%f) confi = %f",line_slope,bottom_line_slope,confidence);
                 num_lines++;
                 if(num_lines==10){
                   end_case=true;//!
                 }
-/*
+
                 int x_mid=(int)(l[0]+l[2])/2;
-                int y_mid=(int)(l[1]+l[3])/2;*/
+                int y_mid=(int)(l[1]+l[3])/2;
 
                 float point_distance=9999,point_distance_a=9999,point_distance_b=9999;
                 
                 for(int j=36;j<=44;j++){
                   float temp_mid_dist=(float)sqrt(pow((x_mid-chess_knob_vector_[j].x),2)+pow((y_mid-chess_knob_vector_[j].y),2));
-                  float temp_a_dist=(float)sqrt(pow((l[0]-chess_knob_vector_[j].x),2)+pow((l[1]-chess_knob_vector_[j].y),2));
-                  float temp_b_dist=(float)sqrt(pow((l[2]-chess_knob_vector_[j].x),2)+pow((l[3]-chess_knob_vector_[j].y),2));
+                  //float temp_a_dist=(float)sqrt(pow((l[0]-chess_knob_vector_[j].x),2)+pow((l[1]-chess_knob_vector_[j].y),2));
+                  //float temp_b_dist=(float)sqrt(pow((l[2]-chess_knob_vector_[j].x),2)+pow((l[3]-chess_knob_vector_[j].y),2));
                   //ROS_INFO("Distances are %f %f %f",temp_mid_dist,temp_a_dist,temp_b_dist);
                   if(temp_mid_dist<point_distance/*&&temp_a_dist<point_distance_a&&temp_b_dist<point_distance_b*/){                  
                     //ROS_INFO("min found at %d",j);
                     point_distance= temp_mid_dist;
-                    point_distance_b=temp_b_dist;
-                    point_distance_a=temp_a_dist;
+                    //point_distance_b=temp_b_dist;
+                    //point_distance_a=temp_a_dist;
                     nearest=j;
                   }
                 }
 
-              if(nearest==36+divresult.quot){
-                //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
-                line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 1, LINE_AA); 
-                line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,255 ), 3, LINE_AA);       
-                h_x=l[0];
-                h_y=l[1];
-                horizontal_line_sl=line_slope;
-
-                if(found){
-                //vertical_line_sl is the λ' (line 2)
-                  int x_value=(int)( (1/(vertical_line_sl-horizontal_line_sl)* (-horizontal_line_sl*h_x+h_y+vertical_line_sl*v_x-v_y)));
-                  int y_value=(int)( (1/(vertical_line_sl-horizontal_line_sl)* (-vertical_line_sl*horizontal_line_sl*h_x + vertical_line_sl*h_y + horizontal_line_sl*vertical_line_sl*v_x - horizontal_line_sl*v_y))); 
-                  //ROS_INFO("VRIKE SHMEIEO? %d %d",x_value,y_value);
-                  Scalar color;
-                  if(divresult.rem==0){
-                    color=Scalar( 0,0,0);
-                  }else if(divresult.rem==1){
-                    color=Scalar( 0,0,0);
-                  }else if(divresult.rem==2){
-                    color=Scalar( 255,0,0);
-                  }else if(divresult.rem==3){
-                    color=Scalar( 0,255,0);
-                  }else if(divresult.rem==4){
-                    color=Scalar( 0,0,255);
-                  }else if(divresult.rem==5){
-                    color=Scalar( 0,255,255);
-                  }else if(divresult.rem==6){
-                    color=Scalar( 255,0,255);
-                  }else if(divresult.rem==7){
-                    color=Scalar( 255,255,0);
-                  }else if(divresult.rem==8){
-                    color=Scalar( 125,0,0);
-                  }else if(divresult.rem==9){
-                    color=Scalar( 0,125,0);
-                  }
-                  circle(src, Point(x_value,y_value), 4, color, -1, 8, 0 );
-                  ROS_INFO("MPOUUM");
-                  found=false;
-
-                }      
-              }}
-
+                if(nearest==36+divresult.rem){
+                  //line( src, Point(l[0],l[1]), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 3, LINE_AA); 
+                  //line( src, Point(x_mid,y_mid), Point( chess_knob_vector_[nearest].x,chess_knob_vector_[nearest].y),Scalar(255,0,0), 1, LINE_AA); 
+                  //line( src, Point(l[0], l[1]), Point(l[2], l[3]),Scalar( 255,0,255 ), 3, LINE_AA);       
+                  vision::ChessLine a;
+                  a.x=l[0];
+                  a.y=l[1];
+                  a.slope=line_slope;
+                  horizontal_lines.push_back(a);
+                  //h_x=l[0];
+                  //h_y=l[1];
+                  //horizontal_line_sl=line_slope;    
+                }
+              }
             }
-          }else continue;
-        }   
+ROS_INFO("brike v %d",vertical_lines.size());
+ROS_INFO("brike h %d",horizontal_lines.size());
+            
+/*
+          for(int d=0;d<vertical_lines.size();d++){
+            Scalar color;
+                    if(divresult.quot==0){
+                      color=Scalar( 255,255,255);
+                    }else if(divresult.quot==1){
+                      color=Scalar( 0,0,0);
+                    }else if(divresult.quot==2){
+                      color=Scalar( 255,0,0);
+                    }else if(divresult.quot==3){
+                      color=Scalar( 0,255,0);
+                    }else if(divresult.quot==4){
+                      color=Scalar( 0,0,255);
+                    }else if(divresult.quot==5){
+                      color=Scalar( 0,255,255);
+                    }else if(divresult.quot==6){
+                      color=Scalar( 255,0,255);
+                    }else if(divresult.quot==7){
+                      color=Scalar( 255,255,0);
+                    }else if(divresult.quot==8){
+                      color=Scalar( 125,0,0);
+                    }else if(divresult.quot==9){
+                      color=Scalar( 0,125,0);
+                    }
+                    circle(src, Point(vertical_lines[d].x,vertical_lines[d].y), 4, color, -1, 8, 0 );
+          }*/
+
+            
+
+/*          for(int d=0;d<horizontal_lines.size();d++){
+            Scalar color;
+                    if(divresult.rem==0){
+                      color=Scalar( 255,255,255);
+                    }else if(divresult.rem==1){
+                      color=Scalar( 0,0,0);
+                    }else if(divresult.rem==2){
+                      color=Scalar( 255,0,0);
+                    }else if(divresult.rem==3){
+                      color=Scalar( 0,255,0);
+                    }else if(divresult.rem==4){
+                      color=Scalar( 0,0,255);
+                    }else if(divresult.rem==5){
+                      color=Scalar( 0,255,255);
+                    }else if(divresult.rem==6){
+                      color=Scalar( 255,0,255);
+                    }else if(divresult.rem==7){
+                      color=Scalar( 255,255,0);
+                    }else if(divresult.rem==8){
+                      color=Scalar( 125,0,0);
+                    }else if(divresult.rem==9){
+                      color=Scalar( 0,125,0);
+                    }
+                    circle(src, Point(horizontal_lines[d].x,horizontal_lines[d].y), 4, color, -1, 8, 0 );
+          }*/
+          for(int o=0;o<vertical_lines.size();o++){
+          for(int a=0;a<horizontal_lines.size();a++){
+          int x_value=(int)( (1/(vertical_lines[o].slope-horizontal_lines[a].slope)* (-horizontal_lines[a].slope*horizontal_lines[a].x+horizontal_lines[a].y+vertical_lines[o].slope*vertical_lines[o].x-vertical_lines[o].y)));
+          int y_value=(int)( (1/(vertical_lines[o].slope-horizontal_lines[a].slope)* (-vertical_lines[o].slope*horizontal_lines[a].slope*horizontal_lines[a].x + vertical_lines[o].slope*horizontal_lines[a].y + horizontal_lines[a].slope*vertical_lines[o].slope*vertical_lines[o].x - horizontal_lines[a].slope*vertical_lines[o].y))); 
+          if(sqrt(pow((chess_knob_vector_[e].x-x_value),2)+pow((chess_knob_vector_[e].y-y_value),2))<=50){
+ Scalar color;
+                    if(divresult.rem==0){
+                      color=Scalar( 255,255,255);
+                    }else if(divresult.rem==1){
+                      color=Scalar( 0,0,0);
+                    }else if(divresult.rem==2){
+                      color=Scalar( 255,0,0);
+                    }else if(divresult.rem==3){
+                      color=Scalar( 0,255,0);
+                    }else if(divresult.rem==4){
+                      color=Scalar( 0,0,255);
+                    }else if(divresult.rem==5){
+                      color=Scalar( 0,255,255);
+                    }else if(divresult.rem==6){
+                      color=Scalar( 255,0,255);
+                    }else if(divresult.rem==7){
+                      color=Scalar( 255,255,0);
+                    }else if(divresult.rem==8){
+                      color=Scalar( 125,0,0);
+                    }else if(divresult.rem==9){
+                      color=Scalar( 0,125,0);
+                    }
+          circle(src, Point(x_value,y_value), 4, color, -1, 8, 0 );
+
+          }
+          }}
+
+            vertical_lines.clear();
+            horizontal_lines.clear();
+           }else continue;
+         }  
       }}
       //imwrite( "easy_13.jpg", src ); //for storing the snapped images..
       cv::imshow(OPENCV_WINDOW,src);
