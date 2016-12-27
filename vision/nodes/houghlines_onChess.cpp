@@ -36,7 +36,7 @@ std::vector<cv::Point3d> temp_vector;
 
 float vertical_line_sl,horizontal_line_sl;
 int v_x,v_y,h_x,h_y;
-int hough_thres=10;
+int hough_thres=100;
 int num_lines;
 float vert_slope_threshold=0.25;
 
@@ -168,6 +168,7 @@ public:
           //line( src, Point(chess_knob_vector_[start].x,chess_knob_vector_[start].y), Point(chess_knob_vector_[end].x,chess_knob_vector_[end].y),Scalar( 255,0,0 ), 3, LINE_AA); 
           //ROS_INFO("AFairw ta %d %d",chess_knob_vector_[end].x,chess_knob_vector_[start].x);
           chess_vertical_slopes[j]=(float)(chess_knob_vector_[end].y-chess_knob_vector_[start].y)/(chess_knob_vector_[end].x-chess_knob_vector_[start].x);
+          ROS_INFO("to vertis einai %f",chess_vertical_slopes[j]);
           column=column+9;
         }
 
@@ -213,9 +214,17 @@ public:
 
           vert_slope_threshold=temp_thr;
           if(j==0){
-            area_limits[j][0]=chess_vertical_slopes[j];
+            if(chess_vertical_slopes[j]<0){              
+              area_limits[j][0]=chess_vertical_slopes[j]-chess_vertical_slopes[j]*0.2;
+            }else{              
+              area_limits[j][0]=chess_vertical_slopes[j]+chess_vertical_slopes[j]*0.2;
+            }
           }else if(j==8){
-            area_limits[j][1]=chess_vertical_slopes[j];
+            if(chess_vertical_slopes[j]<0){              
+              area_limits[j][1]=chess_vertical_slopes[j]-chess_vertical_slopes[j]*0.2;
+            }else{              
+              area_limits[j][1]=chess_vertical_slopes[j]+chess_vertical_slopes[j]*0.2;
+            }
           }
         }
 
@@ -228,7 +237,12 @@ public:
         float confidence=abs(bottom_line_slope-second_line_slope);
         float opa1=(float)(chess_knob_vector_[74].y-chess_knob_vector_[2].y)/(chess_knob_vector_[74].x-chess_knob_vector_[2].x);
         float opa2=(float)(chess_knob_vector_[75].y-chess_knob_vector_[3].y)/(chess_knob_vector_[75].x-chess_knob_vector_[3].x);
-        ROS_INFO("O SYNTELESTHS EINAI %f %f %f %f",bottom_line_slope,second_line_slope,opa1,opa2);
+        float opa3=(float)(chess_knob_vector_[76].y-chess_knob_vector_[4].y)/(chess_knob_vector_[76].x-chess_knob_vector_[4].x);
+        float opa4=(float)(chess_knob_vector_[77].y-chess_knob_vector_[5].y)/(chess_knob_vector_[77].x-chess_knob_vector_[5].x);
+        float opa5=(float)(chess_knob_vector_[78].y-chess_knob_vector_[6].y)/(chess_knob_vector_[78].x-chess_knob_vector_[6].x);
+        float opa6=(float)(chess_knob_vector_[79].y-chess_knob_vector_[7].y)/(chess_knob_vector_[79].x-chess_knob_vector_[7].x);
+        float opa7=(float)(chess_knob_vector_[80].y-chess_knob_vector_[8].y)/(chess_knob_vector_[80].x-chess_knob_vector_[8].x);
+        ROS_INFO("O SYNTELESTHS EINAI %f %f %f %f %f %f %f %f %f",bottom_line_slope,second_line_slope,opa1,opa2,opa3,opa4,opa5,opa6,opa7);
         float side_line_slope=(float)(chess_knob_vector_[76].y-chess_knob_vector_[72].y)/(chess_knob_vector_[76].x-chess_knob_vector_[72].x);
         //ROS_INFO("O syntelesths iytthnshs einai %f sid:%f",bottom_line_slope,side_line_slope);
         bool end_case=true;
@@ -242,18 +256,14 @@ public:
           
           if(chess_knob_vector_[e].state.compare("estimated")==0){
           
-            ROS_INFO("paei gia to %d",e);
+            //ROS_INFO("paei gia to %d",e);
             std::vector<vision::ChessLine> vertical_lines;
             std::vector<vision::ChessLine> horizontal_lines;
-            bool found=false;
             div_t divresult;
             divresult = div (e,9);
-            ROS_INFO("thelw na vrw to estimated sth thesh %d, dld sthn grammh %d kai sthlh %d",e,divresult.quot,divresult.rem);
+            //ROS_INFO("thelw na vrw to estimated sth thesh %d, dld sthn grammh %d kai sthlh %d",e,divresult.quot,divresult.rem);
 /*            divresult.quot=2; //line
             divresult.rem=6;  //column*/
-/*            int abba=divresult.quot;
-            divresult.quot=divresult.rem;
-            divresult.rem=abba;*/
 
              //F0r the Vertical lines ~~
             for( size_t i = 0; i < lines.size() && end_case; i++ ){
@@ -275,8 +285,6 @@ public:
                   //v_x=l[0];
                   //v_y=l[1];
                   //vertical_line_sl=line_slope;
-                  found=true;
-                  ROS_INFO("tha sxediasei thn %d",divresult.quot);  
                 }
               }else{
                 if(line_slope>=area_limits[divresult.quot][0]&&line_slope<=area_limits[divresult.quot][1]){
@@ -287,8 +295,6 @@ public:
                   a.slope=line_slope;  
 
                   vertical_lines.push_back(a);
-                  found=true;  
-                  ROS_INFO("tha sxediasei thn %d",divresult.quot); 
                 }
               }
             }
@@ -340,8 +346,8 @@ public:
                 }
               }
             }
-ROS_INFO("brike v %d",vertical_lines.size());
-ROS_INFO("brike h %d",horizontal_lines.size());
+/*ROS_INFO("brike v %d",vertical_lines.size());
+ROS_INFO("brike h %d",horizontal_lines.size());*/
             
 /*
           for(int d=0;d<vertical_lines.size();d++){
@@ -397,37 +403,49 @@ ROS_INFO("brike h %d",horizontal_lines.size());
                     }
                     circle(src, Point(horizontal_lines[d].x,horizontal_lines[d].y), 4, color, -1, 8, 0 );
           }*/
+int mid_x,mid_y;
+bool ok=false;
           for(int o=0;o<vertical_lines.size();o++){
           for(int a=0;a<horizontal_lines.size();a++){
           int x_value=(int)( (1/(vertical_lines[o].slope-horizontal_lines[a].slope)* (-horizontal_lines[a].slope*horizontal_lines[a].x+horizontal_lines[a].y+vertical_lines[o].slope*vertical_lines[o].x-vertical_lines[o].y)));
           int y_value=(int)( (1/(vertical_lines[o].slope-horizontal_lines[a].slope)* (-vertical_lines[o].slope*horizontal_lines[a].slope*horizontal_lines[a].x + vertical_lines[o].slope*horizontal_lines[a].y + horizontal_lines[a].slope*vertical_lines[o].slope*vertical_lines[o].x - horizontal_lines[a].slope*vertical_lines[o].y))); 
           if(sqrt(pow((chess_knob_vector_[e].x-x_value),2)+pow((chess_knob_vector_[e].y-y_value),2))<=50){
- Scalar color;
-                    if(divresult.rem==0){
-                      color=Scalar( 255,255,255);
-                    }else if(divresult.rem==1){
-                      color=Scalar( 0,0,0);
-                    }else if(divresult.rem==2){
-                      color=Scalar( 255,0,0);
-                    }else if(divresult.rem==3){
-                      color=Scalar( 0,255,0);
-                    }else if(divresult.rem==4){
-                      color=Scalar( 0,0,255);
-                    }else if(divresult.rem==5){
-                      color=Scalar( 0,255,255);
-                    }else if(divresult.rem==6){
-                      color=Scalar( 255,0,255);
-                    }else if(divresult.rem==7){
-                      color=Scalar( 255,255,0);
-                    }else if(divresult.rem==8){
-                      color=Scalar( 125,0,0);
-                    }else if(divresult.rem==9){
-                      color=Scalar( 0,125,0);
-                    }
-          circle(src, Point(x_value,y_value), 4, color, -1, 8, 0 );
-
+            if(!ok){
+              mid_x=x_value;
+              mid_y=y_value;
+              ok=true;
+            }else
+            {
+              mid_x=(int)((mid_x+x_value)/2);
+              mid_y=(int)((mid_y+y_value)/2);
+            }
           }
           }}
+
+
+            Scalar color;
+                    if(divresult.quot==0){
+                      color=Scalar( 255,255,255);
+                    }else if(divresult.quot==1){
+                      color=Scalar( 0,0,0);
+                    }else if(divresult.quot==2){
+                      color=Scalar( 255,0,0);
+                    }else if(divresult.quot==3){
+                      color=Scalar( 0,255,0);
+                    }else if(divresult.quot==4){
+                      color=Scalar( 0,0,255);
+                    }else if(divresult.quot==5){
+                      color=Scalar( 0,255,255);
+                    }else if(divresult.quot==6){
+                      color=Scalar( 255,0,255);
+                    }else if(divresult.quot==7){
+                      color=Scalar( 255,255,0);
+                    }else if(divresult.quot==8){
+                      color=Scalar( 125,0,0);
+                    }else if(divresult.quot==9){
+                      color=Scalar( 0,125,0);
+                    }
+                    if(ok) circle(src, Point(mid_x,mid_y), 4, color, -1, 8, 0 );
 
             vertical_lines.clear();
             horizontal_lines.clear();
