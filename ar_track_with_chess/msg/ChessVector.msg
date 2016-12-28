@@ -1,1 +1,0 @@
-ChessPoint[] p_vector

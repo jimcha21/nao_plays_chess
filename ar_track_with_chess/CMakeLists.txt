@@ -28,11 +28,11 @@ find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(TinyXML REQUIRED)
 
-add_message_files(
-  FILES
-  ChessPoint.msg
-  ChessVector.msg
-)
+#add_message_files(
+#  FILES
+#  ChessPoint.msg
+#  ChessVector.msg
+#)
 
 # dynamic reconfigure support
 generate_dynamic_reconfigure_options(cfg/Params.cfg)
@@ -40,6 +40,7 @@ generate_dynamic_reconfigure_options(cfg/Params.cfg)
 generate_messages(
   DEPENDENCIES
   std_msgs
+  vision
 )
 
 catkin_package(
