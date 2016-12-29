@@ -38,7 +38,7 @@ bool enable_snap=false;
 float frameDensity[8][8][3];
 float squareDensity[8][8][3]; //0 for black, 1 for white , 2 for und
 
-static const std::string OPENCV_WINDOW = "Source Image";
+static const std::string OPENCV_WINDOW = "wpa";
 
 /// Function headers
 int *square_CornPoints(/*std::string str*/int int_letter ,int num);
@@ -74,13 +74,14 @@ public:
     : it_(nh_)
   {
           // Subscrive to input video feed and publish output video feed
-          chess_sub = nh_.subscribe("mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
+          chess_sub = nh_.subscribe("hough_mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
 
           if(!view_mode_debug){    
              snapshot_sub = nh_.subscribe("take_snaps", 10, &ImageConverter::Snapshot, this); //chessboard subscriber
           }else{          
             //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::movementDetector, this);       
-            image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);    
+            //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);   
+             image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imagePreview, this); 
           }
 
           //image_sub_.shutdown();
@@ -91,6 +92,46 @@ public:
   {
           cv::destroyWindow(OPENCV_WINDOW);
   }
+
+  void imagePreview(const sensor_msgs::ImageConstPtr& msg)
+  {
+
+      cv_bridge::CvImagePtr cv_ptr;
+ROS_INFO("ta pire ?%d",chess_topic_points.size());
+       try
+      {
+          //The input from the robot is encoded with RGB8.
+          cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+      }
+      catch (cv_bridge::Exception& e)
+      {
+          ROS_ERROR("cv_bridge exception: %s", e.what());
+          return;
+      }
+
+      //cvtColor( cv_ptr->image, src_gray, COLOR_BGR2GRAY );      
+      
+      if(true){
+        src=cv_ptr->image.clone();
+      }else{
+        src = imread("src/vision/src/data/3.jpg", 1);
+        if(src.empty())
+        {
+          ROS_INFO("can not open the image");// << filename << endl;
+          return ;
+        }
+      }
+      
+      //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
+      
+      for( int j = 0; j < chess_topic_points.size(); j++ ){
+        circle(src, Point(chess_topic_points[j].x,chess_topic_points[j].y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
+        //ROS_INFO("she %d -> %d %d",chess_featured_points_[j].x,chess_featured_points_[j].y);
+      }  
+      cv::imshow("image2-das", src);
+     cv::waitKey(3);
+}
+
 
 /////////////////////////
 
@@ -176,8 +217,8 @@ public:
             //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
                 
 
-            for(int ch_line=1;ch_line<=2;ch_line++){
-                for(int ch_column=1;ch_column<=3;ch_column++){
+            for(int ch_line=1;ch_line<=6;ch_line++){
+                for(int ch_column=1;ch_column<=6;ch_column++){
                 //ROS_INFO("ara ta prohgoumena einai %f %f %f",squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);
 
                 //choosing a chess square ..
@@ -302,7 +343,7 @@ public:
                             }
 
                             //for checking area inspection..
-                            new_image3.at<uchar>(y, x)=255;
+                            //new_image3.at<uchar>(y, x)=255;
                     }}}}
                   }
                 }
