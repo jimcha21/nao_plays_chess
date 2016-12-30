@@ -17,7 +17,6 @@
 #include "opencv2/core/core.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
-
 #include "vision/ChessVector.h"
 #include "vision/ChessPoint.h"
 
@@ -207,7 +206,7 @@ ROS_INFO("ta pire ?%d",chess_topic_points.size());
         cv::absdiff(snap_one, snap_two, new_image);
         cv::imshow("difference", new_image);
         Mat range_img,new_image3;
-        inRange(new_image, cv::Scalar(1,1,10), cv::Scalar(255,255,255 ), range_img); //BGR Scalar not RGB sequence
+        inRange(new_image, cv::Scalar(10,10,10), cv::Scalar(255,255,255 ), range_img); //BGR Scalar not RGB sequence
 
         cv::imshow("ranged", range_img);
         medianBlur ( range_img, new_image3, 3 );
