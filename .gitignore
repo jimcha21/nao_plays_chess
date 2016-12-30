@@ -7,5 +7,6 @@ $ cat .gitignore
 !/README.md
 !/chessboard_schematics
 !/naoqi_driver/
+!/folder
 
 !/.gitignore
