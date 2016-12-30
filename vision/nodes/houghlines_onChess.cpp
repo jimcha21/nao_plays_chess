@@ -71,8 +71,8 @@ public:
   {
           // Subscrive to input video feed and publish output video feed
 
-          image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
-          //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);
+          image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::houghLinesCb, this);
+          //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::houghLinesCb, this);
           mapped_chesspoints = nh_.advertise<vision::ChessVector>("hough_mapped_chessboard_knob_coordinates",0);
           chess_sub = nh_.subscribe("mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
           //add it
@@ -89,7 +89,7 @@ public:
   }
 
 
-  void imageCb(const sensor_msgs::ImageConstPtr& msg)
+  void houghLinesCb(const sensor_msgs::ImageConstPtr& msg)
   {
 
       cv_bridge::CvImagePtr cv_ptr;
@@ -131,7 +131,7 @@ public:
      
       vector<Vec4i> lines;
       HoughLinesP(dst, lines, 1, CV_PI / 180, hough_thres,100/*(int)sqrt(pow((chess_knob_vector_.p_vector[8].x-chess_knob_vector_.p_vector[80].x),2)+pow((chess_knob_vector_.p_vector[8].y-chess_knob_vector_.p_vector[80].y),2))-50*/,40);
-      ROS_INFO("%d lines found",lines.size());
+      //ROS_INFO("%d lines found",lines.size());
       //cv::imshow("m to canny",dst);
 
       //float chess_vertical_slopes[9]={};

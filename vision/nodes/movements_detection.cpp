@@ -206,8 +206,11 @@ ROS_INFO("ta pire ?%d",chess_topic_points.size());
         //new_image3 = new_image2 - new_image1;
         cv::absdiff(snap_one, snap_two, new_image);
         cv::imshow("difference", new_image);
-        Mat new_image3;
-        inRange(new_image, cv::Scalar(50,10,10), cv::Scalar(255,255,255 ), new_image3); //BGR Scalar not RGB sequence
+        Mat range_img,new_image3;
+        inRange(new_image, cv::Scalar(1,1,10), cv::Scalar(255,255,255 ), range_img); //BGR Scalar not RGB sequence
+
+        cv::imshow("ranged", range_img);
+        medianBlur ( range_img, new_image3, 3 );
         cv::imshow("color filtered in range", new_image3);
 
         //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
@@ -217,8 +220,8 @@ ROS_INFO("ta pire ?%d",chess_topic_points.size());
             //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
                 
 
-            for(int ch_line=1;ch_line<=6;ch_line++){
-                for(int ch_column=1;ch_column<=6;ch_column++){
+            for(int ch_line=1;ch_line<=8;ch_line++){
+                for(int ch_column=1;ch_column<=8;ch_column++){
                 //ROS_INFO("ara ta prohgoumena einai %f %f %f",squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);
 
                 //choosing a chess square ..
@@ -393,7 +396,7 @@ ROS_INFO("ta pire ?%d",chess_topic_points.size());
                   ROS_INFO("-----------------------------------------------");
                 }
                 v.clear();
-                    cv::imshow(OPENCV_WINDOW,new_image3);
+                //cv::imshow(OPENCV_WINDOW,new_image3);
             cv::waitKey(3);
             }}
           }

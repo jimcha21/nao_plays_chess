@@ -3,6 +3,7 @@
 
 #include <sstream>
 
+int timing=20;
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
  */
@@ -22,7 +23,7 @@ int main(int argc, char **argv)
    
     std_msgs::Bool msg;
 
-    if((count%15==0||count%25==0) && count!=0){
+    if((count%timing==0||count%(timing+15)==0) && count!=0){
       msg.data = true;
       ROS_INFO("MOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWNMOVE THE PAWN");
     }else{
