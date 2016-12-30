@@ -6,6 +6,6 @@ $ cat .gitignore
 !/CMakeLists.txt
 !/README.md
 !/chessboard_schematics
-!/naoqi_driver
+!/naoqi_driver/
 
 !/.gitignore
