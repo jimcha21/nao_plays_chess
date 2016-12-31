@@ -18,9 +18,9 @@
 	<node name="movement_detection_node" pkg="vision" type="movements_detection" respawn="false" output="screen"/>
 	<node name="NAO_behavior" pkg="vision" type="NAO_behavior_node" respawn="false" output="screen"/>
 
-<!-- head movement comman -->d
+<!-- head movement command -->
 <!-- 
-rostopic pub -1 /joint_angles naoqi_bridge_msgs//JointAnglesWithSpeed '{header: {frame_id: "test", seq: 200}, joint_names: ["HeadYaw"], joint_angles: [10], speed: 1}' -->
+rostopic pub -1 /joint_angles naoqi_bridge_msgs/JointAnglesWithSpeed '{header: {frame_id: "test", seq: 200}, joint_names: ["HeadYaw"], joint_angles: [10], speed: 1}' -->
 
 <!-- 	<node name="ar_track_alvar_front" pkg="ar_track_alvar" type="individualMarkersForChess" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic_front) $(arg cam_info_topic_front) $(arg output_frame)" /> -->
 

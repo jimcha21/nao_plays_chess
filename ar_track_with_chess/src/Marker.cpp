@@ -148,7 +148,7 @@ std::vector<CvPoint> Marker::VisualizeChess(IplImage *image, Camera *cam, std::v
 	}*/
 
 	if(int(GetId())==7){
-ROS_INFO("eide 7");
+//ROS_INFO("eide 7");
 		int knob_id_num=0;
 		for (double i = -3.5-lim; i < 3.6+lim; i++)
 	    {
@@ -156,23 +156,23 @@ ROS_INFO("eide 7");
 	    	{
 	    		//the squares' centre coordinates (chess square center points)
 	    		double square_x=edge_length*i;
-	    		double square_y=edge_length*j;
-	    		//z_ax don't care
+	    		double square_y=edge_length*j;	    		
+	    		double square_z=0;
 
 	    		//cube base coordinates in 2d plane							
 				visualize3d_points[11][0]=square_x;
 				visualize3d_points[11][1]=square_y;
-				//visualize3d_points[11][2]=;
+				visualize3d_points[11][2]=edge_length+square_z;
 				visualize3d_points[10][0]=square_x;
 				visualize3d_points[10][1]=edge_length+square_y;
-				//visualize3d_points[10]2]=;
+				visualize3d_points[10][2]=square_z;
 				visualize3d_points[9][0]=edge_length+square_x;
 				visualize3d_points[9][1]=square_y;
-				//visualize3d_points[9][2]=;
+				visualize3d_points[9][2]=square_z;
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
-				//visualize3d_points[8][2]=;
-ROS_INFO("gia to %d",knob_id_num);
+				visualize3d_points[8][2]=square_z;
+//ROS_INFO("gia to %d",knob_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
@@ -185,10 +185,92 @@ ROS_INFO("gia to %d",knob_id_num);
 				chess_2dcoordinates[knob_id_num].x=knob_points.x;
 				chess_2dcoordinates[knob_id_num].y=knob_points.y;
 				
-				ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
+				//ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
 				
-				DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color); //change it to CV_RGB(255,0,0) for estimation debuging
-				//DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,255,0));
+				//DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color); //change it to CV_RGB(255,0,0) for estimation debuging
+if(knob_id_num>=63&&knob_id_num<71){ //watch out (estimating on bottom left corner knob) 63-71 completes the cubes of column 8.
+		square_x=edge_length*i+edge_length*0.15;
+		square_y=edge_length*j+edge_length*0.15;
+		square_z=4; //TODO REPLACE WITH EACH PAWN HEIGHT SEPARATELY.. value is in cm like marker size.
+		visualize3d_points[11][0]=square_x;
+		visualize3d_points[11][1]=square_y;
+		visualize3d_points[11][2]=square_z;
+		visualize3d_points[10][0]=square_x;
+		visualize3d_points[10][1]=edge_length*0.7+square_y;
+		visualize3d_points[10][2]=0;
+		visualize3d_points[9][0]=edge_length*0.7+square_x;
+		visualize3d_points[9][1]=square_y;
+		visualize3d_points[9][2]=0;
+		visualize3d_points[8][0]=square_x;
+		visualize3d_points[8][1]=square_y;
+		visualize3d_points[8][2]=0;
+		cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+		cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+
+		// Coordinates
+		CvPoint a = cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+		CvPoint b = cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]);
+		CvPoint c = cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]);
+		CvPoint d = cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
+		//	ROS_INFO("ta shmia inai %d %d %d %d %d %d %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1], (int)visualize2d_points[9][0], (int)visualize2d_points[9][1],(int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
+
+		square_x=edge_length*i+edge_length*0.85;
+		square_y=edge_length*j+edge_length*0.85;
+		square_z=4; //TODO REPLACE WITH EACH PAWN HEIGHT SEPARATELY.. value is in cm like marker size.
+		visualize3d_points[11][0]=square_x;
+		visualize3d_points[11][1]=square_y;
+		visualize3d_points[11][2]=0;
+		visualize3d_points[10][0]=square_x;
+		visualize3d_points[10][1]=square_y-edge_length*0.7;
+		visualize3d_points[10][2]=square_z;
+		visualize3d_points[9][0]=square_x-edge_length*0.7;
+		visualize3d_points[9][1]=square_y;
+		visualize3d_points[9][2]=square_z;
+		visualize3d_points[8][0]=square_x;
+		visualize3d_points[8][1]=square_y;
+		visualize3d_points[8][2]=square_z;
+		cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+		cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+
+		cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(0,255,0));
+		cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), CV_RGB(0,255,0));
+		cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,255,0));
+
+		cvLine(image, cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), b, CV_RGB(0,255,255));
+		cvLine(image, cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), c, CV_RGB(0,255,255));
+
+		cvLine(image, cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), b, CV_RGB(255,255,0));
+		cvLine(image, cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), d, CV_RGB(255,255,0));
+
+		cvLine(image, cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), d, CV_RGB(0,255,0));
+		cvLine(image, cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), c, CV_RGB(0,255,0));
+
+		cvLine(image, cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), c, CV_RGB(0,0,255));
+		cvLine(image, cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), b, CV_RGB(0,0,255));
+
+		cvLine(image, a, b, CV_RGB(0,255,0));
+		cvLine(image, a, c, CV_RGB(0,255,0));
+		cvLine(image, a, d, CV_RGB(0,255,0));
+
+
+}
+/*				square_z=5;
+				visualize3d_points[11][0]=square_x;
+				visualize3d_points[11][1]=square_y;
+				visualize3d_points[11][2]=square_z;
+				visualize3d_points[10][0]=square_x;
+				visualize3d_points[10][1]=edge_length+square_y;
+				visualize3d_points[10][2]=square_z;
+				visualize3d_points[9][0]=edge_length+square_x;
+				visualize3d_points[9][1]=square_y;
+				visualize3d_points[9][2]=square_z;
+				visualize3d_points[8][0]=square_x;
+				visualize3d_points[8][1]=square_y;
+				visualize3d_points[8][2]=square_z;
+ROS_INFO("gia to %d",knob_id_num);
+				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
+				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
+				DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,0,0));*/
 				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
 				//chess_2dcoordinates[0].x=1;
 				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
@@ -198,7 +280,7 @@ ROS_INFO("gia to %d",knob_id_num);
 	    	}
 	    }
 	}else if(int(GetId())==8){  //ROTATED MATRIX - TODO REDUCE CODE -> ONE PART 2D ARRAY LOOP
-		ROS_INFO("eide 8");
+		//ROS_INFO("eide 8");
 		int knob_id_num=0;
 		for (double j = 8.1+lim; j>1.0-lim ; j--)
 	    {	
@@ -207,25 +289,25 @@ ROS_INFO("gia to %d",knob_id_num);
 	    		//the squares' centre coordinates (chess square center points)
 	    		double square_x=edge_length*i;
 	    		double square_y=edge_length*j;
-	    		//z_ax don't care
+	    		double square_z=4;
 
 	    		//cube base coordinates in 2d plane							
 				visualize3d_points[11][0]=square_x;
 				visualize3d_points[11][1]=square_y;
-				//visualize3d_points[11][2]=;
+				visualize3d_points[11][2]=square_z;
 				visualize3d_points[10][0]=square_x;
 				visualize3d_points[10][1]=edge_length+square_y;
-				//visualize3d_points[10]2]=;
+				visualize3d_points[10][2]=square_z;
 				visualize3d_points[9][0]=edge_length+square_x;
 				visualize3d_points[9][1]=square_y;
-				//visualize3d_points[9][2]=;
+				visualize3d_points[9][2]=square_z;
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
-				//visualize3d_points[8][2]=;
-ROS_INFO("gia to %d",knob_id_num);
+				visualize3d_points[8][2]=square_z;
+//ROS_INFO("gia to %d",knob_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
-				ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
 				//DrawChessCoordinates(image, cam, CvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),  CV_RGB(0,0,255));
 				CvPoint knob_points;
 				knob_points=FindWightedMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
@@ -234,7 +316,7 @@ ROS_INFO("gia to %d",knob_id_num);
 				
 				chess_2dcoordinates[knob_id_num].x=knob_points.x;
 				chess_2dcoordinates[knob_id_num].y=knob_points.y;
-				ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
+				//ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
 				
 				//DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color);
 				//DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,0,255));
