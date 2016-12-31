@@ -51,9 +51,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
+   ChessPiece.msg
    ChessLine.msg
    ChessPoint.msg
    ChessVector.msg
+   ChessPiecesVector.msg
 )
 
 ## Declare ROS messages and services

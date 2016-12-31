@@ -45,6 +45,7 @@ using std::rotate;
 #include <map>
 #include <cassert>
 #include <Eigen/StdVector>
+#include "vision/ChessPiecesVector.h"
 
 namespace alvar {
 
@@ -68,6 +69,7 @@ protected:
 	std::map<unsigned long, double> map_edge_length;
 	double edge_length;
 	std::vector<CvPoint> chess_2dcoordinates; //chess_2dcoordinates[81][2];
+	  vision::ChessPiecesVector chessPiecesArea_2dcoordinates;
 	int res;
 	double margin;
 	bool detect_pose_grayscale;

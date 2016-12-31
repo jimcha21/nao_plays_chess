@@ -1,0 +1,9 @@
+ChessPoint a
+ChessPoint b
+ChessPoint c
+ChessPoint d
+ChessPoint e
+ChessPoint f
+ChessPoint g
+ChessPoint h
+string category
