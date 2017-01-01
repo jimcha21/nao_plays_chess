@@ -16,8 +16,10 @@
 #include <ar_track_alvar/ParamsConfig.h>
 
 #include "vision/ChessVector.h"
+#include "vision/ChessPiece.h"
+#include "vision/ChessPiecesVector.h"
 #include "vision/ChessPoint.h"
-
+#include "vision/ChessInfoVector.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp> //remove those 2 if you are in paionaios..
@@ -34,6 +36,7 @@ image_transport::Subscriber cam_sub_;
 ros::Publisher arMarkerPub_;
 ros::Publisher rvizMarkerPub_;
 ros::Publisher chessPointsPub_;
+ros::Publisher chessPiecesPub_;
 
 ar_track_alvar_msgs::AlvarMarkers arPoseMarkers_;
 visualization_msgs::Marker chessSquares_,chessPoints_;
@@ -43,8 +46,9 @@ tf::TransformBroadcaster *tf_broadcaster;
 
 MarkerDetector<MarkerData> marker_detector;
 
-vision::ChessPoint chess_point;
-vision::ChessVector chess_vector;
+vision::ChessPiecesVector chesspieces_vector;
+vision::ChessVector chesspoints_vector;
+vision::ChessInfoVector chess_knob_vector_;
 
 bool enableSwitched = false;
 bool enabled = true;
@@ -103,7 +107,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             // us a cv::Mat. I'm too lazy to change to cv::Mat throughout right now, so I
             // do this conversion here -jbinney
             IplImage ipl_image = cv_ptr_->image;
-            std::vector<CvPoint> chess_knob_vector_;
+            //std::vector<CvPoint> chess_knob_vector_;
+            
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
@@ -114,21 +119,35 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 			}
 
             vision::ChessPoint chess_point;
+            vision::ChessPiece chess_piece;
 
-			for(int i=0;i<chess_knob_vector_.size();i++){
-				if(chess_knob_vector_[i].x<0 || chess_knob_vector_[i].y<0){
+			for(int i=0;i<chess_knob_vector_.knob_points[0].p_vector.size();i++){
+				if(chess_knob_vector_.knob_points[0].p_vector[i].x<0 || chess_knob_vector_.knob_points[0].p_vector[i].y<0){
 					continue; // bypass the invisible-outofrange points..
 				}
-				chess_point.x=chess_knob_vector_[i].x;
-				chess_point.y=chess_knob_vector_[i].y;
-				chess_vector.p_vector.push_back(chess_point);
+				chess_point.x=chess_knob_vector_.knob_points[0].p_vector[i].x;
+				chess_point.y=chess_knob_vector_.knob_points[0].p_vector[i].y;
+				chess_point.state=chess_knob_vector_.knob_points[0].p_vector[i].state;
+				chesspoints_vector.p_vector.push_back(chess_point);
+				if(i<chess_knob_vector_.pieces[0].p_vector.size()){ // 64 pieces..
+					chess_piece.a=chess_knob_vector_.pieces[0].p_vector[i].a; chess_piece.b=chess_knob_vector_.pieces[0].p_vector[i].b;
+					chess_piece.c=chess_knob_vector_.pieces[0].p_vector[i].c; chess_piece.d=chess_knob_vector_.pieces[0].p_vector[i].d;
+					chess_piece.e=chess_knob_vector_.pieces[0].p_vector[i].e; chess_piece.f=chess_knob_vector_.pieces[0].p_vector[i].f;
+					chess_piece.g=chess_knob_vector_.pieces[0].p_vector[i].g; chess_piece.h=chess_knob_vector_.pieces[0].p_vector[i].h;
+					chess_piece.category=chess_knob_vector_.pieces[0].p_vector[i].category;
+					chesspieces_vector.p_vector.push_back(chess_piece);
+				}
 			}//total 81.. (- the outofrange points)
 
 			//publishing the chess 'estimated' coordinates..
-			chessPointsPub_.publish(chess_vector);
+			chessPointsPub_.publish(chesspoints_vector);
 
-			chess_knob_vector_.clear();
-			chess_vector.p_vector.clear();
+			//publishing the pieces' 'estimated' body areas..
+			chessPiecesPub_.publish(chesspieces_vector);
+
+			chess_knob_vector_.pieces.clear();
+			chess_knob_vector_.knob_points.clear();
+			chesspoints_vector.p_vector.clear();
       	    arPoseMarkers_.markers.clear();
 
 			for (size_t i=0; i<marker_detector.markers->size(); i++) 
@@ -533,7 +552,8 @@ int main(int argc, char *argv[])
 	tf_broadcaster = new tf::TransformBroadcaster();
 	arMarkerPub_ = n.advertise < ar_track_alvar_msgs::AlvarMarkers > ("ar_pose_marker", 0);
 	rvizMarkerPub_ = n.advertise < visualization_msgs::Marker > ("visualization_marker", 0);
-	chessPointsPub_ = n.advertise < vision::ChessVector > ("chessboard_estimated_coordinates", 0);
+	chessPointsPub_ = n.advertise < vision::ChessVector > ("chessboard_estimated_coordinates", 0);	
+	chessPiecesPub_ = n.advertise < vision::ChessPiecesVector > ("chessboard_estimated_areas_ofPieces", 0);
 
 	// Prepare dynamic reconfiguration
 	dynamic_reconfigure::Server < ar_track_alvar::ParamsConfig > server;

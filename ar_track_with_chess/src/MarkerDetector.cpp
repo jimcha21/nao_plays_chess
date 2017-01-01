@@ -25,7 +25,9 @@
 #include <ros/ros.h>
 #include "vision/ChessPiece.h"
 #include "vision/ChessPoint.h"
+#include "vision/ChessVector.h"
 #include "vision/ChessPiecesVector.h"
+#include "vision/ChessInfoVector.h"
 
 template class ALVAR_EXPORT alvar::MarkerDetector<alvar::Marker>;
 template class ALVAR_EXPORT alvar::MarkerDetector<alvar::MarkerData>;
@@ -72,30 +74,32 @@ namespace alvar {
     }
 
 	void MarkerDetectorImpl::Initialize_Chess2dArray(){
-		CvPoint pt;		
+		vision::ChessPoint pt;		
 		vision::ChessPiece pc;
-		vision::ChessPiecesVector chessPiecesArea_2dcoordinates;
 		for(int i=0;i<81;i++){
 			pt.x=0;
 			pt.y=0;
-			chess_2dcoordinates.push_back(pt);
-			pc.a.x=0; pc.a.y=0; pc.a.state="estimated";
-			pc.b.x=0; pc.b.y=0; pc.b.state="estimated";
-			pc.c.x=0; pc.c.y=0; pc.c.state="estimated";
-			pc.d.x=0; pc.d.y=0; pc.d.state="estimated";
-			pc.e.x=0; pc.e.y=0; pc.e.state="estimated";
-			pc.f.x=0; pc.f.y=0; pc.f.state="estimated";
-			pc.g.x=0; pc.g.y=0; pc.g.state="estimated";
-			pc.h.x=0; pc.h.y=0; pc.h.state="estimated";
-			pc.category="pawn";
-			chessPiecesArea_2dcoordinates.p_vector.push_back(pc);
+			pt.state="NaN";
+			chess_2dcoordinates.p_vector.push_back(pt);
+			if(i<64){
+				pc.a.x=0; pc.a.y=0; pc.a.state="NaN";
+				pc.b.x=0; pc.b.y=0; pc.b.state="NaN";
+				pc.c.x=0; pc.c.y=0; pc.c.state="NaN";
+				pc.d.x=0; pc.d.y=0; pc.d.state="NaN";
+				pc.e.x=0; pc.e.y=0; pc.e.state="NaN";
+				pc.f.x=0; pc.f.y=0; pc.f.state="NaN";
+				pc.g.x=0; pc.g.y=0; pc.g.state="NaN";
+				pc.h.x=0; pc.h.y=0; pc.h.state="NaN";
+				pc.category="NaN";
+				chessPiecesArea_2dcoordinates.p_vector.push_back(pc);
+			}
 		}
 	} 
 
 /*	void MarkerDetectorImpl::Update_Chess2dArray(){
 		for(int i=0;i<81;i++){
-			chess_2dcoordinates[i].x=480;
-			chess_2dcoordinates[i].y=640;
+			chess_2dcoordinates.p_vector[i].x=480;
+			chess_2dcoordinates.p_vector[i].y=640;
 		}
 		//ROS_INFO("updated");
 	} */
@@ -108,7 +112,7 @@ namespace alvar {
 		detect_pose_grayscale = _detect_pose_grayscale;
 	}
 
-	std::vector<CvPoint>  MarkerDetectorImpl::DetectChess(IplImage *image,
+	vision::ChessInfoVector  MarkerDetectorImpl::DetectChess(IplImage *image,
 			   Camera *cam,
 			   bool track,
 			   bool visualize,
@@ -168,8 +172,9 @@ namespace alvar {
 					blob_corners[track_i].clear(); // We don't want to handle this again...
 					if (visualize){
 						chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates,CV_RGB(0,255,0));
+						chessPiecesArea_2dcoordinates=mn->VisualizeChessPawns(image, cam, chessPiecesArea_2dcoordinates,CV_RGB(0,255,0));
 						//mn->Update_Chess2dArray();
-						ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
+						ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates.p_vector[80].x,chess_2dcoordinates.p_vector[80].y,chess_2dcoordinates.p_vector.size());
 					}
 				}
 			}
@@ -193,9 +198,10 @@ namespace alvar {
                 mn->ros_orientation = orientation;
 				_markers_push_back(mn); 
 				if (visualize){
-					chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates,CV_RGB(0,0,255));
+					chess_2dcoordinates=mn->VisualizeChess(image, cam, chess_2dcoordinates,CV_RGB(0,0,255));					
+					chessPiecesArea_2dcoordinates=mn->VisualizeChessPawns(image, cam, chessPiecesArea_2dcoordinates,CV_RGB(0,255,0));
 					//mn->Update_Chess2dArray();
-					ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates[80].x,chess_2dcoordinates[80].y,chess_2dcoordinates.size());
+					ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates.p_vector[80].x,chess_2dcoordinates.p_vector[80].y,chess_2dcoordinates.p_vector.size());
 				}
 			}
 			
@@ -203,7 +209,10 @@ namespace alvar {
 		}
 
 		ROS_INFO("end");
-		return chess_2dcoordinates;
+		vision::ChessInfoVector info_vector;
+		info_vector.pieces.push_back(chessPiecesArea_2dcoordinates);
+		info_vector.knob_points.push_back(chess_2dcoordinates);
+		return info_vector;
 	}
 
 	int MarkerDetectorImpl::Detect(IplImage *image,

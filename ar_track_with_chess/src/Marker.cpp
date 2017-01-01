@@ -27,7 +27,9 @@
 #include <ros/ros.h>
 #include "vision/ChessPiece.h"
 #include "vision/ChessPoint.h"
+#include "vision/ChessVector.h"
 #include "vision/ChessPiecesVector.h"
+
 
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::Marker>;
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::MarkerData>;
@@ -43,14 +45,14 @@ double marker_weight;
 
 #define HEADER_SIZE 8
 
-CvPoint FindWightedMidPoint(int track_id,int knob_id_num, double visualize2d_x,double visualize2d_y, std::vector<CvPoint> chess_2dcoordinates){
+CvPoint FindWightedMidPoint(int track_id,int piece_id_num, double visualize2d_x,double visualize2d_y, vision::ChessVector chess_2dcoordinates){
 	
 /*	ROS_INFO("%d",int(GetId()));*/
 	//cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1])
 	//DrawChessCoordinates(image, cam, visualize2d_points, color);
 
 	marker_weight=0.5;
-	if(chess_2dcoordinates[0].x==0 && chess_2dcoordinates[1].x==0 && chess_2dcoordinates[2].x==0){
+	if(chess_2dcoordinates.p_vector[0].x==0 && chess_2dcoordinates.p_vector[1].x==0 && chess_2dcoordinates.p_vector[2].x==0){
 		
 		ROS_INFO("init ?");
 		return cvPoint((int)visualize2d_x, (int)visualize2d_y); 
@@ -58,38 +60,38 @@ CvPoint FindWightedMidPoint(int track_id,int knob_id_num, double visualize2d_x,d
 	}//else return the midpoint, of the previous knob point and the new detected one..
 	
 	//calculate the weight depending the detected track and the knob position..
-	if(knob_id_num==27 || knob_id_num==28 || knob_id_num==36 || knob_id_num==37 || knob_id_num==45 || knob_id_num==46 ||
-	 knob_id_num==0 || knob_id_num==1 || knob_id_num==9 || knob_id_num==10 || knob_id_num==18 || knob_id_num==19){ //in front of marker 7
+	if(piece_id_num==27 || piece_id_num==28 || piece_id_num==36 || piece_id_num==37 || piece_id_num==45 || piece_id_num==46 ||
+	 piece_id_num==0 || piece_id_num==1 || piece_id_num==9 || piece_id_num==10 || piece_id_num==18 || piece_id_num==19){ //in front of marker 7
 		marker_weight=1;
 		if(track_id==8){
 			marker_weight=1-marker_weight;
 		}
-	}else if(knob_id_num==29 || knob_id_num==30 || knob_id_num==38 || knob_id_num==39 || knob_id_num==47 ||
-	 knob_id_num==2 || knob_id_num==3 || knob_id_num==11 || knob_id_num==12 || knob_id_num==20 || knob_id_num==21){ //in front of marker 7 zone 2
+	}else if(piece_id_num==29 || piece_id_num==30 || piece_id_num==38 || piece_id_num==39 || piece_id_num==47 ||
+	 piece_id_num==2 || piece_id_num==3 || piece_id_num==11 || piece_id_num==12 || piece_id_num==20 || piece_id_num==21){ //in front of marker 7 zone 2
 		marker_weight=0.7;
 		if(track_id==8){
 			marker_weight=1-marker_weight;
 		}
 	}
-	else if(knob_id_num==75 || knob_id_num==76 || knob_id_num==77 || knob_id_num==66 || knob_id_num==67 || knob_id_num==68  ||
-	knob_id_num==78 || knob_id_num==79 || knob_id_num==80 || knob_id_num==69|| knob_id_num==70 || knob_id_num==71){ //in front of marker 8
+	else if(piece_id_num==75 || piece_id_num==76 || piece_id_num==77 || piece_id_num==66 || piece_id_num==67 || piece_id_num==68  ||
+	piece_id_num==78 || piece_id_num==79 || piece_id_num==80 || piece_id_num==69|| piece_id_num==70 || piece_id_num==71){ //in front of marker 8
 		marker_weight=1;
 		if(track_id==7){
 			marker_weight=1-marker_weight;
 		}	
-	}else if(knob_id_num==62 || knob_id_num==61 || knob_id_num==60 || knob_id_num==59 || knob_id_num==58 || knob_id_num==57 
-	|| knob_id_num==53 || knob_id_num==52 || knob_id_num==51 || knob_id_num==50 || knob_id_num==49){ //in front of marker 8 zone
+	}else if(piece_id_num==62 || piece_id_num==61 || piece_id_num==60 || piece_id_num==59 || piece_id_num==58 || piece_id_num==57 
+	|| piece_id_num==53 || piece_id_num==52 || piece_id_num==51 || piece_id_num==50 || piece_id_num==49){ //in front of marker 8 zone
 		marker_weight=0.7;
 		if(track_id==7){
 			marker_weight=1-marker_weight;
 		}	
 	}//additional case -  chess right bottom corner, gives advantage to marker 8
-	else if(knob_id_num==65 || knob_id_num==64 || knob_id_num==73 || knob_id_num==74){
+	else if(piece_id_num==65 || piece_id_num==64 || piece_id_num==73 || piece_id_num==74){
 		marker_weight=0.8;
 		if(track_id==7){
 			marker_weight=1-marker_weight;
 		}
-	}/*else if(knob_id_num==72 ){ // bottor-right point
+	}/*else if(piece_id_num==72 ){ // bottor-right point
 		marker_weight=0.75;
 		if(track_id==7){
 			marker_weight=1-marker_weight;
@@ -98,13 +100,13 @@ CvPoint FindWightedMidPoint(int track_id,int knob_id_num, double visualize2d_x,d
 	//else weight = 0.5
 
 	//the exact midpoint
-	//return cvPoint((chess_2dcoordinates[knob_id_num].x+(int)visualize2d_x)/2, (chess_2dcoordinates[knob_id_num].y+(int)visualize2d_y)/2);
+	//return cvPoint((chess_2dcoordinates[piece_id_num].x+(int)visualize2d_x)/2, (chess_2dcoordinates[piece_id_num].y+(int)visualize2d_y)/2);
 
-	return cvPoint( (int)((chess_2dcoordinates[knob_id_num].x)*(1-marker_weight)+(int)visualize2d_x*marker_weight),(int)((chess_2dcoordinates[knob_id_num].y)*(1-marker_weight)+(int)visualize2d_y*marker_weight));
+	return cvPoint( (int)((chess_2dcoordinates.p_vector[piece_id_num].x)*(1-marker_weight)+(int)visualize2d_x*marker_weight),(int)((chess_2dcoordinates.p_vector[piece_id_num].y)*(1-marker_weight)+(int)visualize2d_y*marker_weight));
 
 }
 
-std::vector<CvPoint> Marker::VisualizeChess(IplImage *image, Camera *cam, std::vector<CvPoint> chess_2dcoordinates, CvScalar color) const {
+vision::ChessVector Marker::VisualizeChess(IplImage *image, Camera *cam, vision::ChessVector chess_2dcoordinates, CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -152,7 +154,7 @@ std::vector<CvPoint> Marker::VisualizeChess(IplImage *image, Camera *cam, std::v
 
 	if(int(GetId())==7){
 //ROS_INFO("eide 7");
-		int knob_id_num=0;
+		int piece_id_num=0;
 		for (double i = -3.5-lim; i < 3.6+lim; i++)
 	    {
 	    	for (double j = 1.1-lim; j < 8.2+lim; j++)
@@ -175,23 +177,23 @@ std::vector<CvPoint> Marker::VisualizeChess(IplImage *image, Camera *cam, std::v
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
 				visualize3d_points[8][2]=square_z;
-//ROS_INFO("gia to %d",knob_id_num);
+//ROS_INFO("gia to %d",piece_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
 				//DrawChessCoordinates(image, cam, CvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),  CV_RGB(0,255,0));
 				CvPoint knob_points;
-				knob_points=FindWightedMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+				knob_points=FindWightedMidPoint(int(GetId()),piece_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 				
-				//ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
+				//ROS_INFO("%f %f gia knob %d",i,j,piece_id_num);
 
-				chess_2dcoordinates[knob_id_num].x=knob_points.x;
-				chess_2dcoordinates[knob_id_num].y=knob_points.y;
-
+				chess_2dcoordinates.p_vector[piece_id_num].x=knob_points.x;
+				chess_2dcoordinates.p_vector[piece_id_num].y=knob_points.y;
+				chess_2dcoordinates.p_vector[piece_id_num].state="estimated";
 				
-				//ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
+				//ROS_INFO("vgainoun %d %d",chess_2dcoordinates.p_vector[piece_id_num].x,chess_2dcoordinates.p_vector[piece_id_num].y);
 				
-				DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color); //change it to CV_RGB(255,0,0) for estimation debuging
+				DrawChessCoordinates(image, cam, CvPoint(chess_2dcoordinates.p_vector[piece_id_num].x,chess_2dcoordinates.p_vector[piece_id_num].y), color); //change it to CV_RGB(255,0,0) for estimation debuging
 
 /*				square_z=5;
 				visualize3d_points[11][0]=square_x;
@@ -206,21 +208,21 @@ std::vector<CvPoint> Marker::VisualizeChess(IplImage *image, Camera *cam, std::v
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
 				visualize3d_points[8][2]=square_z;
-ROS_INFO("gia to %d",knob_id_num);
+ROS_INFO("gia to %d",piece_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,0,0));*/
-				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
-				//chess_2dcoordinates[0].x=1;
-				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
+				//ROS_INFO("meta  %d %d",chess_2dcoordinates.p_vector.size(),chess_2dcoordinates.p_vector[0].x);
+				//chess_2dcoordinates.p_vector[0].x=1;
+				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.p_vector.size(),chess_2dcoordinates.p_vector[0].x);
 				
-				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
-	    		knob_id_num++;
+				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates.p_vector[0][0],chess_2dcoordinates.p_vector[0][1],chess_2dcoordinates.p_vector[1][0],chess_2dcoordinates.p_vector[1][1]); 			
+	    		piece_id_num++;
 	    	}
 	    }
 	}else if(int(GetId())==8){  //ROTATED MATRIX - TODO REDUCE CODE -> ONE PART 2D ARRAY LOOP
 		//ROS_INFO("eide 8");
-		int knob_id_num=0;
+		int piece_id_num=0;
 		for (double j = 8.1+lim; j>1.0-lim ; j--)
 	    {	
 			for (double i = -3.5-lim; i < 3.6+lim; i++)
@@ -243,28 +245,29 @@ ROS_INFO("gia to %d",knob_id_num);
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
 				visualize3d_points[8][2]=square_z;
-//ROS_INFO("gia to %d",knob_id_num);
+//ROS_INFO("gia to %d",piece_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
 				//DrawChessCoordinates(image, cam, CvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]),  CV_RGB(0,0,255));
 				CvPoint knob_points;
-				knob_points=FindWightedMidPoint(int(GetId()),knob_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
+				knob_points=FindWightedMidPoint(int(GetId()),piece_id_num,visualize2d_points[8][0], visualize2d_points[8][1],chess_2dcoordinates);
 				
-			//	ROS_INFO("%f %f gia knob %d",i,j,knob_id_num);
+			//	ROS_INFO("%f %f gia knob %d",i,j,piece_id_num);
 				
-				chess_2dcoordinates[knob_id_num].x=knob_points.x;
-				chess_2dcoordinates[knob_id_num].y=knob_points.y;
-				//ROS_INFO("vgainoun %d %d",chess_2dcoordinates[knob_id_num].x,chess_2dcoordinates[knob_id_num].y);
+				chess_2dcoordinates.p_vector[piece_id_num].x=knob_points.x;
+				chess_2dcoordinates.p_vector[piece_id_num].y=knob_points.y;
+				chess_2dcoordinates.p_vector[piece_id_num].state="estimated";
+				//ROS_INFO("vgainoun %d %d",chess_2dcoordinates.p_vector[piece_id_num].x,chess_2dcoordinates.p_vector[piece_id_num].y);
 				
-				//DrawChessCoordinates(image, cam, chess_2dcoordinates[knob_id_num], color);
+				//DrawChessCoordinates(image, cam, chess_2dcoordinates.p_vector[piece_id_num], color);
 				//DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,0,255));
-				//ROS_INFO("meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
-				//chess_2dcoordinates[0].x=1;
-				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.size(),chess_2dcoordinates[0].x);
+				//ROS_INFO("meta  %d %d",chess_2dcoordinates.p_vector.size(),chess_2dcoordinates.p_vector[0].x);
+				//chess_2dcoordinates.p_vector[0].x=1;
+				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.p_vector.size(),chess_2dcoordinates.p_vector[0].x);
 				//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
-				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates[0][0],chess_2dcoordinates[0][1],chess_2dcoordinates[1][0],chess_2dcoordinates[1][1]); 			
-	    		knob_id_num++;
+				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates.p_vector[0][0],chess_2dcoordinates.p_vector[0][1],chess_2dcoordinates.p_vector[1][0],chess_2dcoordinates.p_vector[1][1]); 			
+	    		piece_id_num++;
 	    	}
 	    }
 	} 
@@ -289,8 +292,6 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 		{  0, 0, edge_length },
 	};
 
-	//vision::ChessPiecesVector chessPiecesArea_2dcoordinates;
-	chessPiecesArea_2dcoordinates.p_vector.clear();
 	double visualize2d_points[12][2];
 	CvMat visualize3d_points_mat;
 	CvMat visualize2d_points_mat;
@@ -298,15 +299,12 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 	
 	bool enabe_squares_or_centre=false;
 	double lim=0.5;
-	if(enabe_squares_or_centre){ //true for squares
-		lim=0;
-	}
 
 	if(int(GetId())==7){
-		int knob_id_num=0;
-		for (double i = -3.5-lim; i < 3.6+lim; i++)
+		int piece_id_num=0;
+		for (double i = -3.5-lim; i < 2.6+lim; i++)
 	    {
-	    	for (double j = 1.1-lim; j < 8.2+lim; j++)
+	    	for (double j = 1.1-lim; j < 7.2+lim; j++)
 	    	{
 	    		//the squares' centre coordinates (chess square center points)
 	    		double square_x=edge_length*i;
@@ -315,7 +313,7 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 
 	    		//cube base coordinates in 2d plane							
 
-			if(knob_id_num>=63&&knob_id_num<71){ //watch out (estimating on bottom left corner knob) 63-71 completes the cubes of column 8.
+			//watch out (estimating on bottom left corner knob) 63-71 completes the cubes of column 8.
 					square_x=edge_length*i+edge_length*0.15;
 					square_y=edge_length*j+edge_length*0.15;
 					square_z=4; //TODO REPLACE WITH EACH PAWN HEIGHT SEPARATELY.. value is in cm like marker size.
@@ -342,10 +340,10 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					c.x = (int)visualize2d_points[10][0]; c.y = (int)visualize2d_points[10][1]; c.state="estimated";
 					d.x = (int)visualize2d_points[11][0]; d.y = (int)visualize2d_points[11][1]; d.state="estimated";
 
-			/*		CvPoint a = cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
-					CvPoint b = cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]);
-					CvPoint c = cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]);
-					CvPoint d = cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);*/
+					//CvPoint a = cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+					//CvPoint b = cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]);
+					//CvPoint c = cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]);
+					//CvPoint d = cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
 					//	ROS_INFO("ta shmia inai %d %d %d %d %d %d %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1], (int)visualize2d_points[9][0], (int)visualize2d_points[9][1],(int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
 
 					square_x=edge_length*i+edge_length*0.85;
@@ -366,7 +364,7 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 					cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 
-			/*		cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(0,255,0));
+/*					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(0,255,0));
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), CV_RGB(0,255,0));
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,255,0));
 
@@ -384,21 +382,27 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 
 					cvLine(image, a, b, CV_RGB(0,255,0));
 					cvLine(image, a, c, CV_RGB(0,255,0));
-					cvLine(image, a, d, CV_RGB(0,255,0));
-			*/
+					cvLine(image, a, d, CV_RGB(0,255,0));*/
+			
 					e.x = (int)visualize2d_points[8][0]; e.y = (int)visualize2d_points[8][1]; e.state="estimated";
 					f.x = (int)visualize2d_points[9][0]; f.y = (int)visualize2d_points[9][1]; f.state="estimated";
 					g.x = (int)visualize2d_points[10][0]; g.y = (int)visualize2d_points[10][1]; g.state="estimated";
 					h.x = (int)visualize2d_points[11][0]; h.y = (int)visualize2d_points[11][1]; h.state="estimated";
 
 
-					vision::ChessPiece piece;
-					piece.a=a; piece.b=b; piece.c=c; piece.d=d;piece.e=e; piece.f=f; piece.g=g; piece.h=h; piece.category="pawn";
-					chessPiecesArea_2dcoordinates.p_vector.push_back(piece);
-
-			}
-			
-	    	knob_id_num++;
+					//vision::ChessPiece piece;
+					//piece.a=a; piece.b=b; piece.c=c; piece.d=d;piece.e=e; piece.f=f; piece.g=g; piece.h=h; piece.category="pawn";
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].a=a;//.push_back(piece);
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].b=b;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].c=c;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].d=d;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].e=e;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].f=f;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].g=g;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].h=h;
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].category="pawn";
+					//ROS_INFO("piecee%d",piece_id_num);
+					piece_id_num++;
 	    	}
 	    }
 	}

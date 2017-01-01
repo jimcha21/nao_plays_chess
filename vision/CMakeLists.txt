@@ -56,6 +56,7 @@ add_message_files(
    ChessPoint.msg
    ChessVector.msg
    ChessPiecesVector.msg
+   ChessInfoVector.msg
 )
 
 ## Declare ROS messages and services
