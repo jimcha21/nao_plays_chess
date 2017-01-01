@@ -92,7 +92,7 @@ namespace alvar {
      *  This virtual method is meant to be implemented by heirs.
      */
     virtual bool DecodeContent(int *orientation);
-	
+  
     /** \brief Returns the content as a matrix
      */
     CvMat *GetContent() const {
@@ -255,12 +255,12 @@ namespace alvar {
       MARKER_CONTENT_TYPE_FILE,
       MARKER_CONTENT_TYPE_HTTP
     };
-    unsigned char	content_type;
+    unsigned char content_type;
 
     /** \brief \e MarkerData content can be presented either as number (\e MARKER_CONTENT_TYPE_NUMBER) or string */
     union {
-      unsigned long	id;							
-      char			str[MAX_MARKER_STRING_LEN]; 
+      unsigned long id;             
+      char      str[MAX_MARKER_STRING_LEN]; 
     } data;
 
     /** \brief Default constructor 
