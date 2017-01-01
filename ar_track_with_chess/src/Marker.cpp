@@ -334,16 +334,16 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 
 					// Coordinates
 
-					vision::ChessPoint a,b,c,d,e,f,g,h;
+/*					vision::ChessPoint a,b,c,d,e,f,g,h;
 					a.x = (int)visualize2d_points[8][0]; a.y = (int)visualize2d_points[8][1]; a.state="estimated";
 					b.x = (int)visualize2d_points[9][0]; b.y = (int)visualize2d_points[9][1]; b.state="estimated";
 					c.x = (int)visualize2d_points[10][0]; c.y = (int)visualize2d_points[10][1]; c.state="estimated";
-					d.x = (int)visualize2d_points[11][0]; d.y = (int)visualize2d_points[11][1]; d.state="estimated";
+					d.x = (int)visualize2d_points[11][0]; d.y = (int)visualize2d_points[11][1]; d.state="estimated";*/
 
-					//CvPoint a = cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
-					//CvPoint b = cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]);
-					//CvPoint c = cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]);
-					//CvPoint d = cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
+					CvPoint a = cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
+					CvPoint b = cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]);
+					CvPoint c = cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]);
+					CvPoint d = cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
 					//	ROS_INFO("ta shmia inai %d %d %d %d %d %d %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1], (int)visualize2d_points[9][0], (int)visualize2d_points[9][1],(int)visualize2d_points[11][0], (int)visualize2d_points[11][1]);
 
 					square_x=edge_length*i+edge_length*0.85;
@@ -364,7 +364,8 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 					cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 
-/*					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(0,255,0));
+					if(piece_id_num==49){
+					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(0,255,0));
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), CV_RGB(0,255,0));
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,255,0));
 
@@ -382,9 +383,9 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 
 					cvLine(image, a, b, CV_RGB(0,255,0));
 					cvLine(image, a, c, CV_RGB(0,255,0));
-					cvLine(image, a, d, CV_RGB(0,255,0));*/
+					cvLine(image, a, d, CV_RGB(0,255,0));}
 			
-					e.x = (int)visualize2d_points[8][0]; e.y = (int)visualize2d_points[8][1]; e.state="estimated";
+/*					e.x = (int)visualize2d_points[8][0]; e.y = (int)visualize2d_points[8][1]; e.state="estimated";
 					f.x = (int)visualize2d_points[9][0]; f.y = (int)visualize2d_points[9][1]; f.state="estimated";
 					g.x = (int)visualize2d_points[10][0]; g.y = (int)visualize2d_points[10][1]; g.state="estimated";
 					h.x = (int)visualize2d_points[11][0]; h.y = (int)visualize2d_points[11][1]; h.state="estimated";
@@ -401,7 +402,7 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].g=g;
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].h=h;
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].category="pawn";
-					//ROS_INFO("piecee%d",piece_id_num);
+					//ROS_INFO("piecee%d",piece_id_num);*/
 					piece_id_num++;
 	    	}
 	    }
