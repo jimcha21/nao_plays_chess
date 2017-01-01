@@ -1,1 +1,1 @@
-ChessboardSquare[64] chessSquare
+ChessboardSquare[] chessSquare

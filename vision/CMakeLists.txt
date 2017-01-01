@@ -228,6 +228,11 @@ target_link_libraries(shitomashi_goodFeatures_chesspoints ${catkin_LIBRARIES})
 target_link_libraries(shitomashi_goodFeatures_chesspoints ${OpenCV_LIBS} )
 add_dependencies(shitomashi_goodFeatures_chesspoints ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS})
 
+add_executable(ChessGame nodes/ChessGame.cpp)
+target_link_libraries(ChessGame ${catkin_LIBRARIES})
+target_link_libraries(ChessGame ${OpenCV_LIBS} )
+add_dependencies(ChessGame ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS})
+
 add_executable(image_converter src/image_converter.cpp)
 target_link_libraries(image_converter ${catkin_LIBRARIES})
 add_dependencies(image_converter beginner_tutorials_generate_messages_cpp)
