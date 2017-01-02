@@ -109,7 +109,7 @@ public:
 	 */
 	void SetTranslation(const double *tra);
 	/** Set the translation part for the \e Pose */
-	void SetTranslation(const double x, const double y, const double z);
+	void SetTranslation(const double x,const double y,const double z);
 	/** Get the translation part from the \e Pose 
 	 *  \param tra Column vector where the three translation elements are filled in
 	 */

@@ -180,7 +180,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 			{
 				//Get the pose relative to the camera
         		int id = (*(marker_detector.markers))[i].GetId(); 
-				Pose p = (*(marker_detector.markers))[i].pose;  // ! ayto prepei na deis
+				Pose p = (*(marker_detector.markers))[i].pose;  //!
 				double px = (p.translation[0])/100.0;
 				double py = (p.translation[1])/100.0;
 				double pz = (p.translation[2])/100.0;

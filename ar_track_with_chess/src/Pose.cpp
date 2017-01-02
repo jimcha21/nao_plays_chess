@@ -159,7 +159,7 @@ void Pose::SetTranslation(const double *tra) {
 	translation[2] = tra[2];
 	translation[3] = 1;
 }
-void Pose::SetTranslation(const double x, const double y, const double z) {
+void Pose::SetTranslation(const double x,const double y,const double z) {
 	translation[0] = x;
 	translation[1] = y;
 	translation[2] = z;
