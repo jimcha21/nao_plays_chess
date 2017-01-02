@@ -4,7 +4,8 @@
 #include "vision/ChessboardSquare.h"
 #include <stdlib.h> 
 #include <std_msgs/String.h>
-
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::stoi
 
 
 /*string colour(script,clr){
@@ -148,17 +149,94 @@ Select one Option from below:\n\n\
 		}else if(selection.compare("2")==0){
 			chessboard=init_piecesPositions(chessboard);
 			std::cout << "Pieces repositioned to their initial positions..\n";
-		}else if(selection.compare("2")==0){
+		}else if(selection.compare("3")==0){
 			
+			vision::ChessboardSquare square;
+			std::string piece_choice="0";
+			int line,column,square_id;
+			//std::string::size_type sz; 
+			
+			std::cout << "# # # # # # # # # # # # # # # # # # # # # # # #\n\nPlease insert the Piece's information.\n(0:cancel)*Line: ";
+			std::getline(std::cin, piece_choice);
+			if(piece_choice.compare("0")!=0){
+				line = atoi(piece_choice.c_str());
+				//line = std::stoi (piece_choice,&sz);
+				std::cout << "\n(0:cancel)*Column: ";
+
+				std::getline(std::cin, piece_choice);
+				if(piece_choice.compare("0")!=0){
+
+					column = atoi(piece_choice.c_str());
+					//column = std::stoi (piece_choice,&sz);
+
+					square_id=(column*8-1)-(8-line);
+					square.square_color = chessboard.chessSquare[square_id].square_color;
+
+					std::cout << "\n(0:cancel)*Piece color: ";
+					std::getline(std::cin, piece_choice);
+					if(piece_choice.compare("0")!=0&&(piece_choice.compare("black")==0||piece_choice.compare("white")==0)){
+						
+						square.piece_color = piece_choice;
+						
+						std::cout << "\n(0:cancel)*Piece category: ";
+						std::getline(std::cin, piece_choice);
+						if(piece_choice.compare("0")!=0&&(piece_choice.compare("pawn")==0||piece_choice.compare("knight")==0||piece_choice.compare("bishop")==0||piece_choice.compare("tower")==0||piece_choice.compare("king")==0||piece_choice.compare("queen")==0)){
+							square.category = piece_choice;
+							if(piece_choice.compare("pawn")==0){
+								square.piece_height=4;
+							}else if(piece_choice.compare("knight")==0){
+								square.piece_height=5.5;
+							}else if(piece_choice.compare("bishop")==0){
+								square.piece_height=5.4;		
+							}else if(piece_choice.compare("tower")==0){
+								square.piece_height=4.4;
+							}else if(piece_choice.compare("king")==0){
+								square.piece_height=7.9;	
+							}else if(piece_choice.compare("queen")==0){
+								square.piece_height=7.8;	
+							}
+							//success
+							std::cout << "\n\ninsertion done!";
+							chessboard.chessSquare[square_id].square_color=square.square_color;
+							chessboard.chessSquare[square_id].category=square.category;
+							chessboard.chessSquare[square_id].piece_height=square.piece_height;
+							chessboard.chessSquare[square_id].piece_color=square.piece_color;
+
+						}
+					}
+				}
+			}
+
+
 		}else if (selection.compare("0")==0){
 			terminate=true;
 		}
 		if(selection.compare("4")==0){
-			std::cout << "# # # # # # # # # # # # # # # # # # # # # # # #\n\n";
-			for (int i = 7; i>=0; i--)
-			{
-				std::cout << chessboard.chessSquare[i].category << "|" << chessboard.chessSquare[i+8].category << "|" << chessboard.chessSquare[i+16].category << "|" << chessboard.chessSquare[i+24].category << "|" << chessboard.chessSquare[i+32].category << "|" << chessboard.chessSquare[i+40].category << "|" << chessboard.chessSquare[i+48].category<< "|" << chessboard.chessSquare[i+56].category <<  "\n";
+			std::string draw_choice="0";
+			std::cout << "# # # # # # # # # # # # # # # # # # # # # # # #\n\nChoices : \n*Chess squares Colors [1] \n*Chess pieces Colors [2] \n*Chess pieces categories [3] \n*Chess pieces' heights [4]\n : ";
+			std::getline(std::cin, draw_choice);
+			if(draw_choice.compare("1")==0){
+				for (int i = 7; i>=0; i--)
+				{
+					std::cout << chessboard.chessSquare[i].square_color << "|" << chessboard.chessSquare[i+8].square_color << "|" << chessboard.chessSquare[i+16].square_color << "|" << chessboard.chessSquare[i+24].square_color << "|" << chessboard.chessSquare[i+32].square_color << "|" << chessboard.chessSquare[i+40].square_color << "|" << chessboard.chessSquare[i+48].square_color<< "|" << chessboard.chessSquare[i+56].square_color <<  "\n";
+				}
+			}else if(draw_choice.compare("2")==0){
+				for (int i = 7; i>=0; i--)
+				{
+					std::cout << chessboard.chessSquare[i].piece_color << "|" << chessboard.chessSquare[i+8].piece_color << "|" << chessboard.chessSquare[i+16].piece_color << "|" << chessboard.chessSquare[i+24].piece_color << "|" << chessboard.chessSquare[i+32].piece_color << "|" << chessboard.chessSquare[i+40].piece_color << "|" << chessboard.chessSquare[i+48].piece_color<< "|" << chessboard.chessSquare[i+56].piece_color <<  "\n";
+				}
+			}else if(draw_choice.compare("3")==0){
+				for (int i = 7; i>=0; i--)
+				{
+					std::cout << chessboard.chessSquare[i].category << "|" << chessboard.chessSquare[i+8].category << "|" << chessboard.chessSquare[i+16].category << "|" << chessboard.chessSquare[i+24].category << "|" << chessboard.chessSquare[i+32].category << "|" << chessboard.chessSquare[i+40].category << "|" << chessboard.chessSquare[i+48].category<< "|" << chessboard.chessSquare[i+56].category <<  "\n";
+				}
+			}else if(draw_choice.compare("4")==0){
+				for (int i = 7; i>=0; i--)
+				{
+					std::cout << chessboard.chessSquare[i].piece_height << "|" << chessboard.chessSquare[i+8].piece_height << "|" << chessboard.chessSquare[i+16].piece_height << "|" << chessboard.chessSquare[i+24].piece_height << "|" << chessboard.chessSquare[i+32].piece_height << "|" << chessboard.chessSquare[i+40].piece_height << "|" << chessboard.chessSquare[i+48].piece_height<< "|" << chessboard.chessSquare[i+56].piece_height <<  "\n";
+				}
 			}
+
 			std::cout << "\n# # # # # # # # # # # # # # # # # # # # # # # #\n";
 		}else system("clear");		
 		selection="0";
