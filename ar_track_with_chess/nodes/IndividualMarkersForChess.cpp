@@ -20,6 +20,8 @@
 #include "vision/ChessPiecesVector.h"
 #include "vision/ChessPoint.h"
 #include "vision/ChessInfoVector.h"
+#include "vision/ChessboardSquare.h"
+#include "vision/ChessBoard.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp> //remove those 2 if you are in paionaios..
@@ -49,6 +51,7 @@ MarkerDetector<MarkerData> marker_detector;
 vision::ChessPiecesVector chesspieces_vector;
 vision::ChessVector chesspoints_vector;
 vision::ChessInfoVector chess_knob_vector_;
+vision::ChessBoard game_;
 
 bool enableSwitched = false;
 bool enabled = true;
@@ -65,6 +68,8 @@ std::string cam_info_topic;
 std::string output_frame;
 
 void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg);
+void getGameStatus (const vision::ChessBoard & game_data);
+
 
 const char* getTfName(int tf_category, int data_name)
 {			
@@ -78,6 +83,18 @@ const char* getTfName(int tf_category, int data_name)
  	}
 	const char *nameInChar = name.c_str();
  	return nameInChar;
+}
+
+void getGameStatus (const vision::ChessBoard & game_data)
+{
+/*	for (int i = 7; i>=0; i--)
+	{
+		std::cout << game_data.chessSquare[i].category << "|" << game_data.chessSquare[i+8].category << "|" << game_data.chessSquare[i+16].category << "|" << game_data.chessSquare[i+24].category << "|" << game_data.chessSquare[i+32].category << "|" << game_data.chessSquare[i+40].category << "|" << game_data.chessSquare[i+48].category<< "|" << game_data.chessSquare[i+56].category <<  "\n";
+	}*/
+	game_.chessSquare.clear();
+	for(int i=0;i<game_data.chessSquare.size();i++){		
+		game_.chessSquare.push_back(game_data.chessSquare[i]);
+	}
 }
 
 void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
@@ -101,6 +118,15 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             //Convert the image
             cv_ptr_ = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
 
+            //Debuging for checking if game status was received properly..
+			/*ROS_INFO("recevied game status ? %d=64? ",game_.chessSquare.size());
+			if(game_.chessSquare.size()!=0){
+			for (int i = 7; i>=0; i--)
+				{
+					std::cout << game_.chessSquare[i].category << "|" << game_.chessSquare[i+8].category << "|" << game_.chessSquare[i+16].category << "|" << game_.chessSquare[i+24].category << "|" << game_.chessSquare[i+32].category << "|" << game_.chessSquare[i+40].category << "|" << game_.chessSquare[i+48].category<< "|" << game_.chessSquare[i+56].category <<  "\n";
+				}
+			}*/
+
             //Get the estimated pose of the main markers by using all the markers in each bundle
 
             // GetMultiMarkersPoses expects an IplImage*, but as of ros groovy, cv_bridge gives
@@ -111,11 +137,11 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
-				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
+				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, game_, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
 				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
 				cv::waitKey(3);
 			}else{
-				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
+				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, game_, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
 			}
 
             vision::ChessPoint chess_point;
@@ -575,6 +601,7 @@ int main(int argc, char *argv[])
   /// Subscriber for enable-topic so that a user can turn off the detection if it is not used without
   /// having to use the reconfigure where he has to know all parameters
   ros::Subscriber enable_sub_ = pn.subscribe("enable_detection", 1, &enableCallback);
+  ros::Subscriber game_sub_ = pn.subscribe("/Game_Menu_node/chessboard_state", 1, &getGameStatus);
 
   enableSwitched = true;
   while (ros::ok())

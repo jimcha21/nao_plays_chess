@@ -29,6 +29,7 @@
 #include "vision/ChessPoint.h"
 #include "vision/ChessVector.h"
 #include "vision/ChessPiecesVector.h"
+#include "vision/ChessBoard.h"
 
 
 template class ALVAR_EXPORT alvar::MarkerIteratorImpl<alvar::Marker>;
@@ -106,7 +107,7 @@ CvPoint FindWightedMidPoint(int track_id,int piece_id_num, double visualize2d_x,
 
 }
 
-vision::ChessVector Marker::VisualizeChess(IplImage *image, Camera *cam, vision::ChessVector chess_2dcoordinates, CvScalar color) const {
+vision::ChessVector Marker::VisualizeChess(IplImage *image, Camera *cam, vision::ChessBoard game_, vision::ChessVector chess_2dcoordinates, CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -274,7 +275,7 @@ ROS_INFO("gia to %d",piece_id_num);
     return chess_2dcoordinates;
 }
 
-vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *cam, vision::ChessPiecesVector chessPiecesArea_2dcoordinates,CvScalar color) const {
+vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *cam, vision::ChessBoard game_, vision::ChessPiecesVector chessPiecesArea_2dcoordinates,CvScalar color) const {
 		double visualize3d_points[12][3] = {
 		// cube
 		{ -(edge_length), -(edge_length), 0 },
@@ -306,10 +307,13 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 	    {
 	    	for (double j = 1.1-lim; j < 7.2+lim; j++)
 	    	{
-	    		//the squares' centre coordinates (chess square center points)
-	    		double square_x=edge_length*i;
-	    		double square_y=edge_length*j;	    		
-	    		double square_z=0;
+	    		
+	    		if(game_.chessSquare[piece_id_num].category.compare("empty")!=0){//check if a piece exists in the current square..
+
+		    	//the squares' centre coordinates (chess square center points)
+		    		double square_x=edge_length*i;
+		    		double square_y=edge_length*j;	    		
+		    		double square_z=0;
 
 	    		//cube base coordinates in 2d plane							
 
@@ -348,7 +352,7 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 
 					square_x=edge_length*i+edge_length*0.85;
 					square_y=edge_length*j+edge_length*0.85;
-					square_z=4; //TODO REPLACE WITH EACH PAWN HEIGHT SEPARATELY.. value is in cm like marker size.
+					square_z=game_.chessSquare[piece_id_num].piece_height; //depends on piece's height.. value is in cm like marker size.
 					visualize3d_points[11][0]=square_x;
 					visualize3d_points[11][1]=square_y;
 					visualize3d_points[11][2]=0;
@@ -364,7 +368,6 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 					cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 
-					if(piece_id_num==49){
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[9][0], (int)visualize2d_points[9][1]), CV_RGB(0,255,0));
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[10][0], (int)visualize2d_points[10][1]), CV_RGB(0,255,0));
 					cvLine(image, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), cvPoint((int)visualize2d_points[11][0], (int)visualize2d_points[11][1]), CV_RGB(0,255,0));
@@ -383,7 +386,7 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 
 					cvLine(image, a, b, CV_RGB(0,255,0));
 					cvLine(image, a, c, CV_RGB(0,255,0));
-					cvLine(image, a, d, CV_RGB(0,255,0));}
+					cvLine(image, a, d, CV_RGB(0,255,0));
 			
 /*					e.x = (int)visualize2d_points[8][0]; e.y = (int)visualize2d_points[8][1]; e.state="estimated";
 					f.x = (int)visualize2d_points[9][0]; f.y = (int)visualize2d_points[9][1]; f.state="estimated";
@@ -403,11 +406,10 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].h=h;
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].category="pawn";
 					//ROS_INFO("piecee%d",piece_id_num);*/
-					piece_id_num++;
-	    	}
-	    }
-	}
-    return chessPiecesArea_2dcoordinates;
+				}piece_id_num++;
+			}
+		}
+	}return chessPiecesArea_2dcoordinates;
 }
 
 void Marker::VisualizeMarkerPose(IplImage *image, Camera *cam, double visualize2d_points[12][2], CvScalar color) const {

@@ -47,7 +47,7 @@ using std::rotate;
 #include <Eigen/StdVector>
 #include "vision/ChessPiecesVector.h"
 #include "vision/ChessVector.h"
-
+#include "vision/ChessBoard.h"
 #include "vision/ChessInfoVector.h"
 
 
@@ -140,6 +140,7 @@ public:
 
 	vision::ChessInfoVector DetectChess(IplImage *image,
 			   Camera *cam,
+			   vision::ChessBoard game_,
 			   bool track=false,
 			   bool visualize=false,
 			   double max_new_marker_error=0.08,

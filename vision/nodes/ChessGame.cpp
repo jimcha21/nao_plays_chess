@@ -7,6 +7,13 @@
 #include <iostream>   // std::cout
 #include <string>     // std::string, std::stoi
 
+//in cm..
+float pawn_height=4;
+float tower_height=4.2;
+float knight_height=5.2;
+float bishop_height=5.1;
+float king_height=6.5;
+float queen_height=6.3;
 
 /*string colour(script,clr){
     #clr
@@ -51,46 +58,46 @@ vision::ChessBoard init_piecesPositions(vision::ChessBoard chessboard){
 			if(i==1){
 				square.category="pawn";
 				square.piece_color="white";
-				square.piece_height=4; //4 cm ..
+				square.piece_height=pawn_height; //4 cm ..
 			}else if(i==6){
 				square.category="pawn";
-				square.piece_height=4;
+				square.piece_height=pawn_height;
 				square.piece_color="black";				
 			}else if(i==0){				
 				square.piece_color="white";
 				if(j==0||j==7){
 					square.category="tower";
-					square.piece_height=4.4;
+					square.piece_height=tower_height;
 				}else if(j==1||j==6){
 					square.category="knight";
-					square.piece_height=5.5;
+					square.piece_height=knight_height;
 				}else if(j==2||j==5){
 					square.category="bishop";
-					square.piece_height=5.4;					
+					square.piece_height=bishop_height;					
 				}else if(j==3){
 					square.category="queen";
-					square.piece_height=7.8;					
+					square.piece_height=queen_height;					
 				}else if(j==4){
 					square.category="king";
-					square.piece_height=7.9;					
+					square.piece_height=king_height;					
 				}
 			}else if(i==7){
 				square.piece_color="black";
 				if(j==0||j==7){
 					square.category="tower";
-					square.piece_height=4.4;
+					square.piece_height=tower_height;
 				}else if(j==1||j==6){
 					square.category="knight";
-					square.piece_height=5.5;
+					square.piece_height=knight_height;
 				}else if(j==2||j==5){
 					square.category="bishop";
-					square.piece_height=5.4;					
+					square.piece_height=bishop_height;					
 				}else if(j==3){
 					square.category="king";
-					square.piece_height=7.9;					
+					square.piece_height=king_height;					
 				}else if(j==4){
 					square.category="queen";
-					square.piece_height=7.8;					
+					square.piece_height=queen_height;					
 				}
 			}else{
 				square.piece_color="empty";
@@ -183,17 +190,17 @@ Select one Option from below:\n\n\
 						if(piece_choice.compare("0")!=0&&(piece_choice.compare("pawn")==0||piece_choice.compare("knight")==0||piece_choice.compare("bishop")==0||piece_choice.compare("tower")==0||piece_choice.compare("king")==0||piece_choice.compare("queen")==0)){
 							square.category = piece_choice;
 							if(piece_choice.compare("pawn")==0){
-								square.piece_height=4;
+								square.piece_height=pawn_height;
 							}else if(piece_choice.compare("knight")==0){
-								square.piece_height=5.5;
+								square.piece_height=knight_height;
 							}else if(piece_choice.compare("bishop")==0){
-								square.piece_height=5.4;		
+								square.piece_height=bishop_height;		
 							}else if(piece_choice.compare("tower")==0){
-								square.piece_height=4.4;
+								square.piece_height=tower_height;
 							}else if(piece_choice.compare("king")==0){
-								square.piece_height=7.9;	
+								square.piece_height=king_height;	
 							}else if(piece_choice.compare("queen")==0){
-								square.piece_height=7.8;	
+								square.piece_height=queen_height;	
 							}
 							//success
 							std::cout << "\n\ninsertion done!";

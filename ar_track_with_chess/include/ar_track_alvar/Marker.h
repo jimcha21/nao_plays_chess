@@ -48,7 +48,7 @@
 #include "vision/ChessPiecesVector.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
-
+#include "vision/ChessBoard.h"
 
 using namespace cv;
 namespace alvar {
@@ -108,8 +108,8 @@ namespace alvar {
      */
     void Visualize(IplImage *image, Camera *cam, CvScalar color=CV_RGB(255,0,0)) const;
     /*visualize Chessboard's characteristics' coordination points*/
-    vision::ChessVector VisualizeChess(IplImage *image, Camera *cam, vision::ChessVector  chess_2dcoordinates, CvScalar color=CV_RGB(255,0,0)) const;
-    vision::ChessPiecesVector VisualizeChessPawns(IplImage *image, Camera *cam, vision::ChessPiecesVector chessPiecesArea_2dcoordinates,CvScalar color=CV_RGB(255,0,0)) const;
+    vision::ChessVector VisualizeChess(IplImage *image, Camera *cam, vision::ChessBoard game_, vision::ChessVector  chess_2dcoordinates, CvScalar color=CV_RGB(255,0,0)) const;
+    vision::ChessPiecesVector VisualizeChessPawns(IplImage *image, Camera *cam, vision::ChessBoard game_, vision::ChessPiecesVector chessPiecesArea_2dcoordinates,CvScalar color=CV_RGB(255,0,0)) const;
     /** \brief Method for resizing the marker dimensions  */
     void SetMarkerSize(double _edge_length = 0, int _res = 0, double _margin = 0);
 
