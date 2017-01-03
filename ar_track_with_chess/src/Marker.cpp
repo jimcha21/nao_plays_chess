@@ -59,7 +59,7 @@ CvPoint FindWightedMidPoint(int track_id,int piece_id_num, double visualize2d_x,
 	marker_weight=0.5;
 	if(chess_2dcoordinates.p_vector[0].x==0 && chess_2dcoordinates.p_vector[1].x==0 && chess_2dcoordinates.p_vector[2].x==0){
 		
-		ROS_INFO("init ?");
+		//ROS_INFO("init");
 		return cvPoint((int)visualize2d_x, (int)visualize2d_y); 
 	
 	}//else return the midpoint, of the previous knob point and the new detected one..
@@ -158,7 +158,6 @@ vision::ChessVector Marker::VisualizeChess(IplImage *image, Camera *cam, vision:
 	}*/
 
 	if(int(GetId())==7){
-//ROS_INFO("eide 7");
 		int piece_id_num=0;
 		for (double i = -3.5-lim; i < 3.6+lim; i++)
 	    {
@@ -182,7 +181,6 @@ vision::ChessVector Marker::VisualizeChess(IplImage *image, Camera *cam, vision:
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
 				visualize3d_points[8][2]=square_z;
-//ROS_INFO("gia to %d",piece_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
@@ -213,7 +211,6 @@ vision::ChessVector Marker::VisualizeChess(IplImage *image, Camera *cam, vision:
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
 				visualize3d_points[8][2]=square_z;
-ROS_INFO("gia to %d",piece_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				DrawChessCoordinates(image, cam, cvPoint((int)visualize2d_points[8][0], (int)visualize2d_points[8][1]), CV_RGB(0,0,0));*/
@@ -221,12 +218,11 @@ ROS_INFO("gia to %d",piece_id_num);
 				//chess_2dcoordinates.p_vector[0].x=1;
 				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.p_vector.size(),chess_2dcoordinates.p_vector[0].x);
 				
-				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates.p_vector[0][0],chess_2dcoordinates.p_vector[0][1],chess_2dcoordinates.p_vector[1][0],chess_2dcoordinates.p_vector[1][1]); 			
-	    		piece_id_num++;
+				piece_id_num++;
 	    	}
 	    }
 	}else if(int(GetId())==8){  //ROTATED MATRIX - TODO REDUCE CODE -> ONE PART 2D ARRAY LOOP
-		//ROS_INFO("eide 8");
+		
 		int piece_id_num=0;
 		for (double j = 8.1+lim; j>1.0-lim ; j--)
 	    {	
@@ -250,7 +246,6 @@ ROS_INFO("gia to %d",piece_id_num);
 				visualize3d_points[8][0]=square_x;
 				visualize3d_points[8][1]=square_y;
 				visualize3d_points[8][2]=square_z;
-//ROS_INFO("gia to %d",piece_id_num);
 				cvInitMatHeader(&visualize3d_points_mat, 12, 3, CV_64F, visualize3d_points);
 				cam->ProjectPoints(&visualize3d_points_mat, &pose, &visualize2d_points_mat);
 				//ROS_INFO("mpainoun %d %d",(int)visualize2d_points[8][0], (int)visualize2d_points[8][1]);
@@ -271,8 +266,7 @@ ROS_INFO("gia to %d",piece_id_num);
 				//chess_2dcoordinates.p_vector[0].x=1;
 				//ROS_INFO("kai pio meta  %d %d",chess_2dcoordinates.p_vector.size(),chess_2dcoordinates.p_vector[0].x);
 				//ROS_INFO("vgainoun %f %f",(float)knob_coord.x,(float)knob_coord.y);
-				//ROS_INFO("GEIA SAS %d %d %d %d",chess_2dcoordinates.p_vector[0][0],chess_2dcoordinates.p_vector[0][1],chess_2dcoordinates.p_vector[1][0],chess_2dcoordinates.p_vector[1][1]); 			
-	    		piece_id_num++;
+				piece_id_num++;
 	    	}
 	    }
 	} 
@@ -408,8 +402,8 @@ vision::ChessPiecesVector Marker::VisualizeChessPawns(IplImage *image, Camera *c
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].f=f;
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].g=g;
 					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].h=h;
-					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].category="pawn";
-					ROS_INFO("piecee%d and size is %d",piece_id_num,chessPiecesArea_2dcoordinates.p_vector.size());
+					chessPiecesArea_2dcoordinates.p_vector[piece_id_num].category=game_.chessSquare[piece_id_num].category;
+					//ROS_INFO("piecee%d and size is %d",piece_id_num,chessPiecesArea_2dcoordinates.p_vector.size());
 				}piece_id_num++;
 			}
 		}

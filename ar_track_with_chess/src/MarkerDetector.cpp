@@ -77,6 +77,8 @@ namespace alvar {
 	void MarkerDetectorImpl::Initialize_Chess2dArray(){
 		vision::ChessPoint pt;		
 		vision::ChessPiece pc;
+		chessPiecesArea_2dcoordinates.p_vector.clear();
+		chess_2dcoordinates.p_vector.clear();
 		for(int i=0;i<81;i++){
 			pt.x=0;
 			pt.y=0;
@@ -178,7 +180,8 @@ namespace alvar {
 							chessPiecesArea_2dcoordinates=mn->VisualizeChessPawns(image, cam, game_, chessPiecesArea_2dcoordinates,CV_RGB(0,255,0));
 						}
 						//mn->Update_Chess2dArray();
-						ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates.p_vector[80].x,chess_2dcoordinates.p_vector[80].y,chess_2dcoordinates.p_vector.size());
+						ROS_INFO("coordinates'  vector size: %d",chess_2dcoordinates.p_vector.size());
+						ROS_INFO("pieces' areas vector size: %d",chessPiecesArea_2dcoordinates.p_vector.size());
 					}
 				}
 			}
@@ -207,14 +210,15 @@ namespace alvar {
 						chessPiecesArea_2dcoordinates=mn->VisualizeChessPawns(image, cam, game_, chessPiecesArea_2dcoordinates,CV_RGB(0,255,0));
 					}
 					//mn->Update_Chess2dArray();
-					ROS_INFO("vgike to %d %d megethos %d",chess_2dcoordinates.p_vector[80].x,chess_2dcoordinates.p_vector[80].y,chess_2dcoordinates.p_vector.size());
+					ROS_INFO("coordinates'  vector size: %d",chess_2dcoordinates.p_vector.size());
+					ROS_INFO("pieces' areas vector size: %d",chessPiecesArea_2dcoordinates.p_vector.size());
 				}
 			}
 			
 			delete mn;
 		}
 
-		ROS_INFO("end");
+		//ROS_INFO("end");
 		vision::ChessInfoVector info_vector;
 		info_vector.pieces.push_back(chessPiecesArea_2dcoordinates);
 		info_vector.knob_points.push_back(chess_2dcoordinates);

@@ -91,7 +91,9 @@ void getGameStatus (const vision::ChessBoard & game_data)
 	{
 		std::cout << game_data.chessSquare[i].category << "|" << game_data.chessSquare[i+8].category << "|" << game_data.chessSquare[i+16].category << "|" << game_data.chessSquare[i+24].category << "|" << game_data.chessSquare[i+32].category << "|" << game_data.chessSquare[i+40].category << "|" << game_data.chessSquare[i+48].category<< "|" << game_data.chessSquare[i+56].category <<  "\n";
 	}*/
-	game_.chessSquare.clear();
+	game_.chessSquare.clear();	
+	marker_detector.Initialize_Chess2dArray();
+
 	for(int i=0;i<game_data.chessSquare.size();i++){		
 		game_.chessSquare.push_back(game_data.chessSquare[i]);
 	}
@@ -138,8 +140,8 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, game_, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
-				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
-				cv::waitKey(3);
+/*				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
+				cv::waitKey(3);*/
 			}else{
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, game_, true, false, max_new_marker_error, max_track_error, CVSEQ, true);
 			}
@@ -174,6 +176,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 			chess_knob_vector_.pieces.clear();
 			chess_knob_vector_.knob_points.clear();
 			chesspoints_vector.p_vector.clear();
+			chesspieces_vector.p_vector.clear();
       	    arPoseMarkers_.markers.clear();
 
 			for (size_t i=0; i<marker_detector.markers->size(); i++) 
