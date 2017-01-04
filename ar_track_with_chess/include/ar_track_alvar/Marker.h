@@ -44,7 +44,7 @@
 
 #include "vision/ChessPiece.h"
 #include "vision/ChessPoint.h"
-#include "vision/ChessVector.h"
+#include "vision/ChessVector.h"*//*
 #include "vision/ChessPiecesVector.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"

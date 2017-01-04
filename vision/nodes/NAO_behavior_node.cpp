@@ -4,7 +4,7 @@
 #include <naoqi_bridge_msgs/JointAnglesWithSpeed.h>
 #include <sstream>
 
-int timing=10;
+int timing=20;
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
  */

@@ -147,6 +147,7 @@ Select one Option from below:\n\n\
 *Start New Game\t\t\t [2]\n\
 *Add Piece on the Chessboard\t [3]\n\
 *Print Chessboard\t\t [4]\n\n\
+*\033[1;32mPublish Pieces info again\033[0m\t [5]\n\n\
 * Exit [0]\n\n>>";
 		std::getline(std::cin, selection);
 		if (selection.compare("1")==0){			
@@ -156,6 +157,9 @@ Select one Option from below:\n\n\
 		}else if(selection.compare("2")==0){
 			chessboard=init_piecesPositions(chessboard);
 			std::cout << "Pieces repositioned to their initial positions..\n";
+		}else if(selection.compare("2")==0){
+			//continue and publish the points.. 
+			//std::cout << "Pieces repositioned to their initial positions..\n";
 		}else if(selection.compare("3")==0){
 			
 			vision::ChessboardSquare square;

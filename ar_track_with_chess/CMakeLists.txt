@@ -122,7 +122,7 @@ add_library(medianFilter src/medianFilter.cpp)
 target_link_libraries(medianFilter ar_track_alvar ${catkin_LIBRARIES})
 add_dependencies(medianFilter ${GENCPP_DEPS})
 
-set(ALVAR_TARGETS ar_track_alvar individualMarkersForChess createMarker ar_track_alvar)
+set(ALVAR_TARGETS ar_track_alvar individualMarkersForChess ar_track_alvar)
 
 #add_executable(individualMarkers nodes/IndividualMarkers.cpp)
 #target_link_libraries(individualMarkers ar_track_alvar kinect_filtering ${catkin_LIBRARIES})
@@ -148,9 +148,9 @@ add_dependencies(individualMarkersForChess ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS
 #target_link_libraries(findMarkerBundlesNoKinect ar_track_alvar ${catkin_LIBRARIES})
 #add_dependencies(findMarkerBundlesNoKinect ${PROJECT_NAME}_gencpp ${GENCPP_DEPS})
 
-add_executable(createMarker src/SampleMarkerCreator.cpp)
-target_link_libraries(createMarker ar_track_alvar ${catkin_LIBRARIES})
-add_dependencies(createMarker ${PROJECT_NAME}_gencpp ${GENCPP_DEPS})
+#add_executable(createMarker src/SampleMarkerCreator.cpp)
+#target_link_libraries(createMarker ar_track_alvar ${catkin_LIBRARIES})
+#add_dependencies(createMarker ${PROJECT_NAME}_gencpp ${GENCPP_DEPS})
 
 install(TARGETS ${ALVAR_TARGETS} ${KINECT_FILTERING_TARGETS}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

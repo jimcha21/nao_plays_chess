@@ -29,7 +29,7 @@ using namespace cv;
 using namespace std;
 
 // Variables for debugging.. ignore ..
-bool view_mode_debug=true;
+bool view_mode_debug=false;
 bool picture_mode_debug=false;
 
 Mat src, src_gray;
@@ -68,7 +68,6 @@ void gameTopic(const vision::ChessBoard& data){
 
   ROS_INFO("received game");
   game_.chessSquare.clear();
-  pieces_topic_points.p_vector.clear();
   for(int i=0;i<data.chessSquare.size();i++){ //till 64..
     game_.chessSquare.push_back(data.chessSquare[i]);
   }
@@ -256,6 +255,19 @@ public:
         //new_image3 = new_image2 - new_image1;
         cv::absdiff(snap_one, snap_two, new_image);
         cv::imshow("difference", new_image);
+
+        Mat ba(src.size(), src.type());
+        ba = snap_one - snap_two;
+        cv::imshow("difference ba", ba);
+        inRange(ba, cv::Scalar(10,10,10), cv::Scalar(255,255,255 ), ba); //BGR Scalar not RGB sequence
+        cv::imshow("range ba", ba);
+
+        Mat ab(src.size(), src.type());
+        ab =snap_two-snap_one;
+        cv::imshow("difference ab", ab);
+        inRange(ab, cv::Scalar(10,10,10), cv::Scalar(255,255,255 ), ab); //BGR Scalar not RGB sequence
+        cv::imshow("range ab", ab);
+
         Mat range_img,new_image3;
         inRange(new_image, cv::Scalar(10,10,10), cv::Scalar(255,255,255 ), range_img); //BGR Scalar not RGB sequence
 
@@ -263,7 +275,10 @@ public:
         medianBlur ( range_img, new_image3, 3 );
         cv::imshow("color filtered in range", new_image3);
 
-        //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
+        //cvtColor( src, src_gray, COLOR_BGR2GRAY );
+
+       
+        std::vector<vision::ChessPoint> flag_square; // this vector will used as flagged index , pointing the spotted differences that are detected on any of the 64 chessboard squares. -detection part follows- 
       
        if(chess_topic_points.p_vector.size()>0){ 
 
@@ -361,45 +376,49 @@ public:
                     if(x>new_image3.cols){
                       continue;
                     }
-                  for(int y=min_y;y<=max_y;y++){
-                    if(y>new_image3.rows){
-                      continue;
+                    for(int y=min_y;y<=max_y;y++){
+                      if(y>new_image3.rows){
+                        continue;
+                      }
+                      if(/*(y>=(int)(lamda1*(x-left_bottom_p.x)+left_bottom_p.y)) &&*/ (x>=(int)(y-left_bottom_p.y+lamda1*left_bottom_p.x)/lamda1)){
+                        if(/*(y<=(int)(lamda2*(x-right_bottom_p.x)+right_bottom_p.y))&&*/(x<=(int)(y-right_bottom_p.y+lamda2*right_bottom_p.x)/lamda2)){
+                          if((y<=(int)(lamda3*(x-right_bottom_p.x)+right_bottom_p.y))/*&&(x>=(int)(y-right_bottom_p.y+lamda3*right_bottom_p.x)/lamda3)*/){
+                            if((y>=(int)(lamda4*(x-right_top_p.x)+right_top_p.y))/*&&(x<=(int)(y-right_top_p.y+lamda4*right_top_p.x)/lamda4)*/){
+                              areaIn_pixels++;
+                              
+                              //FOR CV_32F IMAGE (COLOR IMAGE LIKE SOURCE)
+                             /*//THIS IS THE AREA THAT WILL BE EXAMINED
+                              if(new_image3.at<cv::Vec3b>(y,x)[0]<=60&&new_image3.at<cv::Vec3b>(y,x)[1]<=60&&new_image3.at<cv::Vec3b>(y,x)[2]<=60){
+                                blacks++;
+                              }else if(new_image3.at<cv::Vec3b>(y,x)[0]>=190&&new_image3.at<cv::Vec3b>(y,x)[1]>=190&&new_image3.at<cv::Vec3b>(y,x)[2]>=190){
+                                whites++;
+                              }else{
+                                unenti++;
+                              }
+
+                              //for checking area inspection..
+                            new_image3.at<cv::Vec3b>(y,x)[0] = 255;
+                              new_image3.at<cv::Vec3b>(y,x)[1] = 255;
+                              new_image3.at<cv::Vec3b>(y,x)[2] = 255;*/
+
+                              
+                              //FOR CV_8U IMAGE (BINARY LIKE IMAGE - RESULT FROM IMRANGE - NO RGB[][][] ONLY ONE VALUE PER PIXEL=0 OR 255)
+                              //THIS IS THE AREA THAT WILL BE EXAMINED
+                              if(new_image3.at<uchar>(y, x)==0){
+                                blacks++;
+                              }else if(new_image3.at<uchar>(y, x)==255){
+                                whites++;
+                              }
+
+                              //for checking area inspection..
+                              //new_image3.at<uchar>(y, x)=255;
+                            }
+                          }
+                        }
+                      }
                     }
-                    if(/*(y>=(int)(lamda1*(x-left_bottom_p.x)+left_bottom_p.y)) &&*/ (x>=(int)(y-left_bottom_p.y+lamda1*left_bottom_p.x)/lamda1)){
-                      if(/*(y<=(int)(lamda2*(x-right_bottom_p.x)+right_bottom_p.y))&&*/(x<=(int)(y-right_bottom_p.y+lamda2*right_bottom_p.x)/lamda2)){
-                        if((y<=(int)(lamda3*(x-right_bottom_p.x)+right_bottom_p.y))/*&&(x>=(int)(y-right_bottom_p.y+lamda3*right_bottom_p.x)/lamda3)*/){
-                          if((y>=(int)(lamda4*(x-right_top_p.x)+right_top_p.y))/*&&(x<=(int)(y-right_top_p.y+lamda4*right_top_p.x)/lamda4)*/){
-                            areaIn_pixels++;
-                            
-                            //FOR CV_32F IMAGE (COLOR IMAGE LIKE SOURCE)
-                           /*//THIS IS THE AREA THAT WILL BE EXAMINED
-                            if(new_image3.at<cv::Vec3b>(y,x)[0]<=60&&new_image3.at<cv::Vec3b>(y,x)[1]<=60&&new_image3.at<cv::Vec3b>(y,x)[2]<=60){
-                              blacks++;
-                            }else if(new_image3.at<cv::Vec3b>(y,x)[0]>=190&&new_image3.at<cv::Vec3b>(y,x)[1]>=190&&new_image3.at<cv::Vec3b>(y,x)[2]>=190){
-                              whites++;
-                            }else{
-                              unenti++;
-                            }
-
-                            //for checking area inspection..
-                          new_image3.at<cv::Vec3b>(y,x)[0] = 255;
-                            new_image3.at<cv::Vec3b>(y,x)[1] = 255;
-                            new_image3.at<cv::Vec3b>(y,x)[2] = 255;*/
-
-                            
-                            //FOR CV_8U IMAGE (BINARY LIKE IMAGE - RESULT FROM IMRANGE - NO RGB[][][] ONLY ONE VALUE PER PIXEL=0 OR 255)
-                            //THIS IS THE AREA THAT WILL BE EXAMINED
-                            if(new_image3.at<uchar>(y, x)==0){
-                              blacks++;
-                            }else if(new_image3.at<uchar>(y, x)==255){
-                              whites++;
-                            }
-
-                            //for checking area inspection..
-                            //new_image3.at<uchar>(y, x)=255;
-                    }}}}
-                  }
                 }
+
                 if(areaIn_pixels!=0){
                   //ROS_INFO("EXAMINED AN AREA OF %d PIXELS -> BLACKS-> %f WHITES-> %f unenti-> %f",areaIn_pixels,(float)blacks/areaIn_pixels,(float)whites/areaIn_pixels,(float)unenti/areaIn_pixels);
         
@@ -436,22 +455,51 @@ public:
                   squareDensity[ch_line-1][ch_column-1][1]=(float)whites/areaIn_pixels;
                   //squareDensity[ch_line-1][ch_column-1][2]=(float)unenti/areaIn_pixels;    
                   ROS_INFO("%d-%d:Colour amounts %f %f %f ",ch_line,ch_column,squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);    
-                  if(squareDensity[ch_line-1][ch_column-1][0]<0.80){ 
+                  
+                  vision::ChessPoint cp;
+                  if(squareDensity[ch_line-1][ch_column-1][0]<0.80){  //red flag (really positive of a movement)
                     ROS_INFO("\033[1;31mDETECTED!\033[0m\n");
+                    cp.x=ch_line-1; cp.y=ch_column-1; cp.state="confident";
+                    flag_square.push_back(cp);
                   }
-                  else if(squareDensity[ch_line-1][ch_column-1][0]<0.90){
-                    ROS_INFO("\033[1;32mSOMETHING HERE?!\033[0m\n");
+                  else if(squareDensity[ch_line-1][ch_column-1][0]<0.90){ //yellow flag (really positive of a movement)
+                    ROS_INFO("\033[1;33mSOMETHING HERE?!\033[0m\n");
+                    cp.x=ch_line-1; cp.y=ch_column-1; cp.state="cautious";
+                    flag_square.push_back(cp);
                   }
 
                   ROS_INFO("-----------------------------------------------");
                 }
                 v.clear();
                 //cv::imshow(OPENCV_WINDOW,new_image3);
-            cv::waitKey(3);
-            }}
+                cv::waitKey(3);
+            }
+          }
+          
+          //checking the flagged squares..
+
+          int min=7,frontline_idx=7; //init max line
+          for (int i = 0; i < flag_square.size(); ++i) 
+          {
+            if(flag_square[i].x<min){
+              min=flag_square[i].x;
+              frontline_idx=i;
+            }
+            ROS_INFO("found the %d %d with state %s",flag_square[i].x+1,flag_square[i].y+1,flag_square[i].state.c_str());
+          }
+          if(flag_square.size()>0){
+            ROS_INFO("%s piece",pieces_topic_points.p_vector[flag_square[frontline_idx].x+8*flag_square[frontline_idx].y].category.c_str());
+            ROS_INFO("min is %d on vector pos %d and it is going to check on square %d",min,frontline_idx,(flag_square[frontline_idx].x+8*flag_square[frontline_idx].y));
+            if(pieces_topic_points.p_vector[flag_square[frontline_idx].x+8*flag_square[frontline_idx].y].category.compare("empty")!=0){
+              ROS_INFO("brike me sigouria to minimun %s poy vriskotan sth thesh %d %d",pieces_topic_points.p_vector[flag_square[frontline_idx].x+8*flag_square[frontline_idx].y].category.c_str(),flag_square[frontline_idx].x+1,flag_square[frontline_idx].y+1);
+
+            }
           }
 
-        } // else..
+        }
+        flag_square.clear();
+      } // else frames>=2..
+
 
 /*      for( int j = 0; j < chess_topic_points.p_vector.size(); j++ ){
           circle(src, Point(chess_topic_points.p_vector[j].x,chess_topic_points.p_vector[j].y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
@@ -460,7 +508,9 @@ public:
 /*      cv::imshow(OPENCV_WINDOW,new_image3);
       cv::waitKey(3);*/
 
+      
       chess_topic_points.p_vector.clear();
+      pieces_topic_points.p_vector.clear();
       if(!view_mode_debug){
         image_sub_.shutdown();
         return ;
