@@ -51,7 +51,7 @@ static const std::string OPENCV_WINDOW = "wpa";
 
 /// Function headers
 int *square_CornPoints(/*std::string str*/int int_letter ,int num);
-bool checkifItsInsidetheSquare(Mat,Point,bool);
+bool checkifItsInsidetheSquare(CvPoint,int,int);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -150,7 +150,7 @@ public:
           return ;
         }
       }
-      
+      if(chess_topic_points.p_vector.size()>0)  checkifItsInsidetheSquare(CvPoint(92,283),1,1);
       //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
       
       for( int j = 0; j < chess_topic_points.p_vector.size(); j++ ){
@@ -177,6 +177,8 @@ public:
           line(src,Point(pieces_topic_points.p_vector[j].d.x,pieces_topic_points.p_vector[j].d.y),Point(pieces_topic_points.p_vector[j].h.x,pieces_topic_points.p_vector[j].h.y), Scalar(255,0,255),1, LINE_AA);
         }
       }
+
+      
       cv::imshow("movementDetector final image for processing", src);
      cv::waitKey(3);
 }
@@ -187,7 +189,8 @@ public:
   void Snapshot(const std_msgs::Bool& snap){
     
     ROS_INFO("snapdata: %s", snap.data ? "true" : "false");
-    
+    //ROS_INFO("received %d pieces with the last one a.x,a.y : %d %d",pieces_topic_points.p_vector.size(),pieces_topic_points.p_vector[63].a.x,pieces_topic_points.p_vector[63].a.y);
+
     if(snap.data){
        image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);    
        enable_snap=snap.data;
@@ -222,6 +225,7 @@ public:
          ROS_INFO("No ChessPoints received..");
       }
 
+
       try
       {
           //The input from the robot is encoded with RGB8.
@@ -244,6 +248,8 @@ public:
         }
       }
       //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
+
+
 
       if(frame_received==0){
         frame_received++;
@@ -478,7 +484,7 @@ public:
           
           //checking the flagged squares..
 
-          int min=7,frontline_idx=7; //init max line
+/*          int min=7,frontline_idx=7; //init max line
           for (int i = 0; i < flag_square.size(); ++i) 
           {
             if(flag_square[i].x<min){
@@ -494,7 +500,52 @@ public:
               ROS_INFO("brike me sigouria to minimun %s poy vriskotan sth thesh %d %d",pieces_topic_points.p_vector[flag_square[frontline_idx].x+8*flag_square[frontline_idx].y].category.c_str(),flag_square[frontline_idx].x+1,flag_square[frontline_idx].y+1);
 
             }
-          }
+          }*/
+
+          int square_num=56;
+          int column=7,linee=0;
+          bool found_first=false;
+          bool found_second=false;
+          bool yeap=false;
+          CvPoint first,second;
+          do{
+            square_num=column*8+linee;
+            for (int i = 0; i < flag_square.size(); i++){
+              if(flag_square[i].x==linee&&flag_square[i].y==column&&!found_first&&flag_square.p_vector[i].state.compare("ignore")!=0){
+                found_first=true;
+                ROS_INFO("found the first piece at %d %d",linee+1,column+1);
+                first.x=linee;
+                first.y=column;
+                if(pieces_topic_points.p_vector[square_num].category.compare("empty")==0){
+                  ROS_INFO("\033[1;31mFOUND LAST PIECE POSITION!\033[0m\n");
+                  yeap=true;
+                }else{
+                  ROS_INFO("\033[1;31mEDW STO FIRST P BRIKA EXW %s\033[0m\n",pieces_topic_points.p_vector[square_num].category.c_str());
+                  for (int j = 0; j < flag_square.size(); j++){
+                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),flag_square.p_vector[j].x,flag_square.p_vector[j].y)){
+                          flag_square.p_vector[j].state="ignore"; //propably it's a piece's shadow..
+                      }
+                  }
+                }
+              }else if(flag_square[i].x==linee&&flag_square[i].y==column&&found_first&&sqrt(pow(first.x-linee,2)+pow(first.y-column,2))>1.5){
+                if(!found_second){
+                  ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                  second.x=linee;
+                  second.y=column;
+                  found_second=true;
+                }  
+                ROS_INFO("\033[1;33mAN ANOTHEEEEEEEER ONE AT %d %d!\033[0m\n",linee+1,column+1);
+              }
+            } 
+
+
+
+            linee++;
+            if(linee>=8){
+              linee=0;
+              column--;
+            }
+          }while(column>=0/*&&!(found_second&&found_first)*/);
 
         }
         flag_square.clear();
@@ -568,29 +619,65 @@ int *square_CornPoints(/*std::string letter,*/int int_letter, int num){
     return sq_points;
 }
 
-bool checkifItsInsidetheSquare(Mat kati,Point poin,bool chessboard_contour){
-  CvPoint left_bottom_p,left_top_p,right_top_p,right_bottom_p;
-  if(chessboard_contour){
-      left_bottom_p.x=chess_topic_points.p_vector[0].x-10;
-      left_bottom_p.y=chess_topic_points.p_vector[0].y+10;
-      left_top_p.x=chess_topic_points.p_vector[8].x-10;
-      left_top_p.y=chess_topic_points.p_vector[8].y-10;
-      right_bottom_p.x=chess_topic_points.p_vector[72].x+20;
-      right_bottom_p.y=chess_topic_points.p_vector[72].y+20;
-      right_top_p.x=chess_topic_points.p_vector[80].x+10;
-      right_top_p.y=chess_topic_points.p_vector[80].y-10;
+bool checkifItsInsidetheSquare(CvPoint point,int linee,int column){
+
+  int *sq_points=square_CornPoints(column,linee);
+  Point left_bottom_p,left_top_p,right_top_p,right_bottom_p;
+  std::vector<CvPoint> v;
+  left_bottom_p.x=chess_topic_points.p_vector[sq_points[0]].x;
+  left_bottom_p.y=chess_topic_points.p_vector[sq_points[0]].y;
+  v.push_back(left_bottom_p);
+  left_top_p.x=chess_topic_points.p_vector[sq_points[1]].x;
+  left_top_p.y=chess_topic_points.p_vector[sq_points[1]].y;
+  v.push_back(left_top_p);
+  right_top_p.x=chess_topic_points.p_vector[sq_points[3]].x;
+  right_top_p.y=chess_topic_points.p_vector[sq_points[3]].y;
+  v.push_back(right_top_p);
+  right_bottom_p.x=chess_topic_points.p_vector[sq_points[2]].x;
+  right_bottom_p.y=chess_topic_points.p_vector[sq_points[2]].y;
+  v.push_back(right_bottom_p);
+
+  float lamda1 =(float)(left_bottom_p.y-left_top_p.y)/(float)(left_bottom_p.x-left_top_p.x);
+  float lamda2 =(float)(right_bottom_p.y-right_top_p.y)/(float)(right_bottom_p.x-right_top_p.x);
+  float lamda3 =(float)(right_bottom_p.y-left_bottom_p.y)/(float)(right_bottom_p.x-left_bottom_p.x);
+  float lamda4 =(float)(right_top_p.y-left_top_p.y)/(float)(right_top_p.x-left_top_p.x);
+  //ROS_INFO("shmeia %f %f %f %f",lamda1,lamda2,lamda3,lamda4);
+ 
+//!include pls extreme case of total 90 degree rotation-> in this situation you must change the point arrangement 
+
+  //estimation of the examination rectangle, which will be filtered by the 4 line equations below..
+  int min_x=9999,max_x=0,min_y=9999,max_y=0;
+  for(int i=0;i<v.size();i++){
+      if(v[i].x<min_x){
+        min_x=v[i].x;
+      }
+      if(v[i].y<min_y){
+        min_y=v[i].y;
+      }
+      if(v[i].x>max_x){
+        max_x=v[i].x;
+      }
+      if(v[i].y>max_y){
+        max_y=v[i].y;
+      }
+  }//ROS_INFO("max x %d max y %d min x %d min y %d",max_x,max_y,min_x,min_y);
+
+  if(point.x>=(int)(point.y-left_bottom_p.y+lamda1*left_bottom_p.x)/lamda1){
+    if(point.x<=(int)(point.y-right_bottom_p.y+lamda2*right_bottom_p.x)/lamda2){
+      if(point.y<=(int)(lamda3*(point.x-right_bottom_p.x)+right_bottom_p.y)){
+        if(point.y>=(int)(lamda4*(point.x-right_top_p.x)+right_top_p.y)){
+            //ROS_INFO("yes, it belongs to the square.");
+            return true;
+        }
+      }
+    }
   }
-  ROS_INFO("%d %d %d %d %d %d %d",left_bottom_p.x,left_bottom_p.y,left_top_p.x,left_top_p.y,right_bottom_p.x,right_bottom_p.y,right_top_p.x,right_top_p.y);
-  line( kati, Point(chess_topic_points.p_vector[0].x,chess_topic_points.p_vector[0].y),Point(chess_topic_points.p_vector[8].x,chess_topic_points.p_vector[8].y), Scalar(0,0,255), 1, LINE_AA);
-  line( kati, Point(chess_topic_points.p_vector[72].x,chess_topic_points.p_vector[72].y),Point(chess_topic_points.p_vector[80].x,chess_topic_points.p_vector[80].y), Scalar(0,0,255), 1, LINE_AA);
-  line( kati, Point(chess_topic_points.p_vector[0].x,chess_topic_points.p_vector[0].y),Point(chess_topic_points.p_vector[72].x,chess_topic_points.p_vector[72].y), Scalar(0,0,255), 1, LINE_AA);
-  line( kati, Point(chess_topic_points.p_vector[80].x,chess_topic_points.p_vector[80].y),Point(chess_topic_points.p_vector[8].x,chess_topic_points.p_vector[8].y), Scalar(0,0,255), 1, LINE_AA);
-  
-  line( kati, left_bottom_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
-  line( kati, right_bottom_p,right_top_p, Scalar(0,0,255), 1, LINE_AA);
-  line( kati, left_bottom_p,right_bottom_p, Scalar(0,0,255), 1, LINE_AA);
-  line( kati, right_top_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
-  cv::imshow("aaa", kati);
+/*
+  cv::line( img, left_bottom_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
+  cv::line( img, right_bottom_p,right_top_p, Scalar(0,0,255), 1, LINE_AA);
+  cv::line( img, left_bottom_p,right_bottom_p, Scalar(0,0,255), 1, LINE_AA);
+  cv::line( img, right_top_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
+  cv::imshow("checkifItsInsidetheSquare", img);*/
 
 
   return false;
