@@ -35,6 +35,8 @@ bool picture_mode_debug=false;
 Mat src, src_gray;
 Mat snap_one,snap_two;
 
+std::vector<std::string> visited_v;
+
 vision::ChessBoard game_;
 //std::vector<cv::Point> chess_topic_points;
 vision::ChessVector chess_topic_points;
@@ -48,11 +50,13 @@ float frameDensity[8][8][3];
 float squareDensity[8][8][3]; //0 for black, 1 for white , 2 for und
 
 static const std::string OPENCV_WINDOW = "wpa";
+std::vector<int> first_team;
 
 /// Function headers
 int *square_CornPoints(/*std::string str*/int int_letter ,int num);
 bool checkifItsInsidetheSquare(CvPoint,int,int);
 void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq);
+void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -529,7 +533,40 @@ public:
           for (int i = 0; i < flag_square.size(); i++)
           {
             ROS_INFO("\033[1;35mFLAG ARAY %d %d %s!\033[0m\n",flag_square[i].x+1,flag_square[i].y+1,flag_square[i].state.c_str());
+            visited_v.push_back("n"); //n for no, y for yes ... initialization
           }
+
+          
+          first_team.clear();
+          first_team.push_back(0);
+          recursive_flagCheck(0,flag_square);
+
+          visited_v.clear();
+          std::vector<int> second_team;
+          for (int i = 0; i < flag_square.size(); ++i) //to find the second 'team' points..
+          {
+            
+            bool belongs=false; 
+            for (int j = 0; j < first_team.size(); j++)
+            {
+              if(i==first_team[j]){
+                belongs=true;
+                break;
+              }
+            }
+
+            if(!belongs){
+              second_team.push_back(i);
+              ROS_INFO("h omada 2 exei %d stoixeia kai to ena einai to %d",second_team.size(),i);
+            }
+          }
+
+          for (int i = 0; i < first_team.size(); ++i)
+          {
+            ROS_INFO("h omada exei %d stoixeia kai to ena einai to %d",first_team.size(),first_team[i]);
+          }
+
+
           //checking the flagged squares..
 
 /*          int min=7,frontline_idx=7; //init max line
@@ -956,4 +993,32 @@ void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq){
   }
   cv::imshow("end", img);
 
+}
+
+void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square){
+  
+  //ROS_INFO("\nnew iteration with index=%d",index);
+  if(visited_v[index].compare("y")==0){
+    //ROS_INFO("inside return");
+    return;
+  }
+  visited_v[index]="y";
+  for (int i = 0; i < flag_square.size(); ++i) 
+  {
+    ROS_INFO("sygkrinei ta %d %d",index,i);
+    if(i==index){
+      //ROS_INFO("passing..");
+      continue; // to avoid the check with itself in any iteration..
+    } 
+    float dist=sqrt(pow(flag_square[index].x-flag_square[i].x,2)+pow(flag_square[index].y-flag_square[i].y,2));
+    if(dist<=sqrt(2)){
+      //ROS_INFO("is %d visited?=%s",i,visited_v[i].c_str());
+      if(visited_v[i].compare("y")!=0){
+        //ROS_INFO("accepted to  i=%d",i);     
+        first_team.push_back(i);
+        recursive_flagCheck(i,flag_square);
+      }//else continue..
+    }
+  }
+  //ROS_INFO("returned final");
 }
