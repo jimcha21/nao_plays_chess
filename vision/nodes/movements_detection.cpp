@@ -1075,7 +1075,7 @@ void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq){
   right_bottom_p.y=chess_topic_points.p_vector[sq_points[2]].y;
   v.push_back(right_bottom_p);
 
-  if(seq){    
+  if(!seq){    
     cv::line( img, left_bottom_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
     cv::line( img, right_bottom_p,right_top_p, Scalar(0,0,255), 1, LINE_AA);
     cv::line( img, left_bottom_p,right_bottom_p, Scalar(0,0,255), 1, LINE_AA);
@@ -1102,7 +1102,7 @@ void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq){
   right_bottom_p.y=chess_topic_points.p_vector[sq_points[2]].y;
   v.push_back(right_bottom_p);
 
-  if(!seq){    
+  if(seq){    
     cv::line( img, left_bottom_p,left_top_p, Scalar(0,0,255), 1, LINE_AA);
     cv::line( img, right_bottom_p,right_top_p, Scalar(0,0,255), 1, LINE_AA);
     cv::line( img, left_bottom_p,right_bottom_p, Scalar(0,0,255), 1, LINE_AA);
