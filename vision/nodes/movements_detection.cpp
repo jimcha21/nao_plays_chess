@@ -56,7 +56,7 @@ std::vector<int> first_team;
 int *square_CornPoints(/*std::string str*/int int_letter ,int num);
 bool checkifItsInsidetheSquare(CvPoint,int,int);
 void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq);
-void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square);
+void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square,float scan_area);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -539,7 +539,16 @@ public:
           
           first_team.clear();
           first_team.push_back(0);
-          recursive_flagCheck(0,flag_square);
+          recursive_flagCheck(0,flag_square,sqrt(2)); //int scan_area=sqrt(2)
+          visited_v.clear();
+
+          if(first_team.size()==1){ //make a bigger scan
+            for (int i = 0; i < flag_square.size(); i++)
+            {
+              visited_v.push_back("n"); //n for no, y for yes ... initialization
+            }
+            recursive_flagCheck(0,flag_square,2*sqrt(2)); //int scan_area=2*sqrt(2)
+          }
 
           visited_v.clear();
           std::vector<int> second_team;
@@ -995,7 +1004,7 @@ void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq){
 
 }
 
-void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square){
+void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square,float scan_area){
   
   //ROS_INFO("\nnew iteration with index=%d",index);
   if(visited_v[index].compare("y")==0){
@@ -1005,18 +1014,18 @@ void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square){
   visited_v[index]="y";
   for (int i = 0; i < flag_square.size(); ++i) 
   {
-    ROS_INFO("sygkrinei ta %d %d",index,i);
+    //ROS_INFO("comparing the %d %d",index,i);
     if(i==index){
       //ROS_INFO("passing..");
       continue; // to avoid the check with itself in any iteration..
     } 
     float dist=sqrt(pow(flag_square[index].x-flag_square[i].x,2)+pow(flag_square[index].y-flag_square[i].y,2));
-    if(dist<=sqrt(2)){
+    if(dist<=scan_area){
       //ROS_INFO("is %d visited?=%s",i,visited_v[i].c_str());
       if(visited_v[i].compare("y")!=0){
         //ROS_INFO("accepted to  i=%d",i);     
         first_team.push_back(i);
-        recursive_flagCheck(i,flag_square);
+        recursive_flagCheck(i,flag_square,scan_area);
       }//else continue..
     }
   }
