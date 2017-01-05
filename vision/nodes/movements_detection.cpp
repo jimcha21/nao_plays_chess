@@ -52,11 +52,18 @@ float squareDensity[8][8][3]; //0 for black, 1 for white , 2 for und
 static const std::string OPENCV_WINDOW = "wpa";
 std::vector<int> first_team;
 
+
+float confident_thr=0.85;
+float cautious_thr=0.9;
 /// Function headers
 int *square_CornPoints(/*std::string str*/int int_letter ,int num);
 bool checkifItsInsidetheSquare(CvPoint,int,int);
 void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq);
 void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square,float scan_area);
+bool existInTeam(int index,std::vector<int> v);
+std::vector<vision::ChessPoint> check_validPos(std::string p_category,int line,int column);
+bool off_Limits(int value);
+bool isIn_validPos(std::vector<vision::ChessPoint> poses,int line,int column);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -511,12 +518,12 @@ public:
                   ROS_INFO("%d-%d:Colour amounts %f %f %f ",ch_line,ch_column,squareDensity[ch_line-1][ch_column-1][0],squareDensity[ch_line-1][ch_column-1][1],squareDensity[ch_line-1][ch_column-1][2]);    
                   
                   vision::ChessPoint cp;
-                  if(squareDensity[ch_line-1][ch_column-1][0]<0.75){  //red flag (really positive of a movement)
+                  if(squareDensity[ch_line-1][ch_column-1][0]<confident_thr){  //red flag (really positive of a movement)
                     ROS_INFO("\033[1;31mDETECTED!\033[0m\n");
                     cp.x=ch_line-1; cp.y=ch_column-1; cp.state="confident";
                     flag_square.push_back(cp);
                   }
-                  else if(squareDensity[ch_line-1][ch_column-1][0]<0.85){ //yellow flag (really positive of a movement)
+                  else if(squareDensity[ch_line-1][ch_column-1][0]<cautious_thr){ //yellow flag (really positive of a movement)
                     ROS_INFO("\033[1;33mSOMETHING HERE?!\033[0m\n");
                     cp.x=ch_line-1; cp.y=ch_column-1; cp.state="cautious";
                     flag_square.push_back(cp);
@@ -543,6 +550,7 @@ public:
           visited_v.clear();
 
           if(first_team.size()==1){ //make a bigger scan
+            ROS_INFO("\033[1;33mCHECKING BIGGER AREA?!\033[0m\n");
             for (int i = 0; i < flag_square.size(); i++)
             {
               visited_v.push_back("n"); //n for no, y for yes ... initialization
@@ -600,215 +608,321 @@ public:
           int column=7,linee=0;
           bool found_first=false;
           bool found_second=false;
+          int first_pos=99;
           bool yeap=false;
           CvPoint first,second;
-          do{
-            square_num=column*8+linee;
-            for (int i = 0; i < flag_square.size(); i++){
-              if(flag_square[i].x==linee&&flag_square[i].y==column&&!found_first){
-                found_first=true;
-                ROS_INFO("found the first piece at %d %d",linee+1,column+1);
-                first.x=linee;
-                first.y=column;
-                if(pieces_topic_points.p_vector[square_num].category.compare("empty")==0){
-                  ROS_INFO("\033[1;31mFOUND LAST PIECE POSITION!\033[0m\n");
-                  yeap=true;
-                }else{
-                  ROS_INFO("\033[1;31mFOUND ONE OF THE TWO POSITIONS AND I KNOW THAT HERE WAS A %s\033[0m\n",pieces_topic_points.p_vector[square_num].category.c_str());
-                  
-                  for (int ii = 0; ii < 8; ii++)
-                  {
-                    for (int jj = 0; jj < 8; jj++)
+          std::vector<vision::ChessPoint> valid_positions;
+          if(first_team.size()>=1&&second_team.size()>0){
+
+            do{
+              square_num=column*8+linee;
+              for (int i = 0; i < flag_square.size(); i++){
+                if(flag_square[i].x==linee&&flag_square[i].y==column&&!found_first){
+                  found_first=true;
+                  ROS_INFO("found the first piece at %d %d",linee+1,column+1);
+                  first.x=linee;
+                  first.y=column;
+                  first_pos=i;
+                  if(pieces_topic_points.p_vector[square_num].category.compare("empty")==0){
+                    ROS_INFO("\033[1;31mFOUND LAST PIECE POSITION!\033[0m\n");
+                    yeap=true;
+                  }else{
+                    ROS_INFO("\033[1;31mFOUND ONE OF THE TWO POSITIONS AND I KNOW THAT HERE WAS A %s\033[0m\n",pieces_topic_points.p_vector[square_num].category.c_str());
+                    
+                    for (int ii = 0; ii < 8; ii++)
                     {
-                      //for e
-                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),ii+1,jj+1)){
-                         ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
+                      for (int jj = 0; jj < 8; jj++)
+                      {
+                        //for e
+                        if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),ii+1,jj+1)){
+                           ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
 
-                         //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
-                         bool end=false;
-                         int start_x=ii,start_y=jj;
-                         do{
-                            ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
-                            for (int f = 0; f < flag_square.size(); f++){
-                              if(start_x==flag_square[f].x&&start_y==flag_square[f].y){
-                                flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                           //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
+                           bool end=false;
+                           int start_x=ii,start_y=jj;
+                           do{
+                              ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
+                              for (int f = 0; f < flag_square.size(); f++){
+                                if(start_x==flag_square[f].x&&start_y==flag_square[f].y){
+                                  flag_square[f].state="ignore"; //propably it's a piece's shadow..
+                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                }
                               }
-                            }
-                            if(start_x!=linee){//not same row
-                              //aproaching
-                              if(start_x>linee){
-                                start_x--;
-                              }//else start_x++; //never gonna happen
-                            }
-                            if(start_y!=column){
-                              if(start_y>column){
-                                start_y--;
-                              }else{
-                                start_y++;
+                              if(start_x!=linee){//not same row
+                                //aproaching
+                                if(start_x>linee){
+                                  start_x--;
+                                }//else start_x++; //never gonna happen
                               }
-                            }
-                            if(start_y==column&&start_x==linee){
-                              end=true;
-                            }
-                         }while(!end);
-                      }
-                      //for h
-                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].h.x,pieces_topic_points.p_vector[square_num].h.y),ii+1,jj+1)){
-                         ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
+                              if(start_y!=column){
+                                if(start_y>column){
+                                  start_y--;
+                                }else{
+                                  start_y++;
+                                }
+                              }
+                              if(start_y==column&&start_x==linee){
+                                end=true;
+                              }
+                           }while(!end);
+                        }
+                        //for h
+  /*                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].h.x,pieces_topic_points.p_vector[square_num].h.y),ii+1,jj+1)){
+                           ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
 
-                         //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
-                         bool end=false;
-                         int start_x=ii,start_y=jj;
-                         do{
-                            ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
-                            for (int f = 0; f < flag_square.size(); f++){
-                              if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
-                                flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                           //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
+                           bool end=false;
+                           int start_x=ii,start_y=jj;
+                           do{
+                              ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
+                              for (int f = 0; f < flag_square.size(); f++){
+                                if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
+                                  flag_square[f].state="ignore"; //propably it's a piece's shadow..
+                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                }
                               }
-                            }
-                            if(start_x!=linee){//not same row
-                              //aproaching
-                              if(start_x>linee){
-                                start_x--;
-                              }//else start_x++; //never gonna happen
-                            }
-                            if(start_y!=column){
-                              if(start_y>column){
-                                start_y--;
-                              }else{
-                                start_y++;
+                              if(start_x!=linee){//not same row
+                                //aproaching
+                                if(start_x>linee){
+                                  start_x--;
+                                }//else start_x++; //never gonna happen
                               }
-                            }
-                            if(start_y==column&&start_x==linee){
-                              end=true;
-                            }
-                         }while(!end);
-                      }
-                                            //for h
-                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].f.x,pieces_topic_points.p_vector[square_num].f.y),ii+1,jj+1)){
-                         ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
+                              if(start_y!=column){
+                                if(start_y>column){
+                                  start_y--;
+                                }else{
+                                  start_y++;
+                                }
+                              }
+                              if(start_y==column&&start_x==linee){
+                                end=true;
+                              }
+                           }while(!end);
+                        }*/
+                                              //for h
+  /*                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].f.x,pieces_topic_points.p_vector[square_num].f.y),ii+1,jj+1)){
+                           ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
 
-                         //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
-                         bool end=false;
-                         int start_x=ii,start_y=jj;
-                         do{
-                            ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
-                            for (int f = 0; f < flag_square.size(); f++){
-                              if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
-                                flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                           //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
+                           bool end=false;
+                           int start_x=ii,start_y=jj;
+                           do{
+                              ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
+                              for (int f = 0; f < flag_square.size(); f++){
+                                if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
+                                  flag_square[f].state="ignore"; //propably it's a piece's shadow..
+                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                }
                               }
-                            }
-                            if(start_x!=linee){//not same row
-                              //aproaching
-                              if(start_x>linee){
-                                start_x--;
-                              }//else start_x++; //never gonna happen
-                            }
-                            if(start_y!=column){
-                              if(start_y>column){
-                                start_y--;
-                              }else{
-                                start_y++;
+                              if(start_x!=linee){//not same row
+                                //aproaching
+                                if(start_x>linee){
+                                  start_x--;
+                                }//else start_x++; //never gonna happen
                               }
-                            }
-                            if(start_y==column&&start_x==linee){
-                              end=true;
-                            }
-                         }while(!end);
-                      }
-                                            //for h
-                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].g.x,pieces_topic_points.p_vector[square_num].g.y),ii+1,jj+1)){
-                         ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
+                              if(start_y!=column){
+                                if(start_y>column){
+                                  start_y--;
+                                }else{
+                                  start_y++;
+                                }
+                              }
+                              if(start_y==column&&start_x==linee){
+                                end=true;
+                              }
+                           }while(!end);
+                        }*/
+                                              //for h
+  /*                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].g.x,pieces_topic_points.p_vector[square_num].g.y),ii+1,jj+1)){
+                           ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
 
-                         //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
-                         bool end=false;
-                         int start_x=ii,start_y=jj;
-                         do{
-                            ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
-                            for (int f = 0; f < flag_square.size(); f++){
-                              if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
-                                flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                           //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
+                           bool end=false;
+                           int start_x=ii,start_y=jj;
+                           do{
+                              ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
+                              for (int f = 0; f < flag_square.size(); f++){
+                                if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
+                                  flag_square[f].state="ignore"; //propably it's a piece's shadow..
+                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                }
                               }
-                            }
-                            if(start_x!=linee){//not same row
-                              //aproaching
-                              if(start_x>linee){
-                                start_x--;
-                              }//else start_x++; //never gonna happen
-                            }
-                            if(start_y!=column){
-                              if(start_y>column){
-                                start_y--;
-                              }else{
-                                start_y++;
+                              if(start_x!=linee){//not same row
+                                //aproaching
+                                if(start_x>linee){
+                                  start_x--;
+                                }//else start_x++; //never gonna happen
                               }
-                            }
-                            if(start_y==column&&start_x==linee){
-                              end=true;
-                            }
-                         }while(!end);
+                              if(start_y!=column){
+                                if(start_y>column){
+                                  start_y--;
+                                }else{
+                                  start_y++;
+                                }
+                              }
+                              if(start_y==column&&start_x==linee){
+                                end=true;
+                              }
+                           }while(!end);
+                        }*/
                       }
                     }
+
+
+                /*for (int j = 0; j < flag_square.size(); j++){
+
+                    ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].e.x , pieces_topic_points.p_vector[square_num].e.y,flag_square[j].x+1,flag_square[j].y+1);
+                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),flag_square[j].x+1,flag_square[j].y+1)){
+                          flag_square[j].state="ignore"; //propably it's a piece's shadow..
+                           ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                      }
+                   ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].f.x , pieces_topic_points.p_vector[square_num].f.y,flag_square[j].x+1,flag_square[j].y+1);
+                   
+                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].f.x,pieces_topic_points.p_vector[square_num].f.y),flag_square[j].x+1,flag_square[j].y+1)){
+                          flag_square[j].state="ignore"; //propably it's a piece's shadow..
+                          ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                      }
+                   ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].g.x , pieces_topic_points.p_vector[square_num].g.y,flag_square[j].x+1,flag_square[j].y+1);
+                   
+                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].g.x,pieces_topic_points.p_vector[square_num].g.y),flag_square[j].x+1,flag_square[j].y+1)){
+                          flag_square[j].state="ignore"; //propably it's a piece's shadow..
+                          ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                      }
+                   ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].h.x , pieces_topic_points.p_vector[square_num].h.y,flag_square[j].x+1,flag_square[j].y+1);
+                   
+                      if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].h.x,pieces_topic_points.p_vector[square_num].h.y),flag_square[j].x+1,flag_square[j].y+1)){
+                          flag_square[j].state="ignore"; //propably it's a piece's shadow..
+                          ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                      }
+                  }*/
+                  }
+                }else if(flag_square[i].x==linee&&flag_square[i].y==column&&found_first&&/*sqrt(pow(first.x-linee,2)+pow(first.y-column,2))>sqrt(2)&&*/flag_square[i].state.compare("ignore")!=0){
+                  if(existInTeam(first_pos,second_team)){ //if first belongs to the first team , check the second piece with the second team's points..
+                    ROS_INFO("first belongs to first team");
+                    if(!found_second&&/*flag_square[i].state.compare("cautious")!=0&&*/existInTeam(i,first_team)){
+                      ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                      second.x=linee;
+                      second.y=column;
+                      found_second=true;
+                    }  
+                    ROS_INFO("\033[1;33mAN ANOTHEEEEEEEER ONE AT %d %d to %d belongs? %s!\033[0m\n",linee+1,column+1,i,existInTeam(i,first_team) ? "true" : "false");
+                  }else{
+                    ROS_INFO("first belongs to secondc team");
+                    if(!found_second&&/*flag_square[i].state.compare("cautious")!=0&&*/existInTeam(i,second_team)){
+                      ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                      second.x=linee;
+                      second.y=column;
+                      found_second=true;
+                    }  
+                    ROS_INFO("\033[1;33mAN ANOTHEEEEEEEER ONE AT %d %d to %d belongs? %s!\033[0m\n",linee+1,column+1,i,existInTeam(i,second_team) ? "true" : "false");
                   }
 
-
-              /*for (int j = 0; j < flag_square.size(); j++){
-
-                  ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].e.x , pieces_topic_points.p_vector[square_num].e.y,flag_square[j].x+1,flag_square[j].y+1);
-                    if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),flag_square[j].x+1,flag_square[j].y+1)){
-                        flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                         ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
-                    }
-                 ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].f.x , pieces_topic_points.p_vector[square_num].f.y,flag_square[j].x+1,flag_square[j].y+1);
-                 
-                    if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].f.x,pieces_topic_points.p_vector[square_num].f.y),flag_square[j].x+1,flag_square[j].y+1)){
-                        flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                        ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
-                    }
-                 ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].g.x , pieces_topic_points.p_vector[square_num].g.y,flag_square[j].x+1,flag_square[j].y+1);
-                 
-                    if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].g.x,pieces_topic_points.p_vector[square_num].g.y),flag_square[j].x+1,flag_square[j].y+1)){
-                        flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                        ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
-                    }
-                 ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].h.x , pieces_topic_points.p_vector[square_num].h.y,flag_square[j].x+1,flag_square[j].y+1);
-                 
-                    if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].h.x,pieces_topic_points.p_vector[square_num].h.y),flag_square[j].x+1,flag_square[j].y+1)){
-                        flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                        ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
-                    }
-                }*/
                 }
-              }else if(flag_square[i].x==linee&&flag_square[i].y==column&&found_first&&sqrt(pow(first.x-linee,2)+pow(first.y-column,2))>1.5&&flag_square[i].state.compare("ignore")!=0){
-                if(!found_second&&flag_square[i].state.compare("cautious")!=0){
-                  ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
-                  second.x=linee;
-                  second.y=column;
-                  found_second=true;
-                }  
-                ROS_INFO("\033[1;33mAN ANOTHEEEEEEEER ONE AT %d %d!\033[0m\n",linee+1,column+1);
+              } 
+
+
+
+              linee++;
+              if(linee>=8){
+                linee=0;
+                column--;
               }
-            } 
+            }while(column>=0/*&&!(found_second&&found_first)*/);
 
+          }else{ //in case of a close movement..
+            ROS_INFO("SECOND CASE");
+            do{
+                square_num=column*8+linee;
+                for (int i = 0; i < flag_square.size(); i++){
+                  if(flag_square[i].x==linee&&flag_square[i].y==column&&!found_first){
+                    found_first=true;
+                    ROS_INFO("found the first piece at %d %d",linee+1,column+1);
+                    first.x=linee;
+                    first.y=column;
+                    first_pos=i;
+                    if(pieces_topic_points.p_vector[square_num].category.compare("empty")==0){
+                      ROS_INFO("\033[1;31mFOUND LAST PIECE POSITION!\033[0m\n");
+                      yeap=true;
+                    }else{
+                      ROS_INFO("\033[1;31mFOUND ONE OF THE TWO POSITIONS AND I KNOW THAT HERE WAS A %s\033[0m\n",pieces_topic_points.p_vector[square_num].category.c_str());
+                      
+                      
+                      valid_positions = check_validPos(pieces_topic_points.p_vector[square_num].category,linee,column);
 
+                      for (int ton = 0;ton < valid_positions.size(); ton++)
+                      {
+                        ROS_INFO("the valid pos are %d and the one is %d %d ",valid_positions.size(),valid_positions[ton].x,valid_positions[ton].y);
+                        for (int f = 0; f < flag_square.size(); f++){
 
-            linee++;
-            if(linee>=8){
-              linee=0;
-              column--;
-            }
-          }while(column>=0/*&&!(found_second&&found_first)*/);
+                        }
+                      }
+                      for (int ii = 0; ii < 8; ii++)
+                      {
+                        for (int jj = 0; jj < 8; jj++)
+                        {
+                          //for e
+                          if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),ii+1,jj+1)){
+                             ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
 
+                             //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
+                             bool end=false;
+                             int start_x=ii,start_y=jj;
+                             do{
+                                ROS_INFO("HEHE GEIA TO %d %d!",start_x+1,start_y+1);
+                                for (int f = 0; f < flag_square.size(); f++){
+                                  if(start_x==flag_square[f].x&&start_y==flag_square[f].y){
+                                    flag_square[f].state="ignore"; //propably it's a piece's shadow..
+                                    ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                  }
+                                }
+                                if(start_x!=linee){//not same row
+                                  //aproaching
+                                  if(start_x>linee){
+                                    start_x--;
+                                  }//else start_x++; //never gonna happen
+                                }
+                                if(start_y!=column){
+                                  if(start_y>column){
+                                    start_y--;
+                                  }else{
+                                    start_y++;
+                                  }
+                                }
+                                if(start_y==column&&start_x==linee){
+                                  end=true;
+                                }
+                             }while(!end);
+                          }
+                        }
+                      }
+                    }
+                  }else if(flag_square[i].x==linee&&flag_square[i].y==column&&found_first&&first.y!=column&&/*sqrt(pow(first.x-linee,2)+pow(first.y-column,2))>sqrt(2)&&*/flag_square[i].state.compare("ignore")!=0){
+                    if(!found_second&&flag_square[i].state.compare("cautious")!=0&&(isIn_validPos(valid_positions,linee,column)||yeap)){ //whenever the first spotted point had a piece or it (isinValid so the are posible movements) whether there wasn't anything (yeap) so we choose the first one..
+                      ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                      second.x=linee;
+                      second.y=column;
+                      found_second=true;
+                    }  
+                    ROS_INFO("\033[1;33mAN ANOTHEEEEEEEER ONE AT %d %d?!\033[0m\n",linee+1,column+1);
+                  }
+                }
 
+                linee++;
+                if(linee>=8){
+                  linee=0;
+                  column--;
+                }
+              }while(column>=0/*&&!(found_second&&found_first)*/);
+
+          }
+
+      valid_positions.clear();
           if(found_second&&found_first){
            ROS_INFO("cvpoints start %d %d  end %d %d",first.x,first.y,second.x,second.y);
            colorMovement(snap_one,first,second,yeap);
          }
         }
+
         flag_square.clear();
       } // else frames>=2..
 
@@ -820,7 +934,6 @@ public:
 /*      cv::imshow(OPENCV_WINDOW,new_image3);
       cv::waitKey(3);*/
 
-      
       chess_topic_points.p_vector.clear();
       pieces_topic_points.p_vector.clear();
       if(!view_mode_debug){
@@ -1004,6 +1117,7 @@ void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq){
 
 }
 
+//for separating the 2 detected regions..
 void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square,float scan_area){
   
   //ROS_INFO("\nnew iteration with index=%d",index);
@@ -1030,4 +1144,101 @@ void recursive_flagCheck(int index,std::vector<vision::ChessPoint> flag_square,f
     }
   }
   //ROS_INFO("returned final");
+}
+
+//matching a point to above region teams..
+bool existInTeam(int index,std::vector<int> v){
+  for (int i = 0; i < v.size(); ++i)
+  {
+    if(v[i]==index) return true;
+  }
+  return false;
+}
+
+
+std::vector<vision::ChessPoint> check_validPos(std::string p_category,int line,int column){
+  std::vector<vision::ChessPoint> a;
+  vision::ChessPoint pos;  
+  if(p_category.compare("pawn")==0){
+    pos.x=line+1;
+    pos.y=column;
+    pos.state="nothing";
+    if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+    
+    pos.x=line+1;
+    pos.y=column+1;
+    pos.state="nothing";
+    if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+
+    pos.x=line+2;
+    pos.y=column;
+    pos.state="nothing";
+    if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+
+    pos.x=line+1;
+    pos.y=column-1;
+    pos.state="nothing";
+    if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+
+  }else if(p_category.compare("tower")==0){
+    for (int i = 0; i < 8; ++i)
+    {
+      if(i==line) continue;
+      pos.x=i;
+      pos.y=column;
+      pos.state="nothing";
+      if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+    }
+
+    for (int i = 0; i < 8; ++i)
+    {
+      if(i==column) continue;
+      pos.x=line;
+      pos.y=i;
+      pos.state="nothing";
+      if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+    }
+
+  }else if(p_category.compare("queen")==0){
+    for (int i = 0; i < 8; ++i)
+    {
+      if(i==line) continue;
+      pos.x=i;
+      pos.y=column;
+      pos.state="nothing";
+      if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+    }
+
+    for (int i = 0; i < 8; ++i)
+    {
+      if(i==column) continue;
+      pos.x=line;
+      pos.y=i;
+      pos.state="nothing";
+      if(!off_Limits(pos.x)&&!off_Limits(pos.y)) a.push_back(pos);
+    }
+    //diagonial..
+  }
+
+
+  return a;
+
+}
+
+bool isIn_validPos(std::vector<vision::ChessPoint> poses,int line,int column){
+  for (int i = 0; i < poses.size(); ++i)
+  {
+    if(poses[i].x==line&&poses[i].y==column){
+      ROS_INFO("valid position..");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool off_Limits(int value){
+  if(value>7||value<0){
+    return true;
+  }
+  return false;
 }
