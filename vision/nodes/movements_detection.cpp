@@ -53,8 +53,8 @@ static const std::string OPENCV_WINDOW = "wpa";
 std::vector<int> first_team;
 
 
-float confident_thr=0.85;
-float cautious_thr=0.9;
+float confident_thr=0.80;
+float cautious_thr=0.85;
 /// Function headers
 int *square_CornPoints(/*std::string str*/int int_letter ,int num);
 bool checkifItsInsidetheSquare(CvPoint,int,int);
@@ -609,7 +609,7 @@ public:
           bool found_first=false;
           bool found_second=false;
           int first_pos=99;
-          bool yeap=false;
+          bool yeap=false,second_case=false;
           CvPoint first,second;
           std::vector<vision::ChessPoint> valid_positions;
           if(first_team.size()>=1&&second_team.size()>0){
@@ -635,7 +635,7 @@ public:
                       {
                         //for e
                         if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),ii+1,jj+1)){
-                           ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
+                           //ROS_INFO("gia to %d BRIKE TH SKIA TOU STO SHMEIO %d %d!",square_num,ii,jj);
 
                            //ROS_INFO("kai prepei na paei sto shmeio %d %d!",linee,column);
                            bool end=false;
@@ -645,7 +645,7 @@ public:
                               for (int f = 0; f < flag_square.size(); f++){
                                 if(start_x==flag_square[f].x&&start_y==flag_square[f].y){
                                   flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                  ROS_INFO("\033[1;32mPropably shadow at point %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
                                 }
                               }
                               if(start_x!=linee){//not same row
@@ -678,7 +678,7 @@ public:
                               for (int f = 0; f < flag_square.size(); f++){
                                 if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
                                   flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                  ROS_INFO("\033[1;32mPropably shadow at point %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
                                 }
                               }
                               if(start_x!=linee){//not same row
@@ -711,7 +711,7 @@ public:
                               for (int f = 0; f < flag_square.size(); f++){
                                 if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
                                   flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                  ROS_INFO("\033[1;32mPropably shadow at point %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
                                 }
                               }
                               if(start_x!=linee){//not same row
@@ -744,7 +744,7 @@ public:
                               for (int f = 0; f < flag_square.size(); f++){
                                 if(start_x==flag_square[f].x&&start_y==flag_square[f].y&&flag_square[f].state.compare("ignore")!=0){
                                   flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                  ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                  ROS_INFO("\033[1;32mPropably shadow at point %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
                                 }
                               }
                               if(start_x!=linee){//not same row
@@ -774,25 +774,25 @@ public:
                     ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].e.x , pieces_topic_points.p_vector[square_num].e.y,flag_square[j].x+1,flag_square[j].y+1);
                       if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].e.x,pieces_topic_points.p_vector[square_num].e.y),flag_square[j].x+1,flag_square[j].y+1)){
                           flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                           ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                           ROS_INFO("\033[1;31mPropably shadow at point %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
                       }
                    ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].f.x , pieces_topic_points.p_vector[square_num].f.y,flag_square[j].x+1,flag_square[j].y+1);
                    
                       if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].f.x,pieces_topic_points.p_vector[square_num].f.y),flag_square[j].x+1,flag_square[j].y+1)){
                           flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                          ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                          ROS_INFO("\033[1;31mPropably shadow at point %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
                       }
                    ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].g.x , pieces_topic_points.p_vector[square_num].g.y,flag_square[j].x+1,flag_square[j].y+1);
                    
                       if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].g.x,pieces_topic_points.p_vector[square_num].g.y),flag_square[j].x+1,flag_square[j].y+1)){
                           flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                          ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                          ROS_INFO("\033[1;31mPropably shadow at point %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
                       }
                    ROS_INFO("eimaste sto %d kai elegxoume to shmeio %d %d an anhkei mesa sto kouti %d %d",square_num , pieces_topic_points.p_vector[square_num].h.x , pieces_topic_points.p_vector[square_num].h.y,flag_square[j].x+1,flag_square[j].y+1);
                    
                       if(checkifItsInsidetheSquare(CvPoint(pieces_topic_points.p_vector[square_num].h.x,pieces_topic_points.p_vector[square_num].h.y),flag_square[j].x+1,flag_square[j].y+1)){
                           flag_square[j].state="ignore"; //propably it's a piece's shadow..
-                          ROS_INFO("\033[1;31mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
+                          ROS_INFO("\033[1;31mPropably shadow at point %d %d!\033[0m\n",flag_square[j].x+1,flag_square[j].y+1);
                       }
                   }*/
                   }
@@ -800,7 +800,7 @@ public:
                   if(existInTeam(first_pos,second_team)){ //if first belongs to the first team , check the second piece with the second team's points..
                     ROS_INFO("first belongs to first team");
                     if(!found_second&&/*flag_square[i].state.compare("cautious")!=0&&*/existInTeam(i,first_team)){
-                      ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                      ROS_INFO("\033[1;33mSecond Chess position founded at %d %d!\033[0m\n",linee+1,column+1);
                       second.x=linee;
                       second.y=column;
                       found_second=true;
@@ -809,7 +809,7 @@ public:
                   }else{
                     ROS_INFO("first belongs to secondc team");
                     if(!found_second&&/*flag_square[i].state.compare("cautious")!=0&&*/existInTeam(i,second_team)){
-                      ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                      ROS_INFO("\033[1;33mSecond Chess position founded at %d %d!\033[0m\n",linee+1,column+1);
                       second.x=linee;
                       second.y=column;
                       found_second=true;
@@ -831,6 +831,7 @@ public:
 
           }else{ //in case of a close movement..
             ROS_INFO("SECOND CASE");
+            second_case=true;
             do{
                 square_num=column*8+linee;
                 for (int i = 0; i < flag_square.size(); i++){
@@ -872,7 +873,7 @@ public:
                                 for (int f = 0; f < flag_square.size(); f++){
                                   if(start_x==flag_square[f].x&&start_y==flag_square[f].y){
                                     flag_square[f].state="ignore"; //propably it's a piece's shadow..
-                                    ROS_INFO("\033[1;32mAPOKLEIEI VASH TOU PRWTOU P BRIKE TH SKIA TOU STO SHMEIO %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
+                                    ROS_INFO("\033[1;32mPropably shadow at point %d %d!\033[0m\n",flag_square[f].x+1,flag_square[f].y+1);
                                   }
                                 }
                                 if(start_x!=linee){//not same row
@@ -897,14 +898,17 @@ public:
                       }
                     }
                   }else if(flag_square[i].x==linee&&flag_square[i].y==column&&found_first&&first.y!=column&&/*sqrt(pow(first.x-linee,2)+pow(first.y-column,2))>sqrt(2)&&*/flag_square[i].state.compare("ignore")!=0){
-                    if(!found_second&&flag_square[i].state.compare("cautious")!=0&&(isIn_validPos(valid_positions,linee,column)||yeap)){ //whenever the first spotted point had a piece or it (isinValid so the are posible movements) whether there wasn't anything (yeap) so we choose the first one..
-                      ROS_INFO("\033[1;33mMWRE LES NA KSEKINAEI APO DW %d %d!\033[0m\n",linee+1,column+1);
+                    if(!found_second/*&&flag_square[i].state.compare("cautious")!=0*/&&(isIn_validPos(valid_positions,linee,column)||yeap)){ //whenever the first spotted point had a piece or it (isinValid so the are posible movements) whether there wasn't anything (yeap) so we choose the first one..
+                      ROS_INFO("\033[1;33mSecond Chess position founded at %d %d!\033[0m\n",linee+1,column+1);
                       second.x=linee;
                       second.y=column;
                       found_second=true;
                     }  
                     ROS_INFO("\033[1;33mAN ANOTHEEEEEEEER ONE AT %d %d?!\033[0m\n",linee+1,column+1);
                   }
+
+
+
                 }
 
                 linee++;
@@ -913,6 +917,26 @@ public:
                   column--;
                 }
               }while(column>=0/*&&!(found_second&&found_first)*/);
+
+            if(!found_second&&found_first&&second_case){
+              //propably the movement has been on the same column..
+              for(int m=0;m<valid_positions.size();m++){
+                if(isIn_validPos(valid_positions,first.x+1,first.y)){
+                  ROS_INFO("\033[1;33mPropably the piece moved one step foward !\033[0m\n");
+                  second.x=first.x+1;
+                  second.y=first.y;
+                  found_second=true;
+                  break ;
+                }else if(isIn_validPos(valid_positions,first.x+2,first.y)){
+                  ROS_INFO("\033[1;33mPropably the piece moved two step foward !\033[0m\n");
+                  second.x=first.x+2;
+                  second.y=first.y;
+                  found_second=true;
+                  break ;
+                }
+              }
+            }
+
 
           }
 
