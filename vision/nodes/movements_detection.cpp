@@ -1083,6 +1083,8 @@ bool checkifItsInsidetheSquare(CvPoint point,int linee,int column){
 
 void colorMovement(Mat img,CvPoint start_pos,CvPoint end_pos,bool seq){
 
+
+  cv::imshow("snap_one", img);
   int *sq_points=square_CornPoints(start_pos.y+1,start_pos.x+1);
   Point left_bottom_p,left_top_p,right_top_p,right_bottom_p;
   std::vector<CvPoint> v;
