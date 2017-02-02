@@ -6,7 +6,6 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
