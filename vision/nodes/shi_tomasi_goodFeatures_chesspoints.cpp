@@ -260,12 +260,12 @@ public:
           //chess_final_points.push_back(cv::Point(chess_topic_points[i].x,chess_topic_points[i].y));
           //chess_final_points.push_back(pt);          
           chess_vector.p_vector.push_back(chess_point);
-          if(min_found_from_shi){ //random color on points detected correctly from shitomashi function 
+          if(min_found_from_shi){ //random color on points detected correctly from shi_tomasi function 
             circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
           }else if(min_found_from_featured){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
             circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
           }
-          else{//red color on points that shitomashi function didn't found and received from the topic ..
+          else{//red color on points that shi_tomasi function didn't found and received from the topic ..
             circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( 0,0,255 ), -1, 8, 0 );    
           }
            
@@ -336,7 +336,7 @@ public:
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "shitomashi_with_goodFeatures_node");
+  ros::init(argc, argv, "shi_tomasi_with_goodFeatures_node");
   ImageConverter ic;
   for(int i=0;i<8;i++){
       for(int j=0;j<8;j++){
