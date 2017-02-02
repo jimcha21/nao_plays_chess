@@ -241,7 +241,7 @@ public:
               }
           }
 
-          //Merge the extra featured points that were detected along with the Shitomashi Corner detections.. 
+          //Merge the extra featured points that were detected along with the Shi_Tomasi Corner detections.. 
           for(int j=0;j<chess_featured_points_.size();j++){ //80 in total
               distance=sqrt(pow((chess_topic_points[i].x-chess_featured_points_[j].x),2)+pow((chess_topic_points[i].y-chess_featured_points_[j].y),2));
               if(distance<min&&distance<=confidence_area_pix){ //no need for min because the vector is already filtered..
@@ -261,7 +261,7 @@ public:
           chess_vector.p_vector.push_back(chess_point);
           if(min_found_from_shi){ //random color on points detected correctly from shi_tomasi function 
             circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255) ), -1, 8, 0 );    
-          }else if(min_found_from_featured){ //green points are the "bestFeatures" detected points which are merged with the Shitomashi points
+          }else if(min_found_from_featured){ //green points are the "bestFeatures" detected points which are merged with the Shi_Tomasi points
             circle(final_image, Point(chess_point.x,chess_point.y), 4, Scalar( 0,255,0 ), -1, 8, 0 );    
           }
           else{//red color on points that shi_tomasi function didn't found and received from the topic ..
