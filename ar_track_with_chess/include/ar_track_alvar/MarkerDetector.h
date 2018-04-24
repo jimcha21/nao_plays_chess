@@ -21,6 +21,8 @@
  * <http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>.
  */
 
+//hello
+
 #ifndef MARKER_DETECTOR_H
 #define MARKER_DETECTOR_H
 

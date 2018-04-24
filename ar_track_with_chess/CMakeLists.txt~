@@ -122,7 +122,7 @@ add_library(medianFilter src/medianFilter.cpp)
 target_link_libraries(medianFilter ar_track_alvar ${catkin_LIBRARIES})
 add_dependencies(medianFilter ${GENCPP_DEPS})
 
-set(ALVAR_TARGETS ar_track_alvar individualMarkersForChess ar_track_alvar)
+set(ALVAR_TARGETS ar_track_alvar  ar_track_alvar)
 
 #add_executable(individualMarkers nodes/IndividualMarkers.cpp)
 #target_link_libraries(individualMarkers ar_track_alvar kinect_filtering ${catkin_LIBRARIES})
