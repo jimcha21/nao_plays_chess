@@ -101,8 +101,11 @@ void getGameStatus (const vision::ChessBoard & game_data)
 
 void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 {
+
+  			ROS_INFO("before mpee ");
     //If we've already gotten the cam info, then go ahead
 	if(cam->getCamInfo_){
+
 		try{
 			tf::StampedTransform CamToOutput;
 			//ROS_INFO("%s" , "mpe");
@@ -118,8 +121,11 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             //ROS_INFO("CamToOutput rotattion x=%f ,y=%f , z=%f , w=%f\n",CamToOutput.getRotation ()[0],CamToOutput.getRotation ()[1] ,CamToOutput.getRotation ()[2],CamToOutput.getRotation ()[3]);
             
             //Convert the image
+
+  			//ROS_INFO("before mpee2 ");
             cv_ptr_ = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
 
+  			//ROS_INFO("mpee ");
             //Debuging for checking if game status was received properly..
 			/*ROS_INFO("recevied game status ? %d=64? ",game_.chessSquare.size());
 			if(game_.chessSquare.size()!=0){
@@ -138,7 +144,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
             //std::vector<CvPoint> chess_knob_vector_;
             
 
-			if(cam_image_topic.compare("/naoqi_driver_node/camera/front/image_raw") != 0){
+			if(cam_image_topic.compare("/naoqi_driver/camera/front/image_raw") != 0){
 				chess_knob_vector_=marker_detector.DetectChess(&ipl_image, cam, game_, true, true, max_new_marker_error, max_track_error, CVSEQ, true);
 				cv::imshow("OPENCV_WINDOW", cv_ptr_->image);
 				cv::waitKey(3);
@@ -617,12 +623,14 @@ int main(int argc, char *argv[])
       // Change rate dynamically; if must be above 0, as 0 will provoke a segfault on next spinOnce
       ROS_DEBUG("Changing frequency from %.2f to %.2f", 1.0 / rate.expectedCycleTime().toSec(), max_frequency);
       rate = ros::Rate(max_frequency);
-    }
+    }	
 
     if (enableSwitched)
     {
       // Enable/disable switch: subscribe/unsubscribe to make use of pointcloud processing nodelet
       // lazy publishing policy; in CPU-scarce computer as TurtleBot's laptop this is a huge saving
+	cout<<cam_image_topic<<endl;
+
         if (enabled)
             cam_sub_ = it_.subscribe(cam_image_topic, 1, &getCapCallback);
         else

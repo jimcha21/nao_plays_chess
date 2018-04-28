@@ -16,7 +16,7 @@
 	<node name="shi_tomasi_with_goodFeatures_node" pkg="vision" type="shi_tomasi_goodFeatures_chesspoints" respawn="false" output="screen"/>
 	<node name="houghlines_onChess_node" pkg="vision" type="houghlines_onChess" respawn="false" output="screen"/>
 	<node name="movement_detection_node" pkg="vision" type="movements_detection" respawn="false" output="screen"/>
-	<node name="NAO_behavior" pkg="vision" type="NAO_behavior_node" respawn="false" output="screen"/>
+<!-- 	<node name="NAO_behavior" pkg="vision" type="NAO_behavior_node" respawn="false" output="screen"/> -->
 	
 
 <!-- head movement command -->

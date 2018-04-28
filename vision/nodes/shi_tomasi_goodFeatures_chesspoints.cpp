@@ -91,7 +91,7 @@ public:
   {
           chess_sub = nh_.subscribe("chessboard_estimated_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
           mapped_chesspoints = nh_.advertise<vision::ChessVector>("mapped_chessboard_knob_coordinates",0);
-          image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
+          image_sub_ = it_.subscribe("/naoqi_driver/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
           //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::imageCb, this);             
           //image_pub_ = it_.advertise("/image_converter/output_video", 1);          
   }

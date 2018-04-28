@@ -2,10 +2,10 @@
 	<arg name="marker_size" default="3.5" />
 	<arg name="max_new_marker_error" default="0.08" />
 	<arg name="max_track_error" default="0.2" />
-	<arg name="cam_image_topic_bottom" default="/naoqi_driver_node/camera/bottom/image_raw" />
-	<arg name="cam_info_topic_bottom" default="/naoqi_driver_node/camera/bottom/camera_info" />
-	<arg name="cam_image_topic_front" default="/naoqi_driver_node/camera/front/image_raw" />
-	<arg name="cam_info_topic_front" default="/naoqi_driver_node/camera/front/camera_info" />
+	<arg name="cam_image_topic_bottom" default="/naoqi_driver/camera/bottom/image_raw" />
+	<arg name="cam_info_topic_bottom" default="/naoqi_driver/camera/bottom/camera_info" />
+	<arg name="cam_image_topic_front" default="/naoqi_driver/camera/front/image_raw" />
+	<arg name="cam_info_topic_front" default="/naoqi_driver/camera/front/camera_info" />
 	<!-- <arg name="output_frame" default="/base_link" /> -->
 	<arg name="output_frame" default="/base_footprint" />
 	<arg name="med_filt_size" default="10" />
@@ -21,3 +21,4 @@
 <!-- 	<node name="ar_track_alvar" pkg="ar_track_alvar" type="findMarkerBundles" respawn="false" output="screen" args="$(arg cam_image_topic_bottom) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame) $(arg med_filt_size) $(arg bundle_files)"  -->
 
 </launch>
+

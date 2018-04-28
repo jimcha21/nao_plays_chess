@@ -113,7 +113,7 @@ public:
   {
           // Subscrive to input video feed and publish output video feed
           game_sub = nh_.subscribe("/Game_Menu_node/chessboard_state", 10, gameTopic); //game status subscriber
-          chess_sub = nh_.subscribe("hough_mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
+          chess_sub = nh_.subscribe("/hough_mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
           pieces_sub = nh_.subscribe("/chessboard_estimated_areas_ofPieces", 10, piecesVectorTopic); //pieces areas subscriber
 
 
@@ -121,8 +121,8 @@ public:
              snapshot_sub = nh_.subscribe("take_snaps", 10, &ImageConverter::Snapshot, this); //chessboard subscriber
           }else{          
             //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::movementDetector, this);       
-            //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);   
-             image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imagePreview, this); 
+            //image_sub_ = it_.subscribe("/naoqi_driver/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);   
+             image_sub_ = it_.subscribe("/naoqi_driver/camera/bottom/image_raw", 10, &ImageConverter::imagePreview, this); 
           }
 
           //image_sub_.shutdown();
@@ -247,7 +247,7 @@ public:
     //ROS_INFO("received %d pieces with the last one a.x,a.y : %d %d",pieces_topic_points.p_vector.size(),pieces_topic_points.p_vector[63].a.x,pieces_topic_points.p_vector[63].a.y);
 
     if(snap.data){
-       image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::movementDetector, this);    
+       image_sub_ = it_.subscribe("/naoqi_driver/camera/bottom/image_raw", 1, &ImageConverter::movementDetector, this);    
        enable_snap=snap.data;
        //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::movementDetector, this);    
     }
@@ -275,7 +275,6 @@ public:
   void movementDetector(const sensor_msgs::ImageConstPtr& msg)
   {
       cv_bridge::CvImagePtr cv_ptr;
-
       if(chess_topic_points.p_vector.size()==0){
          ROS_INFO("No ChessPoints received..");
       }
@@ -304,12 +303,13 @@ public:
       }
       //cvtColor( src, src_gray, COLOR_BGR2GRAY ); 
 
-
+      ROS_INFO("frames received %d",frame_received);
 
       if(frame_received==0){
         frame_received++;
         snap_one=src.clone();
       }else if(frame_received==1){
+        ROS_INFO("mpikeee");
         frame_received++;
         snap_two=src.clone();
         Mat new_image(src.size(), src.type());
@@ -343,7 +343,7 @@ public:
       
        if(chess_topic_points.p_vector.size()>0){ 
 
-            //image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
+            //image_sub_ = it_.subscribe("/naoqi_driver/camera/bottom/image_raw", 10, &ImageConverter::imageCb, this);
                 
 
             for(int ch_line=1;ch_line<=8;ch_line++){

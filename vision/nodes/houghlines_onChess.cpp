@@ -68,7 +68,7 @@ public:
   {
           // Subscrive to input video feed and publish output video feed
 
-          image_sub_ = it_.subscribe("/naoqi_driver_node/camera/bottom/image_raw", 10, &ImageConverter::houghLinesCb, this);
+          image_sub_ = it_.subscribe("/naoqi_driver/camera/bottom/image_raw", 10, &ImageConverter::houghLinesCb, this);
           //image_sub_ = it_.subscribe("/usb_cam/image_raw", 10, &ImageConverter::houghLinesCb, this);
           mapped_chesspoints = nh_.advertise<vision::ChessVector>("hough_mapped_chessboard_knob_coordinates",0);
           chess_sub = nh_.subscribe("mapped_chessboard_knob_coordinates", 10, chessboardVectorTopic); //chessboard subscriber
