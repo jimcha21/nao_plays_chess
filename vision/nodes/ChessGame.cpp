@@ -8,12 +8,12 @@
 #include <string>     // std::string, std::stoi
 
 //in cm..
-float pawn_height=4;
-float tower_height=4.2;
-float knight_height=5.2;
-float bishop_height=5.1;
-float king_height=6.5;
-float queen_height=6.3;
+float pawn_height=4.6;
+float tower_height=5;
+float knight_height=5.5;
+float bishop_height=6.9;
+float king_height=9.4;
+float queen_height=8.2;
 
 /*string colour(script,clr){
     #clr
@@ -75,11 +75,11 @@ vision::ChessBoard init_piecesPositions(vision::ChessBoard chessboard){
 					square.category="bishop";
 					square.piece_height=bishop_height;					
 				}else if(j==3){
-					square.category="queen";
-					square.piece_height=queen_height;					
-				}else if(j==4){
 					square.category="king";
 					square.piece_height=king_height;					
+				}else if(j==4){
+					square.category="queen";
+					square.piece_height=queen_height;					
 				}
 			}else if(i==7){
 				square.piece_color="black";
